@@ -147,7 +147,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -224,14 +224,14 @@
                 
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 1) document.getElementById('sec${id}').focus();"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
                         onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
                         onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
 
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 1) focusNextMin('${id}');"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextMin('${id}');"
                         onblur="if(this.value !== '') focusNextMin('${id}');"
                         onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
@@ -249,7 +249,10 @@
                 targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
             }
             const card = document.getElementById(`card${id}`);
-            if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
+            if(card) {
+                card.dataset.warned = "";
+                card.dataset.autoCleared = "";
+            }
             saveAll();
             renderVizBar(); 
         }
@@ -260,25 +263,29 @@
             btn.className = isAudioEnabled ? "btn-action btn-audio-on" : "btn-action btn-audio-off";
         }
 
-        // 修改：靜音解鎖音效權限
+        // 修改點：按下按鈕時完全靜音解鎖
         function toggleAudio() {
             if (!hasUnlockedAudio) {
-                pikminSound.muted = true; // 先設為靜音
+                // 將音量設為 0 並播放一次，這會解鎖瀏覽器的音訊限制且不會發出聲音
+                const originalVolume = pikminSound.volume;
+                pikminSound.volume = 0;
                 pikminSound.play().then(() => {
                     pikminSound.pause();
                     pikminSound.currentTime = 0;
-                    pikminSound.muted = false; // 解除靜音，以便稍後播放
+                    pikminSound.volume = originalVolume; // 恢復原本音量
                     hasUnlockedAudio = true;
-                    isAudioEnabled = true;
-                    updateAudioBtnUI();
-                }).catch(() => {});
-            } else {
-                isAudioEnabled = !isAudioEnabled;
-                updateAudioBtnUI();
+                }).catch(e => console.log("Audio unlock failed:", e));
             }
+            isAudioEnabled = !isAudioEnabled;
+            updateAudioBtnUI();
         }
 
-        function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
+        function playWarningBeep() { 
+            if (isAudioEnabled) { 
+                pikminSound.currentTime = 0; 
+                pikminSound.play().catch(()=>{}); 
+            } 
+        }
 
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
@@ -324,3 +331,157 @@
                 if (e.cancelable) e.preventDefault();
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
+                const edge = 60;
+                if (touch.clientX < edge) startAutoScroll('left');
+                else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
+                else stopAutoScroll();
+                const after = getDragAfterElement(vizBar, touch.clientX);
+                if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
+            };
+
+            const onEnd = () => {
+                clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
+                isUserInteracting = false; stopAutoScroll();
+                if (dragItem) {
+                    dragItem.classList.remove('dragging');
+                    dragItem.style.cssText = '';
+                    if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
+                    const items = Array.from(vizBar.querySelectorAll('.viz-item'));
+                    rowOrder = items.map(item => item.dataset.id);
+                    saveAll();
+                    rowOrder.forEach(id => {
+                        const card = document.getElementById(`card${id}`);
+                        if(card) app.appendChild(card);
+                    });
+                    dragItem = null; 
+                    renderVizBar();
+                }
+            };
+            el.addEventListener('touchstart', onStart, { passive: false });
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchend', onEnd);
+            el.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+        }
+
+        function getDragAfterElement(container, x) {
+            const elements = [...container.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')];
+            return elements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = x - (box.left + box.width / 2);
+                if (offset < 0 && offset > closest.offset) return { offset: Number(offset), element: child };
+                else return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function renderVizBar() {
+            if (isUserInteracting) return;
+            vizBar.innerHTML = "";
+            rowOrder.forEach(id => {
+                const nameInput = document.getElementById(`name${id}`);
+                const name = nameInput ? nameInput.value : (localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`);
+                const item = document.createElement('div');
+                item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
+                item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
+                addDragListeners(item); vizBar.appendChild(item);
+            });
+            updateDynamicInfo();
+        }
+
+        function updateDynamicInfo() {
+            const now = Date.now();
+            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+            if (isUserInteracting) return;
+            
+            rowOrder.forEach(id => {
+                const t = targetTimes[id];
+                const item = document.getElementById(`viz-${id}`);
+                const card = document.getElementById(`card${id}`);
+                if (!item) return;
+                const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
+                
+                if (t) {
+                    const diff = Math.floor((t - now) / 1000);
+                    
+                    if (diff <= 0) {
+                        if (card && !card.dataset.autoCleared) {
+                            const minInput = document.getElementById(`min${id}`);
+                            const secInput = document.getElementById(`sec${id}`);
+                            if (minInput) minInput.value = "";
+                            if (secInput) secInput.value = "";
+                            card.dataset.autoCleared = "1";
+                        }
+                        item.classList.add('ready');
+                        item.classList.remove('warning', 'critical');
+                        cdEl.innerText = "已發車";
+                    } 
+                    else {
+                        const isCritical = diff <= 5; 
+                        const isWarning = diff <= 30 && diff > 5; 
+
+                        item.classList.toggle('critical', isCritical);
+                        item.classList.toggle('warning', isWarning);
+                        item.classList.remove('ready');
+
+                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                        const mm = Math.floor(diff / 60), ss = diff % 60;
+                        cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
+                        
+                        if (diff === 10 && card && !card.dataset.warned) { 
+                            playWarningBeep(); 
+                            card.dataset.warned = "1"; 
+                        }
+                    }
+                } else { 
+                    item.classList.remove('warning', 'critical', 'ready'); 
+                    targetEl.innerText = "--:--:--"; 
+                    cdEl.innerText = "等待"; 
+                }
+            });
+            if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
+            else vizBar.style.justifyContent = "center";
+        }
+
+        function resetRow(id) { 
+            const minInput = document.getElementById(`min${id}`);
+            const secInput = document.getElementById(`sec${id}`);
+            if(minInput) minInput.value = "";
+            if(secInput) secInput.value = "";
+            targetTimes[id] = null; 
+            const card = document.getElementById(`card${id}`);
+            if(card) {
+                card.dataset.autoCleared = "";
+                card.dataset.warned = "";
+            }
+            saveAll(); 
+            renderVizBar(); 
+        }
+
+        function changeRows(d) { 
+            if (d > 0) {
+                const nextId = (rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) + 1 : 1).toString();
+                rowOrder.push(nextId);
+                currentRowCount++;
+            } else if (rowOrder.length > 1) {
+                rowOrder.pop();
+                currentRowCount--;
+            }
+            saveAll(); 
+            init(); 
+        }
+
+        function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
+        function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
+
+        function clearAllInputs() {
+            rowOrder.forEach(id => {
+                resetRow(id);
+            });
+        }
+
+        setInterval(updateDynamicInfo, 1000);
+        init();
+    </script>
+</body>
+</html>
