@@ -102,7 +102,7 @@
             opacity: 0.95; transform: scale(1.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
             background: #fff; margin: 0 !important;
-            touch-action: none !important; /* 強制禁用所有手勢以確保移動順暢 */
+            touch-action: none !important;
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
@@ -113,7 +113,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -128,9 +128,15 @@
 
     <script>
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
-        let targetTimes = {}, currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
+        
+        // 從 LocalStorage 載入目標時間
+        let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
+        let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
+        
         const pikminSound = new Audio('pikmin_throw.mp3');
         let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
+
+        function saveTargets() { localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes)); }
 
         function updateAudioBtnUI() {
             const btn = document.getElementById('audioBtn');
@@ -140,11 +146,11 @@
 
         function toggleAudio() {
             if (!hasUnlockedAudio) {
-                pikminSound.volume = 0;
+                pikminSound.volume = 1.0;
                 pikminSound.play().then(() => {
-                    pikminSound.pause(); pikminSound.currentTime = 0; pikminSound.volume = 1.0;
+                    pikminSound.pause(); pikminSound.currentTime = 0;
                     hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
-                });
+                }).catch(e => console.log("Audio unlock failed", e));
             } else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); }
         }
 
@@ -153,7 +159,8 @@
         function init() {
             app.innerHTML = "";
             for (let i = 1; i <= currentRowCount; i++) createRow(i);
-            updateAudioBtnUI(); renderVizBar();
+            updateAudioBtnUI(); 
+            renderVizBar();
         }
 
         function createRow(i) {
@@ -162,13 +169,14 @@
             d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
             d.innerHTML = `
                 <div class="input-group"><input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                <div class="input-group"><input type="number" id="min${i}" placeholder="分" oninput="handleInput(${i})">分</div>
-                <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="handleInput(${i})">秒</div>
+                <div class="input-group"><input type="number" id="min${i}" inputmode="numeric" placeholder="分" oninput="handleInput(${i})">分</div>
+                <div class="input-group"><input type="number" id="sec${i}" inputmode="numeric" placeholder="秒" oninput="handleInput(${i})">秒</div>
                 <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
             `;
             app.appendChild(d);
         }
 
+        // --- 拖拽邏輯 (維持原樣) ---
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
@@ -176,8 +184,7 @@
         function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
         function startAutoScroll(dir) {
             if (autoScrollTimer) return;
-            const scrollSpeed = 4;
-            autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? scrollSpeed : -scrollSpeed); }, 16);
+            autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? 5 : -5); }, 16);
         }
 
         function addDragListeners(el) {
@@ -211,8 +218,6 @@
                     }
                 }
                 if (!dragItem) return;
-                
-                // 核心修復：進入拖移模式時，完全攔截瀏覽器事件
                 if (e.cancelable) e.preventDefault();
 
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
@@ -232,8 +237,9 @@
                 isUserInteracting = false; stopAutoScroll();
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
-                    dragItem.style.left = dragItem.style.top = dragItem.style.width = dragItem.style.height = '';
+                    dragItem.style.cssText = '';
                     if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
+                    // 同步 card 的順序
                     Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => {
                         const card = document.getElementById(`card${item.dataset.id}`);
                         if(card) app.appendChild(card);
@@ -242,14 +248,12 @@
                 }
             };
 
-            // 使用 passive: false 強制獲取控制權
             el.addEventListener('touchstart', onStart, { passive: false });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
             el.addEventListener('mousedown', onStart);
             window.addEventListener('mousemove', onMove);
             window.addEventListener('mouseup', onEnd);
-            el.addEventListener('contextmenu', e => e.preventDefault());
         }
 
         function getDragAfterElement(container, x) {
@@ -262,22 +266,27 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
+        // --- 邏輯優化 ---
         function handleInput(id) {
-            const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
-            if(s.value > 59) s.value = 59;
-            const total = (m.value*60 || 0) + (s.value*1 || 0);
-            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 300) * 1000) : null;
-            if(document.getElementById(`card${id}`)) document.getElementById(`card${id}`).dataset.warned = "";
+            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+            if (m === "" && s === "") {
+                targetTimes[id] = null;
+            } else {
+                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
+                // 目標時間 = 現在時間 + 剩餘時間 + 5分鐘(300秒)
+                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
+            }
+            saveTargets();
+            const card = document.getElementById(`card${id}`);
+            if(card) card.dataset.warned = "";
             renderVizBar(); 
         }
 
         function clearAllInputs() {
             if(confirm("清除所有剩餘時間嗎？")) {
-                Array.from(app.children).forEach(card => {
-                    const id = card.dataset.id;
-                    document.getElementById(`min${id}`).value = document.getElementById(`sec${id}`).value = "";
-                    targetTimes[id] = null; card.dataset.warned = "";
-                });
+                targetTimes = {};
+                saveTargets();
+                Array.from(app.querySelectorAll('input[type="number"]')).forEach(input => input.value = "");
                 renderVizBar();
             }
         }
@@ -296,30 +305,66 @@
         }
 
         function updateDynamicInfo() {
-            const now = new Date();
+            const now = Date.now();
             const ctEl = document.getElementById('currentTime');
-            if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+            if(ctEl) ctEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+            
             if (isUserInteracting) return;
+            
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id];
                 const item = document.getElementById(`viz-${id}`);
                 if (!item) return;
+                
                 const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
+                
                 if (t) {
-                    const diff = Math.floor((t - now) / 1000), isReady = diff <= 0;
+                    const diff = Math.floor((t - now) / 1000);
+                    const isReady = diff <= 0;
+                    
                     item.classList.toggle('ready', isReady);
-                    targetEl.innerText = t.toLocaleTimeString('zh-TW', { hour12: false });
-                    cdEl.innerText = isReady ? "已發車" : `${Math.floor(Math.abs(diff)/60)}:${(Math.abs(diff)%60).toString().padStart(2,'0')}`;
-                    if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
-                } else { item.classList.remove('ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
+                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                    
+                    if (isReady) {
+                        cdEl.innerText = "已發車";
+                    } else {
+                        const mm = Math.floor(diff / 60), ss = diff % 60;
+                        cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
+                        
+                        // 10秒音效警報
+                        if (diff === 10 && !card.dataset.warned) { 
+                            playWarningBeep(); 
+                            card.dataset.warned = "1"; 
+                        }
+                    }
+                } else {
+                    item.classList.remove('ready');
+                    targetEl.innerText = "--:--:--";
+                    cdEl.innerText = "等待";
+                }
             });
-            if (vizBar.scrollWidth > vizBar.clientWidth) { vizBar.style.justifyContent = "flex-start"; vizBar.style.paddingLeft = "10px"; }
-            else { vizBar.style.justifyContent = "center"; vizBar.style.paddingLeft = "0"; }
+
+            // 修正 vizBar 置中或靠左
+            if (vizBar.scrollWidth > vizBar.clientWidth) { vizBar.style.justifyContent = "flex-start"; }
+            else { vizBar.style.justifyContent = "center"; }
         }
 
-        function resetRow(id) { document.getElementById(`min${id}`).value = document.getElementById(`sec${id}`).value = ""; targetTimes[id] = null; renderVizBar(); }
-        function changeRows(d) { currentRowCount = Math.max(1, currentRowCount + d); localStorage.setItem('mushroom_row_count', currentRowCount); init(); }
+        function resetRow(id) { 
+            document.getElementById(`min${id}`).value = ""; 
+            document.getElementById(`sec${id}`).value = ""; 
+            targetTimes[id] = null; 
+            saveTargets();
+            renderVizBar(); 
+        }
+
+        function changeRows(d) { 
+            currentRowCount = Math.max(1, currentRowCount + d); 
+            localStorage.setItem('mushroom_row_count', currentRowCount); 
+            init(); 
+        }
+
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
+        
         function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
 
         setInterval(updateDynamicInfo, 1000);
