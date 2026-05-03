@@ -120,7 +120,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -150,14 +150,16 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 修改：處理分鐘與秒數的自動跳轉邏輯
+        // 修改：處理勾勾(Enter/V)跳轉
         function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (type === 'min') {
+                    // 分鐘按勾勾 -> 跳轉秒數
                     document.getElementById(`sec${id}`).focus();
                 } else {
-                    e.target.blur(); // 秒數按 Enter 直接收鍵盤
+                    // 秒數按勾勾 -> 收起鍵盤
+                    e.target.blur();
                 }
             }
         }
@@ -188,7 +190,6 @@
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
                         oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
-                        onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
                         onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
 
