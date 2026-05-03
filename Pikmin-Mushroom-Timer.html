@@ -251,7 +251,7 @@ Code
         if (m === "" && s === "") { targetTimes[id] = null; } 
         else {
             const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-            targetTimes[id] = Date.now() + (totalSec + 15) * 1000;
+            targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
         }
         // 重新輸入時，清除「自動清空」的標記
         const card = document.getElementById(`card${id}`);
