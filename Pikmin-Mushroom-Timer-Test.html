@@ -20,134 +20,138 @@
             --critical-bg: #ffebee;
             --critical-border: #f44336;
         }
+code
+Code
+html, body { 
+        height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
+        touch-action: manipulation; 
+    }
 
-        html, body { 
-            height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
-            touch-action: manipulation; 
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        -webkit-user-select: none; user-select: none;
+        -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            -webkit-user-select: none; user-select: none;
-            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
-        }
+    body::before {
+        content: ""; position: fixed; inset: 0;
+        background-image: url('pikmin.png');
+        background-repeat: no-repeat; background-position: center; background-size: cover;
+        opacity: 0.15; z-index: -1;
+    }
 
-        body::before {
-            content: ""; position: fixed; inset: 0;
-            background-image: url('pikmin.png');
-            background-repeat: no-repeat; background-position: center; background-size: cover;
-            opacity: 0.15; z-index: -1;
-        }
+    .time-header {
+        position: fixed; top: 0; left: 0; width: 100%;
+        background: rgba(253, 250, 246, 0.96); padding: 5px 0;
+        text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
+    }
 
-        .time-header {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: rgba(253, 250, 246, 0.96); padding: 5px 0;
-            text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
-        }
+    .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
+    .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
+    .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
+    
+    .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
+    .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
-        .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
-        .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
-        .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
-        
-        .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
-        .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
+    .scroll-area {
+        flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        padding-top: 110px; padding-bottom: 130px;
+        display: flex; flex-direction: column; align-items: center; width: 100%;
+    }
 
-        .scroll-area {
-            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-top: 110px; padding-bottom: 130px;
-            display: flex; flex-direction: column; align-items: center; width: 100%;
-        }
+    .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+    .mushroom-card {
+        background: var(--card-bg);
+        padding: 3px 10px; border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 3px;
+        display: flex; gap: 6px; align-items: center; justify-content: center;
+        border: 1px solid #eee; width: 100%; max-width: fit-content;
+        touch-action: pan-y;
+    }
 
-        .mushroom-card {
-            background: var(--card-bg);
-            padding: 3px 10px; border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 3px;
-            display: flex; gap: 6px; align-items: center; justify-content: center;
-            border: 1px solid #eee; width: 100%; max-width: fit-content;
-            touch-action: pan-y;
-        }
+    .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
+    input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
+    input[type="text"] { width: 70px; }
+    input[type="number"] { width: 36px; text-align: center; }
+    .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
-        .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
-        input[type="text"] { width: 70px; }
-        input[type="number"] { width: 36px; text-align: center; }
-        .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+    .viz-bar {
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        background: #fff; border-top: 2px solid var(--primary);
+        padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
+        display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+        justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
+    }
 
-        .viz-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #fff; border-top: 2px solid var(--primary);
-            padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
-            display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
-            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-            z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
-        }
+    .viz-item {
+        min-width: 80px; height: 80px;
+        background: #fff; border: 1px solid #eee; border-radius: 10px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        flex-shrink: 0; border-bottom: 3px solid var(--primary);
+        line-height: 1.2; cursor: grab; box-sizing: border-box;
+    }
 
-        .viz-item {
-            min-width: 80px; height: 80px;
-            background: #fff; border: 1px solid #eee; border-radius: 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            flex-shrink: 0; border-bottom: 3px solid var(--primary);
-            line-height: 1.2; cursor: grab; box-sizing: border-box;
-        }
+    .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+    .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+    .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
-        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+    /* 倒數 30 秒：黃色閃爍 */
+    .viz-item.warning { 
+        border-color: var(--warning-border); 
+        border-bottom: 3px solid var(--warning-border);
+        animation: warning-blink 1s infinite;
+    }
+    @keyframes warning-blink {
+        0%, 100% { background-color: var(--warning-bg); }
+        50% { background-color: #ffffff; }
+    }
+    .viz-item.warning .viz-cd { color: #d2691e; }
 
-        .viz-item.warning { 
-            border-color: var(--warning-border); 
-            border-bottom: 3px solid var(--warning-border);
-            animation: warning-blink 1s infinite;
-        }
-        @keyframes warning-blink {
-            0%, 100% { background-color: var(--warning-bg); }
-            50% { background-color: #ffffff; }
-        }
-        .viz-item.warning .viz-cd { color: #d2691e; }
+    /* 倒數 5 秒：紅色閃爍 */
+    .viz-item.critical {
+        border-color: var(--critical-border);
+        border-bottom: 3px solid var(--critical-border);
+        animation: critical-blink 0.5s infinite;
+    }
+    @keyframes critical-blink {
+        0%, 100% { background-color: var(--critical-bg); }
+        50% { background-color: #ffffff; }
+    }
+    .viz-item.critical .viz-cd { color: var(--danger); font-size: 1rem; }
 
-        .viz-item.critical {
-            border-color: var(--critical-border);
-            border-bottom: 3px solid var(--critical-border);
-            animation: critical-blink 0.5s infinite;
-        }
-        @keyframes critical-blink {
-            0%, 100% { background-color: var(--critical-bg); }
-            50% { background-color: #ffffff; }
-        }
-        .viz-item.critical .viz-cd { color: var(--danger); font-size: 1rem; }
+    /* 已發車：灰色反灰 */
+    .viz-item.ready { 
+        background-color: var(--ready-bg) !important; 
+        border-color: var(--ready-border) !important;
+        border-bottom: 3px solid var(--gray) !important;
+        animation: none !important;
+    }
+    .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { 
+        color: var(--gray) !important; 
+    }
 
-        .viz-item.ready { 
-            background-color: var(--ready-bg) !important; 
-            border-color: var(--ready-border) !important;
-            border-bottom: 3px solid var(--gray) !important;
-            animation: none !important;
-        }
-        .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { 
-            color: var(--gray) !important; 
-        }
+    .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
-        .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
+    .viz-item.dragging {
+        position: fixed !important; z-index: 9999 !important;
+        opacity: 0.95; transform: scale(1.15);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
+        background: #fff; margin: 0 !important;
+        touch-action: none !important;
+    }
 
-        .viz-item.dragging {
-            position: fixed !important; z-index: 9999 !important;
-            opacity: 0.95; transform: scale(1.15);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
-            background: #fff; margin: 0 !important;
-            touch-action: none !important;
-        }
-
-        .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-    </style>
+    .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
+</style>
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -159,339 +163,317 @@
     </div>
     <div class="scroll-area"><div class="container" id="app"></div></div>
     <div class="viz-bar" id="vizBar"></div>
+code
+Code
+<script>
+    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-    <script>
-        document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
+    let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
+    let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
+    let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
 
-        const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
-        let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
-        let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
-        let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
+    const pikminSound = new Audio('pikmin_throw.mp3');
+    let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
-        // 音訊設定
-        const pikminSoundFile = 'pikmin_throw.mp3';
-        // 這是一段 1 秒的 Base64 靜音 MP3
-        const silentAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFhYAAAAbAAAAGluZm86UmF3IERhdGEgY29udmVydGVkIGJ5IG1wM2xhYmVsLmNvbSAtIDY0IGticHMgLSBNb25vIC0gNDQxMDAgSHogLSBTaWxlbnQgTVAzAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZgAAAA8AAAACAAACAAAfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fH///////AAAAU0VOR08AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/uQZAMAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/+5BkBYAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/+5BkBoAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/";
-        
-        let pikminSound = new Audio();
-        let isAudioEnabled = false;
-        let hasUnlockedAudio = false;
-        let isUserInteracting = false;
+    function saveAll() {
+        localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
+        localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
+        localStorage.setItem('mushroom_row_count', currentRowCount);
+    }
 
-        function saveAll() {
-            localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
-            localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
-            localStorage.setItem('mushroom_row_count', currentRowCount);
+    function focusNextMin(currentId) {
+        const idx = rowOrder.indexOf(currentId);
+        if (idx !== -1 && idx < rowOrder.length - 1) {
+            const nextId = rowOrder[idx + 1];
+            const nextMinInput = document.getElementById(`min${nextId}`);
+            if (nextMinInput) nextMinInput.focus();
+        } else {
+            document.getElementById(`sec${currentId}`).blur();
         }
+    }
 
-        function focusNextMin(currentId) {
-            const idx = rowOrder.indexOf(currentId);
-            if (idx !== -1 && idx < rowOrder.length - 1) {
-                const nextId = rowOrder[idx + 1];
-                const nextMinInput = document.getElementById(`min${nextId}`);
-                if (nextMinInput) nextMinInput.focus();
+    function handleKeydown(e, type, id) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (type === 'min') {
+                document.getElementById(`sec${id}`).focus();
             } else {
-                document.getElementById(`sec${currentId}`).blur();
+                focusNextMin(id);
             }
         }
+    }
 
-        function handleKeydown(e, type, id) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (type === 'min') {
-                    document.getElementById(`sec${id}`).focus();
-                } else {
-                    focusNextMin(id);
-                }
-            }
-        }
-
-        function init() {
-            if (rowOrder.length === 0) {
-                for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
-            } else {
-                if (rowOrder.length > currentRowCount) rowOrder = rowOrder.slice(0, currentRowCount);
-                while (rowOrder.length < currentRowCount) {
-                    const nextId = (rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) + 1 : 1).toString();
-                    rowOrder.push(nextId);
-                }
-            }
-            app.innerHTML = "";
-            rowOrder.forEach(id => createRow(id));
-            updateAudioBtnUI(); 
-            renderVizBar();
-        }
-
-        function createRow(id) {
-            const name = localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`;
-            const d = document.createElement('div');
-            d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
-            d.innerHTML = `
-                <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                
-                <div class="input-group">
-                    <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
-                        onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
-                        onkeydown="handleKeydown(event, 'min', '${id}')">分
-                </div>
-
-                <div class="input-group">
-                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextMin('${id}');"
-                        onblur="if(this.value !== '') focusNextMin('${id}');"
-                        onkeydown="handleKeydown(event, 'sec', '${id}')">秒
-                </div>
-
-                <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
-            `;
-            app.appendChild(d);
-        }
-
-        function handleInput(id) {
-            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-            if (m === "" && s === "") { targetTimes[id] = null; } 
-            else {
-                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
-            }
-            const card = document.getElementById(`card${id}`);
-            if(card) {
-                card.dataset.warned = "";
-                card.dataset.autoCleared = "";
-            }
-            saveAll();
-            renderVizBar(); 
-        }
-
-        function updateAudioBtnUI() {
-            const btn = document.getElementById('audioBtn');
-            btn.innerText = isAudioEnabled ? "🔊" : "🔇";
-            btn.className = isAudioEnabled ? "btn-action btn-audio-on" : "btn-action btn-audio-off";
-        }
-
-        // 核心改動：點擊時使用「靜音音源」解鎖 iOS 限制
-        function toggleAudio() {
-            if (!hasUnlockedAudio) {
-                // 1. 使用靜音音源解鎖
-                pikminSound.src = silentAudioSrc;
-                pikminSound.play().then(() => {
-                    // 2. 播完（或開始播）後，立刻換回正式音檔並載入
-                    pikminSound.pause();
-                    pikminSound.src = pikminSoundFile;
-                    pikminSound.load(); 
-                    hasUnlockedAudio = true;
-                }).catch(e => {
-                    console.log("Audio unlock failed:", e);
-                });
-            }
-            isAudioEnabled = !isAudioEnabled;
-            updateAudioBtnUI();
-        }
-
-        function playWarningBeep() { 
-            if (isAudioEnabled && hasUnlockedAudio) { 
-                pikminSound.currentTime = 0; 
-                pikminSound.play().catch(e => console.log("Play failed:", e)); 
-            } 
-        }
-
-        let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
-        let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
-        placeholder.className = 'placeholder';
-
-        function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
-        function startAutoScroll(dir) {
-            if (autoScrollTimer) return;
-            autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? 5 : -5); }, 16);
-        }
-
-        function addDragListeners(el) {
-            const onStart = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                startX = touch.clientX; startY = touch.clientY;
-                initialRect = el.getBoundingClientRect();
-                isUserInteracting = true; el.classList.add('pressing');
-                if (dragTimer) clearTimeout(dragTimer);
-                dragTimer = setTimeout(() => {
-                    dragItem = el;
-                    dragItem.style.left = initialRect.left + 'px';
-                    dragItem.style.top = initialRect.top + 'px';
-                    dragItem.style.width = initialRect.width + 'px';
-                    dragItem.style.height = initialRect.height + 'px';
-                    dragItem.dataset.offsetX = startX - initialRect.left;
-                    dragItem.dataset.offsetY = startY - initialRect.top;
-                    el.classList.remove('pressing');
-                    el.parentNode.insertBefore(placeholder, el);
-                    el.classList.add('dragging');
-                    if(window.navigator.vibrate) window.navigator.vibrate(50);
-                }, 300);
-            };
-
-            const onMove = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                if (dragTimer && !dragItem) {
-                    if (Math.abs(touch.clientX - startX) > 20 || Math.abs(touch.clientY - startY) > 20) {
-                        clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
-                        isUserInteracting = false; 
-                    }
-                }
-                if (!dragItem) return;
-                if (e.cancelable) e.preventDefault();
-                dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
-                dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-                const edge = 60;
-                if (touch.clientX < edge) startAutoScroll('left');
-                else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
-                else stopAutoScroll();
-                const after = getDragAfterElement(vizBar, touch.clientX);
-                if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
-            };
-
-            const onEnd = () => {
-                clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
-                isUserInteracting = false; stopAutoScroll();
-                if (dragItem) {
-                    dragItem.classList.remove('dragging');
-                    dragItem.style.cssText = '';
-                    if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
-                    const items = Array.from(vizBar.querySelectorAll('.viz-item'));
-                    rowOrder = items.map(item => item.dataset.id);
-                    saveAll();
-                    rowOrder.forEach(id => {
-                        const card = document.getElementById(`card${id}`);
-                        if(card) app.appendChild(card);
-                    });
-                    dragItem = null; 
-                    renderVizBar();
-                }
-            };
-            el.addEventListener('touchstart', onStart, { passive: false });
-            window.addEventListener('touchmove', onMove, { passive: false });
-            window.addEventListener('touchend', onEnd);
-            el.addEventListener('mousedown', onStart);
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('mouseup', onEnd);
-        }
-
-        function getDragAfterElement(container, x) {
-            const elements = [...container.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')];
-            return elements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = x - (box.left + box.width / 2);
-                if (offset < 0 && offset > closest.offset) return { offset: Number(offset), element: child };
-                else return closest;
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        function renderVizBar() {
-            if (isUserInteracting) return;
-            vizBar.innerHTML = "";
-            rowOrder.forEach(id => {
-                const nameInput = document.getElementById(`name${id}`);
-                const name = nameInput ? nameInput.value : (localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`);
-                const item = document.createElement('div');
-                item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
-                item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
-                addDragListeners(item); vizBar.appendChild(item);
-            });
-            updateDynamicInfo();
-        }
-
-        function updateDynamicInfo() {
-            const now = Date.now();
-            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-            if (isUserInteracting) return;
-            
-            rowOrder.forEach(id => {
-                const t = targetTimes[id];
-                const item = document.getElementById(`viz-${id}`);
-                const card = document.getElementById(`card${id}`);
-                if (!item) return;
-                const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
-                
-                if (t) {
-                    const diff = Math.floor((t - now) / 1000);
-                    
-                    if (diff <= 0) {
-                        if (card && !card.dataset.autoCleared) {
-                            const minInput = document.getElementById(`min${id}`);
-                            const secInput = document.getElementById(`sec${id}`);
-                            if (minInput) minInput.value = "";
-                            if (secInput) secInput.value = "";
-                            card.dataset.autoCleared = "1";
-                        }
-                        item.classList.add('ready');
-                        item.classList.remove('warning', 'critical');
-                        cdEl.innerText = "已發車";
-                    } 
-                    else {
-                        const isCritical = diff <= 5; 
-                        const isWarning = diff <= 30 && diff > 5; 
-
-                        item.classList.toggle('critical', isCritical);
-                        item.classList.toggle('warning', isWarning);
-                        item.classList.remove('ready');
-
-                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                        const mm = Math.floor(diff / 60), ss = diff % 60;
-                        cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
-                        
-                        // 倒數 10 秒警示
-                        if (diff === 10 && card && !card.dataset.warned) { 
-                            playWarningBeep(); 
-                            card.dataset.warned = "1"; 
-                        }
-                    }
-                } else { 
-                    item.classList.remove('warning', 'critical', 'ready'); 
-                    targetEl.innerText = "--:--:--"; 
-                    cdEl.innerText = "等待"; 
-                }
-            });
-            if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
-            else vizBar.style.justifyContent = "center";
-        }
-
-        function resetRow(id) { 
-            const minInput = document.getElementById(`min${id}`);
-            const secInput = document.getElementById(`sec${id}`);
-            if(minInput) minInput.value = "";
-            if(secInput) secInput.value = "";
-            targetTimes[id] = null; 
-            const card = document.getElementById(`card${id}`);
-            if(card) {
-                card.dataset.autoCleared = "";
-                card.dataset.warned = "";
-            }
-            saveAll(); 
-            renderVizBar(); 
-        }
-
-        function changeRows(d) { 
-            if (d > 0) {
+    function init() {
+        if (rowOrder.length === 0) {
+            for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
+        } else {
+            if (rowOrder.length > currentRowCount) rowOrder = rowOrder.slice(0, currentRowCount);
+            while (rowOrder.length < currentRowCount) {
                 const nextId = (rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) + 1 : 1).toString();
                 rowOrder.push(nextId);
-                currentRowCount++;
-            } else if (rowOrder.length > 1) {
-                rowOrder.pop();
-                currentRowCount--;
             }
-            saveAll(); 
-            init(); 
         }
+        app.innerHTML = "";
+        rowOrder.forEach(id => createRow(id));
+        updateAudioBtnUI(); 
+        renderVizBar();
+    }
 
-        function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
-        function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
+    function createRow(id) {
+        const name = localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`;
+        const d = document.createElement('div');
+        d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
+        d.innerHTML = `
+            <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
+            
+            <div class="input-group">
+                <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
+                    oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                    onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
+                    onkeydown="handleKeydown(event, 'min', '${id}')">分
+            </div>
 
-        function clearAllInputs() {
-            rowOrder.forEach(id => {
-                resetRow(id);
+            <div class="input-group">
+                <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
+                    oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextMin('${id}');"
+                    onblur="if(this.value !== '') focusNextMin('${id}');"
+                    onkeydown="handleKeydown(event, 'sec', '${id}')">秒
+            </div>
+
+            <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
+        `;
+        app.appendChild(d);
+    }
+
+    function handleInput(id) {
+        const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+        if (m === "" && s === "") { targetTimes[id] = null; } 
+        else {
+            const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
+            targetTimes[id] = Date.now() + (totalSec + 15) * 1000;
+        }
+        // 重新輸入時，清除「自動清空」的標記
+        const card = document.getElementById(`card${id}`);
+        if(card) {
+            card.dataset.warned = "";
+            card.dataset.autoCleared = "";
+        }
+        saveAll();
+        renderVizBar(); 
+    }
+
+    function updateAudioBtnUI() {
+        const btn = document.getElementById('audioBtn');
+        btn.innerText = isAudioEnabled ? "🔊" : "🔇";
+        btn.className = isAudioEnabled ? "btn-action btn-audio-on" : "btn-action btn-audio-off";
+    }
+
+    function toggleAudio() {
+        if (!hasUnlockedAudio) {
+            pikminSound.play().then(() => {
+                pikminSound.pause(); pikminSound.currentTime = 0;
+                hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
             });
-        }
+        } else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); }
+    }
 
-        setInterval(updateDynamicInfo, 1000);
-        init();
-    </script>
-</body>
-</html>
+    function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
+
+    let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
+    let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
+    placeholder.className = 'placeholder';
+
+    function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
+    function startAutoScroll(dir) {
+        if (autoScrollTimer) return;
+        autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? 5 : -5); }, 16);
+    }
+
+    function addDragListeners(el) {
+        const onStart = (e) => {
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX; startY = touch.clientY;
+            initialRect = el.getBoundingClientRect();
+            isUserInteracting = true; el.classList.add('pressing');
+            if (dragTimer) clearTimeout(dragTimer);
+            dragTimer = setTimeout(() => {
+                dragItem = el;
+                dragItem.style.left = initialRect.left + 'px';
+                dragItem.style.top = initialRect.top + 'px';
+                dragItem.style.width = initialRect.width + 'px';
+                dragItem.style.height = initialRect.height + 'px';
+                dragItem.dataset.offsetX = startX - initialRect.left;
+                dragItem.dataset.offsetY = startY - initialRect.top;
+                el.classList.remove('pressing');
+                el.parentNode.insertBefore(placeholder, el);
+                el.classList.add('dragging');
+                if(window.navigator.vibrate) window.navigator.vibrate(50);
+            }, 300);
+        };
+
+        const onMove = (e) => {
+            const touch = e.touches ? e.touches[0] : e;
+            if (dragTimer && !dragItem) {
+                if (Math.abs(touch.clientX - startX) > 20 || Math.abs(touch.clientY - startY) > 20) {
+                    clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
+                    isUserInteracting = false; 
+                }
+            }
+            if (!dragItem) return;
+            if (e.cancelable) e.preventDefault();
+            dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
+            dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
+            const edge = 60;
+            if (touch.clientX < edge) startAutoScroll('left');
+            else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
+            else stopAutoScroll();
+            const after = getDragAfterElement(vizBar, touch.clientX);
+            if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
+        };
+
+        const onEnd = () => {
+            clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
+            isUserInteracting = false; stopAutoScroll();
+            if (dragItem) {
+                dragItem.classList.remove('dragging');
+                dragItem.style.cssText = '';
+                if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
+                const items = Array.from(vizBar.querySelectorAll('.viz-item'));
+                rowOrder = items.map(item => item.dataset.id);
+                saveAll();
+                rowOrder.forEach(id => {
+                    const card = document.getElementById(`card${id}`);
+                    if(card) app.appendChild(card);
+                });
+                dragItem = null; 
+                renderVizBar();
+            }
+        };
+        el.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+        el.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+    }
+
+    function getDragAfterElement(container, x) {
+        const elements = [...container.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')];
+        return elements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = x - (box.left + box.width / 2);
+            if (offset < 0 && offset > closest.offset) return { offset: Number(offset), element: child };
+            else return closest;
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function renderVizBar() {
+        if (isUserInteracting) return;
+        vizBar.innerHTML = "";
+        rowOrder.forEach(id => {
+            const nameInput = document.getElementById(`name${id}`);
+            const name = nameInput ? nameInput.value : (localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`);
+            const item = document.createElement('div');
+            item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
+            item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
+            addDragListeners(item); vizBar.appendChild(item);
+        });
+        updateDynamicInfo();
+    }
+
+    function updateDynamicInfo() {
+        const now = Date.now();
+        document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+        if (isUserInteracting) return;
+        
+        rowOrder.forEach(id => {
+            const t = targetTimes[id];
+            const item = document.getElementById(`viz-${id}`);
+            const card = document.getElementById(`card${id}`);
+            if (!item) return;
+            const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
+            
+            if (t) {
+                const diff = Math.floor((t - now) / 1000);
+                
+                if (diff <= 0) {
+                    // 修改：發車當下，清空上方輸入框，但保留下方小卡
+                    if (card && !card.dataset.autoCleared) {
+                        const minInput = document.getElementById(`min${id}`);
+                        const secInput = document.getElementById(`sec${id}`);
+                        if (minInput) minInput.value = "";
+                        if (secInput) secInput.value = "";
+                        card.dataset.autoCleared = "1";
+                    }
+                    item.classList.add('ready');
+                    item.classList.remove('warning', 'critical');
+                    cdEl.innerText = "已發車";
+                } 
+                else {
+                    const isCritical = diff <= 5; 
+                    const isWarning = diff <= 30 && diff > 5; 
+
+                    item.classList.toggle('critical', isCritical);
+                    item.classList.toggle('warning', isWarning);
+                    item.classList.remove('ready');
+
+                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                    const mm = Math.floor(diff / 60), ss = diff % 60;
+                    cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
+                    
+                    if (diff === 10 && card && !card.dataset.warned) { 
+                        playWarningBeep(); 
+                        card.dataset.warned = "1"; 
+                    }
+                }
+            } else { 
+                item.classList.remove('warning', 'critical', 'ready'); 
+                targetEl.innerText = "--:--:--"; 
+                cdEl.innerText = "等待"; 
+            }
+        });
+        if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
+        else vizBar.style.justifyContent = "center";
+    }
+
+    function resetRow(id) { 
+        const minInput = document.getElementById(`min${id}`);
+        const secInput = document.getElementById(`sec${id}`);
+        if(minInput) minInput.value = "";
+        if(secInput) secInput.value = "";
+        targetTimes[id] = null; 
+        const card = document.getElementById(`card${id}`);
+        if(card) {
+            card.dataset.autoCleared = "";
+            card.dataset.warned = "";
+        }
+        saveAll(); 
+        renderVizBar(); 
+    }
+
+    function changeRows(d) { 
+        if (d > 0) {
+            const nextId = (rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) + 1 : 1).toString();
+            rowOrder.push(nextId);
+            currentRowCount++;
+        } else if (rowOrder.length > 1) {
+            rowOrder.pop();
+            currentRowCount--;
+        }
+        saveAll(); 
+        init(); 
+    }
+
+    function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
+    function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
+
+    function clearAllInputs() {
+        rowOrder.forEach(id => {
+            resetRow(id);
+        });
+    }
+
+    setInterval(updateDynamicInfo, 1000);
+    init();
+</script>
