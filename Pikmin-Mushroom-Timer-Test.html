@@ -129,7 +129,7 @@
     <div class="viz-bar" id="vizBar"></div>
 
     <script>
-        // 禁止縮放邏輯
+        // 禁止縮放
         document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
@@ -146,22 +146,28 @@
 
         function saveTargets() { localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes)); }
 
+        // --- 自動跳轉與按鍵跳轉邏輯 ---
+        function checkJump(el, nextId, limit) {
+            if (el.value.length >= limit) {
+                if (nextId) document.getElementById(nextId).focus();
+                else el.blur();
+            }
+        }
+
+        function handleKeydown(e, nextId) {
+            // 如果按下的是 Enter 鍵 (手機鍵盤的勾勾或下一步)
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (nextId) document.getElementById(nextId).focus();
+                else e.target.blur();
+            }
+        }
+
         function init() {
             app.innerHTML = "";
             for (let i = 1; i <= currentRowCount; i++) createRow(i);
             updateAudioBtnUI(); 
             renderVizBar();
-        }
-
-        // 新增：自動跳轉/離開邏輯
-        function checkJump(el, nextId) {
-            if (el.value.length >= 2) {
-                if (nextId) {
-                    document.getElementById(nextId).focus();
-                } else {
-                    el.blur(); // 沒有下一個欄位則離開（收起鍵盤）
-                }
-            }
         }
 
         function createRow(i) {
@@ -170,8 +176,14 @@
             d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
             d.innerHTML = `
                 <div class="input-group"><input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                <div class="input-group"><input type="number" id="min${i}" inputmode="numeric" placeholder="分" oninput="handleInput(${i}); checkJump(this, 'sec${i}')">分</div>
-                <div class="input-group"><input type="number" id="sec${i}" inputmode="numeric" placeholder="秒" oninput="handleInput(${i}); checkJump(this, null)">秒</div>
+                <!-- 分鐘：兩位自動跳，或按勾勾跳 -->
+                <div class="input-group"><input type="number" id="min${i}" inputmode="numeric" placeholder="分" 
+                    oninput="handleInput(${i}); checkJump(this, 'sec${i}', 2)"
+                    onkeydown="handleKeydown(event, 'sec${i}')">分</div>
+                <!-- 秒數：兩位自動離開，或按勾勾離開 -->
+                <div class="input-group"><input type="number" id="sec${i}" inputmode="numeric" placeholder="秒" 
+                    oninput="handleInput(${i}); checkJump(this, null, 2)"
+                    onkeydown="handleKeydown(event, null)">秒</div>
                 <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
             `;
             app.appendChild(d);
