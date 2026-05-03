@@ -24,31 +24,20 @@
             color: var(--text);
             display: flex;
             flex-direction: column;
-            -webkit-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         }
 
         body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background-image: url('pikmin.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-            opacity: 0.15;
-            z-index: -1;
+            content: ""; position: fixed; inset: 0; background-image: url('pikmin.png');
+            background-repeat: no-repeat; background-position: center; background-size: cover;
+            opacity: 0.15; z-index: -1;
         }
 
         .time-header {
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            background: rgba(253, 250, 246, 0.96);
-            backdrop-filter: blur(5px);
-            padding: 5px 0;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            z-index: 4000;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(253, 250, 246, 0.96); backdrop-filter: blur(5px);
+            padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
         }
 
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
@@ -58,11 +47,8 @@
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
         .scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-top: 110px;
-            padding-bottom: 130px;
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-top: 110px; padding-bottom: 130px;
             display: flex; flex-direction: column; align-items: center; width: 100%;
         }
 
@@ -78,26 +64,37 @@
         }
 
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; user-select: text; -webkit-user-select: text;}
+        input[type="text"], input[type="number"] { 
+            border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; 
+            -webkit-user-select: text; user-select: text;
+        }
         input[type="text"] { width: 70px; }
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
+        /* --- 下方狀態欄：修正為置中顯示且支援捲動 --- */
         .viz-bar {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.96);
-            border-top: 2px solid var(--primary);
-            padding: 8px 0 calc(10px + env(safe-area-inset-bottom));
-            display: flex; gap: 8px; overflow-x: auto;
-            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-            z-index: 3000;
-            touch-action: pan-x;
-            scrollbar-width: none; /* Firefox */
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.98); border-top: 2px solid var(--primary);
+            padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
+            display: flex; gap: 8px; 
+            overflow-x: auto;
+            overflow-y: hidden;
+            justify-content: center; /* 核心：內容少時置中 */
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 3000; touch-action: pan-x;
+            scrollbar-width: thin;
         }
-        .viz-bar::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        /* 當內容超過寬度時，自動切換為靠左排列以確保能捲動到末端 */
+        .viz-bar::after { content: ''; display: block; flex-shrink: 0; width: 1px; height: 1px; }
 
-        @media (max-width: 800px) { .viz-bar { justify-content: flex-start; padding-left: 10px; } }
+        .viz-bar::-webkit-scrollbar { height: 4px; display: block; }
+        .viz-bar::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
+
+        /* 確保內容寬度不會被縮減，撐開捲動區域 */
+        .viz-content-wrapper {
+            display: flex; gap: 8px; min-width: max-content; padding: 0 15px;
+        }
 
         .viz-item {
             min-width: 80px; height: 80px;
@@ -107,16 +104,18 @@
             line-height: 1.2; cursor: grab;
         }
 
+        .viz-item.pressing { background-color: #f0f0f0; }
+
         .viz-item.dragging {
             position: fixed !important; z-index: 5000 !important;
-            pointer-events: none; opacity: 0.9; transform: scale(1.15);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25); border: 2px solid var(--primary);
+            pointer-events: none; opacity: 0.95; transform: scale(1.2);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
+            background: #fff;
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-
-        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+        
+        .viz-item strong, .viz-item span { pointer-events: none; }
         .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
         .viz-item.ready * { color: #fff !important; }
 
@@ -130,6 +129,7 @@
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
             <button class="btn-action" onclick="changeRows(-1)">➖ 減少</button>
+            <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
@@ -144,7 +144,6 @@
     <script>
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
         let targetTimes = {}, currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
-        
         const pikminSound = new Audio('pikmin_throw.mp3');
         let isAudioEnabled = false, hasUnlockedAudio = false;
 
@@ -166,9 +165,7 @@
             }
         }
 
-        function playWarningBeep() {
-            if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(() => {}); }
-        }
+        function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(() => {}); } }
 
         function init() {
             app.innerHTML = "";
@@ -192,41 +189,45 @@
             app.appendChild(d);
         }
 
-        // --- 拖拽與自動滾動邏輯 ---
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null;
         placeholder.className = 'placeholder';
 
         function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
-
-        function startAutoScroll(direction) {
+        function startAutoScroll(dir) {
             if (autoScrollTimer) return;
             autoScrollTimer = setInterval(() => {
-                vizBar.scrollLeft += (direction === 'right' ? 10 : -10);
+                vizBar.scrollLeft += (dir === 'right' ? 12 : -12);
             }, 16);
         }
 
         function addDragListeners(el) {
             const onStart = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
+                const touch = e.touches ? e.touches : e;
                 startX = touch.clientX; startY = touch.clientY;
-                const rect = el.getBoundingClientRect();
+                el.classList.add('pressing');
+                
+                if (dragTimer) clearTimeout(dragTimer);
                 dragTimer = setTimeout(() => {
                     dragItem = el;
-                    el.dataset.offsetX = touch.clientX - rect.left;
-                    el.dataset.offsetY = touch.clientY - rect.top;
+                    const rect = el.getBoundingClientRect();
+                    dragItem.dataset.offsetX = touch.clientX - rect.left;
+                    dragItem.dataset.offsetY = touch.clientY - rect.top;
+                    
+                    el.classList.remove('pressing');
                     el.parentNode.insertBefore(placeholder, el);
                     el.classList.add('dragging');
+                    
                     onMove(e);
                     if(window.navigator.vibrate) window.navigator.vibrate(50);
-                }, 500);
+                }, 400);
             };
 
             const onMove = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
+                const touch = e.touches ? e.touches : e;
                 if (dragTimer && !dragItem) {
                     if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
-                        clearTimeout(dragTimer); dragTimer = null;
+                        clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
                     }
                 }
                 if (!dragItem) return;
@@ -234,9 +235,8 @@
 
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-
-                // --- 邊緣自動滾動偵測 ---
-                const edgeThreshold = 50;
+                
+                const edgeThreshold = 60;
                 if (touch.clientX < edgeThreshold) startAutoScroll('left');
                 else if (touch.clientX > window.innerWidth - edgeThreshold) startAutoScroll('right');
                 else stopAutoScroll();
@@ -246,12 +246,15 @@
             };
 
             const onEnd = () => {
-                clearTimeout(dragTimer); stopAutoScroll();
+                clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
+                stopAutoScroll();
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
                     dragItem.style.left = ''; dragItem.style.top = '';
-                    placeholder.parentNode.insertBefore(dragItem, placeholder);
-                    placeholder.remove();
+                    if (placeholder.parentNode) {
+                        placeholder.parentNode.insertBefore(dragItem, placeholder);
+                        placeholder.remove();
+                    }
                     Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => app.appendChild(document.getElementById(`card${item.dataset.id}`)));
                     dragItem = null; updateTime();
                 }
@@ -263,15 +266,16 @@
             window.addEventListener('mousemove', onMove);
             window.addEventListener('touchend', onEnd);
             window.addEventListener('mouseup', onEnd);
+            el.addEventListener('contextmenu', e => e.preventDefault());
         }
 
         function getDragAfterElement(container, x) {
-            const elements = [...container.querySelectorAll('.viz-item:not(.dragging)')];
+            const elements = [...container.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')];
             return elements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = x - (box.left + box.width / 2);
-                if (offset < 0 && offset > closest.offset) return { offset, element: child };
-                return closest;
+                if (offset < 0 && offset > closest.offset) return { offset: Number(offset), element: child };
+                else return closest;
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
@@ -279,15 +283,30 @@
             const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
             if(s.value > 59) s.value = 59;
             const total = (m.value*60 || 0) + (s.value*1 || 0);
-            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 15) * 1000) : null;
+            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 300) * 1000) : null;
             if(document.getElementById(`card${id}`)) document.getElementById(`card${id}`).dataset.warned = "";
             updateTime();
         }
 
+        function clearAllInputs() {
+            if(confirm("清除所有分/秒數值嗎？")) {
+                Array.from(app.children).forEach(card => {
+                    const id = card.dataset.id;
+                    document.getElementById(`min${id}`).value = "";
+                    document.getElementById(`sec${id}`).value = "";
+                    targetTimes[id] = null; card.dataset.warned = "";
+                });
+                updateTime();
+            }
+        }
+
         function updateTime() {
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+            const ctEl = document.getElementById('currentTime');
+            if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
             if (dragItem) return;
+            
+            // 每次更新前檢查內容寬度以決定是否居中
             vizBar.innerHTML = "";
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id], name = document.getElementById(`name${id}`).value;
@@ -300,10 +319,20 @@
                     tStr = t.toLocaleTimeString('zh-TW', { hour12: false });
                     if (isReady) item.classList.add('ready');
                     if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
+                    if (diff > 10) delete card.dataset.warned;
                 }
                 item.innerHTML = `<strong>${name}</strong><span style="font-size:0.7rem;color:#888">${tStr}</span><span class="viz-cd">${cd}</span>`;
                 addDragListeners(item); vizBar.appendChild(item);
             });
+
+            // 動態調整：若小卡很多，取消居中改為靠左，讓捲動行為正確
+            if (vizBar.scrollWidth > vizBar.clientWidth) {
+                vizBar.style.justifyContent = "flex-start";
+                vizBar.style.paddingLeft = "10px";
+            } else {
+                vizBar.style.justifyContent = "center";
+                vizBar.style.paddingLeft = "0";
+            }
         }
 
         function resetRow(id) {
