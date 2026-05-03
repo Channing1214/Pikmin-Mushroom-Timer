@@ -2,7 +2,6 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <!-- 第一重：Meta 標籤強制鎖定縮放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>搶菇計算機</title>
     <style>
@@ -17,15 +16,8 @@
             --ready: #ff4757;
         }
 
-        /* 第二重：CSS touch-action 防止特定手勢觸發縮放 */
         html, body { 
-            height: 100%; 
-            width: 100%; 
-            overflow: hidden; 
-            position: fixed; 
-            margin: 0; 
-            padding: 0;
-            /* manipulation 禁止雙擊縮放，但允許捲動 */
+            height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
             touch-action: manipulation; 
         }
 
@@ -122,7 +114,6 @@
     </style>
 </head>
 <body>
-    <!-- 介面內容與之前相同 -->
     <div class="time-header">
         <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
@@ -138,23 +129,15 @@
     <div class="viz-bar" id="vizBar"></div>
 
     <script>
-        // 第三重：JavaScript 攔截多點觸控和雙擊行為 (針對 iOS Safari)
-        document.addEventListener('touchstart', function(event) {
-            if (event.touches.length > 1) {
-                event.preventDefault(); // 攔截多點觸控（雙指縮放）
-            }
-        }, { passive: false });
-
+        // 禁止縮放邏輯
+        document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
         let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault(); // 攔截雙擊行為
-            }
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, false);
 
-        // 以下為原本的邏輯代碼，無變動
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
         let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
@@ -163,6 +146,38 @@
 
         function saveTargets() { localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes)); }
 
+        function init() {
+            app.innerHTML = "";
+            for (let i = 1; i <= currentRowCount; i++) createRow(i);
+            updateAudioBtnUI(); 
+            renderVizBar();
+        }
+
+        // 新增：自動跳轉/離開邏輯
+        function checkJump(el, nextId) {
+            if (el.value.length >= 2) {
+                if (nextId) {
+                    document.getElementById(nextId).focus();
+                } else {
+                    el.blur(); // 沒有下一個欄位則離開（收起鍵盤）
+                }
+            }
+        }
+
+        function createRow(i) {
+            const name = localStorage.getItem(`mushroom_name_${i}`) || `菇菇${i}`;
+            const d = document.createElement('div');
+            d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
+            d.innerHTML = `
+                <div class="input-group"><input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
+                <div class="input-group"><input type="number" id="min${i}" inputmode="numeric" placeholder="分" oninput="handleInput(${i}); checkJump(this, 'sec${i}')">分</div>
+                <div class="input-group"><input type="number" id="sec${i}" inputmode="numeric" placeholder="秒" oninput="handleInput(${i}); checkJump(this, null)">秒</div>
+                <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
+            `;
+            app.appendChild(d);
+        }
+
+        // --- 以下邏輯維持不變 ---
         function updateAudioBtnUI() {
             const btn = document.getElementById('audioBtn');
             btn.innerText = isAudioEnabled ? "🔊" : "🔇";
@@ -180,27 +195,6 @@
 
         function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
-        function init() {
-            app.innerHTML = "";
-            for (let i = 1; i <= currentRowCount; i++) createRow(i);
-            updateAudioBtnUI(); 
-            renderVizBar();
-        }
-
-        function createRow(i) {
-            const name = localStorage.getItem(`mushroom_name_${i}`) || `菇菇${i}`;
-            const d = document.createElement('div');
-            d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
-            d.innerHTML = `
-                <div class="input-group"><input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                <div class="input-group"><input type="number" id="min${i}" inputmode="numeric" placeholder="分" oninput="handleInput(${i})">分</div>
-                <div class="input-group"><input type="number" id="sec${i}" inputmode="numeric" placeholder="秒" oninput="handleInput(${i})">秒</div>
-                <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
-            `;
-            app.appendChild(d);
-        }
-
-        // 拖拽與計時邏輯 (與上一版相同)
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
@@ -267,7 +261,6 @@
                     dragItem = null; renderVizBar();
                 }
             };
-
             el.addEventListener('touchstart', onStart, { passive: false });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
