@@ -135,16 +135,8 @@
 
     <script>
         document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
-            lastTouchEnd = now;
-        }, false);
 
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
-        
-        // --- 修正：讀取順序陣列 ---
         let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
         let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
@@ -158,34 +150,28 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        function checkJump(el, nextId, limit) {
-            if (el.value.length >= limit) {
-                if (nextId) document.getElementById(nextId).focus();
-                else el.blur();
-            }
-        }
-
-        function handleKeydown(e, nextId) {
+        // 修改：處理分鐘與秒數的自動跳轉邏輯
+        function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (nextId) document.getElementById(nextId).focus();
-                else e.target.blur();
+                if (type === 'min') {
+                    document.getElementById(`sec${id}`).focus();
+                } else {
+                    e.target.blur(); // 秒數按 Enter 直接收鍵盤
+                }
             }
         }
 
         function init() {
-            // 初始化順序：如果沒有紀錄，則按 1~N 建立
             if (rowOrder.length === 0) {
                 for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
             } else {
-                // 確保順序陣列長度與設定的一致
                 if (rowOrder.length > currentRowCount) rowOrder = rowOrder.slice(0, currentRowCount);
                 while (rowOrder.length < currentRowCount) {
                     const nextId = (rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) + 1 : 1).toString();
                     rowOrder.push(nextId);
                 }
             }
-            
             app.innerHTML = "";
             rowOrder.forEach(id => createRow(id));
             updateAudioBtnUI(); 
@@ -198,12 +184,20 @@
             d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
             d.innerHTML = `
                 <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                <div class="input-group"><input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                    oninput="handleInput('${id}'); checkJump(this, 'sec${id}', 2)"
-                    onkeydown="handleKeydown(event, 'sec${id}')">分</div>
-                <div class="input-group"><input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                    oninput="handleInput('${id}'); checkJump(this, null, 2)"
-                    onkeydown="handleKeydown(event, null)">秒</div>
+                
+                <div class="input-group">
+                    <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                        onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
+                        onkeydown="handleKeydown(event, 'min', '${id}')">分
+                </div>
+
+                <div class="input-group">
+                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) this.blur();"
+                        onkeydown="handleKeydown(event, 'sec', '${id}')">秒
+                </div>
+
                 <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
             `;
             app.appendChild(d);
@@ -298,18 +292,13 @@
                     dragItem.classList.remove('dragging');
                     dragItem.style.cssText = '';
                     if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
-                    
-                    // --- 修正：重新計算並儲存順序 ---
                     const items = Array.from(vizBar.querySelectorAll('.viz-item'));
                     rowOrder = items.map(item => item.dataset.id);
                     saveAll();
-
-                    // 同步上方卡片的 HTML 順序
                     rowOrder.forEach(id => {
                         const card = document.getElementById(`card${id}`);
                         if(card) app.appendChild(card);
                     });
-                    
                     dragItem = null; 
                     renderVizBar();
                 }
@@ -335,7 +324,6 @@
         function renderVizBar() {
             if (isUserInteracting) return;
             vizBar.innerHTML = "";
-            // --- 修正：按 rowOrder 順序繪製 ---
             rowOrder.forEach(id => {
                 const nameInput = document.getElementById(`name${id}`);
                 const name = nameInput ? nameInput.value : (localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`);
