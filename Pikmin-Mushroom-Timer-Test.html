@@ -16,7 +16,6 @@
             --ready: #ff4757;
         }
 
-        /* 防止手機端下拉彈跳 */
         html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0; }
 
         body {
@@ -29,15 +28,12 @@
             -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* 背景圖片淡化 */
         body::before {
-            content: ""; position: fixed; inset: 0;
-            background-image: url('pikmin.png');
+            content: ""; position: fixed; inset: 0; background-image: url('pikmin.png');
             background-repeat: no-repeat; background-position: center; background-size: cover;
             opacity: 0.15; z-index: -1;
         }
 
-        /* 頂部固定欄 */
         .time-header {
             position: fixed; top: 0; left: 0; width: 100%;
             background: rgba(253, 250, 246, 0.96); padding: 5px 0;
@@ -46,16 +42,10 @@
 
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
-        
-        .btn-action {
-            padding: 2px 10px; font-size: 0.75rem; border-radius: 15px;
-            border: 1px solid #ddd; background: white; cursor: pointer; color: #555;
-        }
-
+        .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
         .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
-        /* 獨立滾動區域 */
         .scroll-area {
             flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-top: 110px; padding-bottom: 130px;
@@ -74,30 +64,22 @@
         }
 
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"], input[type="number"] { 
-            border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; 
-            -webkit-user-select: text; user-select: text;
-        }
+        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
         input[type="text"] { width: 70px; }
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
-        /* 底部固定視覺欄 */
         .viz-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.98); border-top: 2px solid var(--primary);
+            background: #fff; border-top: 2px solid var(--primary);
             padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
-            display: flex; gap: 8px; 
-            overflow-x: auto; overflow-y: hidden;
-            justify-content: center;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-            z-index: 3000; touch-action: pan-x;
-            scrollbar-width: thin;
+            display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
         }
         .viz-bar::-webkit-scrollbar { height: 4px; display: block; }
         .viz-bar::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
 
-        /* 下方小卡樣式 - 替換為要求檔案的字體設定 */
         .viz-item {
             min-width: 80px; height: 80px;
             background: #fff; border: 1px solid #eee; border-radius: 10px;
@@ -106,41 +88,24 @@
             line-height: 1.2; cursor: grab; box-sizing: border-box;
         }
 
-        .viz-item strong {
-            font-size: 0.8rem; /* 比照要求檔案 */
-            width: 70px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: center;
-        }
-
-        .viz-item .viz-target {
-            font-size: 0.7rem; /* 比照要求檔案 */
-            color: #888;
-        }
-
-        .viz-item .viz-cd {
-            font-size: 0.8rem; /* 比照要求檔案 */
-            color: var(--accent);
-            font-weight: bold;
-        }
-
         .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
         .viz-item.dragging {
             position: fixed !important; z-index: 9999 !important;
-            pointer-events: none; opacity: 0.95; transform: scale(1.15);
+            opacity: 0.95; transform: scale(1.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
             background: #fff; margin: 0 !important;
+            touch-action: none !important;
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
         
-        .viz-item strong, .viz-item span { pointer-events: none; }
+        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+
         .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
         .viz-item.ready * { color: #fff !important; }
-
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     </style>
 </head>
@@ -156,19 +121,14 @@
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
     </div>
-
-    <div class="scroll-area">
-        <div class="container" id="app"></div>
-    </div>
-
+    <div class="scroll-area"><div class="container" id="app"></div></div>
     <div class="viz-bar" id="vizBar"></div>
 
     <script>
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
         let targetTimes = {}, currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
         const pikminSound = new Audio('pikmin_throw.mp3');
-        let isAudioEnabled = false, hasUnlockedAudio = false;
-        let isUserInteracting = false; 
+        let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
         function updateAudioBtnUI() {
             const btn = document.getElementById('audioBtn');
@@ -183,18 +143,15 @@
                     pikminSound.pause(); pikminSound.currentTime = 0; pikminSound.volume = 1.0;
                     hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
                 });
-            } else {
-                isAudioEnabled = !isAudioEnabled; updateAudioBtnUI();
-            }
+            } else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); }
         }
 
-        function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(() => {}); } }
+        function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
         function init() {
             app.innerHTML = "";
             for (let i = 1; i <= currentRowCount; i++) createRow(i);
-            updateAudioBtnUI();
-            renderVizBar();
+            updateAudioBtnUI(); renderVizBar();
         }
 
         function createRow(i) {
@@ -202,10 +159,7 @@
             const d = document.createElement('div');
             d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
             d.innerHTML = `
-                <div class="input-group">
-                    <input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();">
-                    <span style="font-size:0.8rem">剩餘</span>
-                </div>
+                <div class="input-group"><input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
                 <div class="input-group"><input type="number" id="min${i}" placeholder="分" oninput="handleInput(${i})">分</div>
                 <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="handleInput(${i})">秒</div>
                 <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
@@ -214,8 +168,7 @@
         }
 
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
-        let startX = 0, startY = 0, autoScrollTimer = null;
-        let initialRect = null;
+        let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
 
         function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
@@ -226,13 +179,10 @@
 
         function addDragListeners(el) {
             const onStart = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX; startY = touch.clientY;
                 initialRect = el.getBoundingClientRect();
-
-                isUserInteracting = true; 
-                el.classList.add('pressing');
-                
+                isUserInteracting = true; el.classList.add('pressing');
                 if (dragTimer) clearTimeout(dragTimer);
                 dragTimer = setTimeout(() => {
                     dragItem = el;
@@ -242,35 +192,29 @@
                     dragItem.style.height = initialRect.height + 'px';
                     dragItem.dataset.offsetX = startX - initialRect.left;
                     dragItem.dataset.offsetY = startY - initialRect.top;
-                    
                     el.classList.remove('pressing');
                     el.parentNode.insertBefore(placeholder, el);
                     el.classList.add('dragging');
-                    
-                    onMove(e);
                     if(window.navigator.vibrate) window.navigator.vibrate(50);
                 }, 300);
             };
 
             const onMove = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 if (dragTimer && !dragItem) {
-                    if (Math.abs(touch.clientX - startX) > 20 || Math.abs(touch.clientY - startY) > 20) {
+                    if (Math.abs(touch.clientX - startX) > 15 || Math.abs(touch.clientY - startY) > 15) {
                         clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
                         isUserInteracting = false; 
                     }
                 }
                 if (!dragItem) return;
-                e.preventDefault();
-
+                if (e.cancelable) e.preventDefault();
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-                
                 const edge = 60;
                 if (touch.clientX < edge) startAutoScroll('left');
                 else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
                 else stopAutoScroll();
-
                 const after = getDragAfterElement(vizBar, touch.clientX);
                 if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
             };
@@ -280,11 +224,8 @@
                 isUserInteracting = false; stopAutoScroll();
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
-                    dragItem.style.left = ''; dragItem.style.top = ''; dragItem.style.width = ''; dragItem.style.height = '';
-                    if (placeholder.parentNode) {
-                        placeholder.parentNode.insertBefore(dragItem, placeholder);
-                        placeholder.remove();
-                    }
+                    dragItem.style.left = dragItem.style.top = dragItem.style.width = dragItem.style.height = '';
+                    if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
                     Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => {
                         const card = document.getElementById(`card${item.dataset.id}`);
                         if(card) app.appendChild(card);
@@ -294,10 +235,10 @@
             };
 
             el.addEventListener('touchstart', onStart, { passive: true });
-            el.addEventListener('mousedown', onStart);
             window.addEventListener('touchmove', onMove, { passive: false });
-            window.addEventListener('mousemove', onMove);
             window.addEventListener('touchend', onEnd);
+            el.addEventListener('mousedown', onStart);
+            window.addEventListener('mousemove', onMove);
             window.addEventListener('mouseup', onEnd);
             el.addEventListener('contextmenu', e => e.preventDefault());
         }
@@ -322,13 +263,11 @@
         }
 
         function clearAllInputs() {
-            if(confirm("確定要清除所有剩餘時間嗎？")) {
+            if(confirm("清除所有剩餘時間嗎？")) {
                 Array.from(app.children).forEach(card => {
                     const id = card.dataset.id;
-                    document.getElementById(`min${id}`).value = "";
-                    document.getElementById(`sec${id}`).value = "";
-                    targetTimes[id] = null;
-                    card.dataset.warned = "";
+                    document.getElementById(`min${id}`).value = document.getElementById(`sec${id}`).value = "";
+                    targetTimes[id] = null; card.dataset.warned = "";
                 });
                 renderVizBar();
             }
@@ -336,15 +275,13 @@
 
         function renderVizBar() {
             if (isUserInteracting) return;
-            const currentOrder = Array.from(app.children);
             vizBar.innerHTML = "";
-            currentOrder.forEach(card => {
+            Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, name = document.getElementById(`name${id}`).value;
                 const item = document.createElement('div');
                 item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
                 item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
-                addDragListeners(item);
-                vizBar.appendChild(item);
+                addDragListeners(item); vizBar.appendChild(item);
             });
             updateDynamicInfo();
         }
@@ -354,41 +291,25 @@
             const ctEl = document.getElementById('currentTime');
             if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
             if (isUserInteracting) return;
-
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id];
                 const item = document.getElementById(`viz-${id}`);
                 if (!item) return;
                 const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
                 if (t) {
-                    const diff = Math.floor((t - now) / 1000);
-                    const isReady = diff <= 0;
+                    const diff = Math.floor((t - now) / 1000), isReady = diff <= 0;
                     item.classList.toggle('ready', isReady);
                     targetEl.innerText = t.toLocaleTimeString('zh-TW', { hour12: false });
                     cdEl.innerText = isReady ? "已發車" : `${Math.floor(Math.abs(diff)/60)}:${(Math.abs(diff)%60).toString().padStart(2,'0')}`;
                     if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
-                    if (diff > 10) delete card.dataset.warned;
-                } else {
-                    item.classList.remove('ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待";
-                }
+                } else { item.classList.remove('ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
             });
-
-            if (vizBar.scrollWidth > vizBar.clientWidth) {
-                vizBar.style.justifyContent = "flex-start"; vizBar.style.paddingLeft = "10px";
-            } else {
-                vizBar.style.justifyContent = "center"; vizBar.style.paddingLeft = "0";
-            }
+            if (vizBar.scrollWidth > vizBar.clientWidth) { vizBar.style.justifyContent = "flex-start"; vizBar.style.paddingLeft = "10px"; }
+            else { vizBar.style.justifyContent = "center"; vizBar.style.paddingLeft = "0"; }
         }
 
-        function resetRow(id) {
-            document.getElementById(`min${id}`).value = ""; document.getElementById(`sec${id}`).value = "";
-            targetTimes[id] = null; renderVizBar();
-        }
-
-        function changeRows(d) {
-            currentRowCount = Math.max(1, currentRowCount + d); localStorage.setItem('mushroom_row_count', currentRowCount); init();
-        }
-
+        function resetRow(id) { document.getElementById(`min${id}`).value = document.getElementById(`sec${id}`).value = ""; targetTimes[id] = null; renderVizBar(); }
+        function changeRows(d) { currentRowCount = Math.max(1, currentRowCount + d); localStorage.setItem('mushroom_row_count', currentRowCount); init(); }
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
         function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
 
