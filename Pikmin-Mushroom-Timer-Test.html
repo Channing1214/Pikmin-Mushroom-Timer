@@ -126,7 +126,7 @@
             border: 1px solid #eee;
             width: 100%;
             max-width: fit-content;
-            touch-action: none;
+            touch-action: pan-y; /* 允許垂直滾動 */
         }
 
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
@@ -150,6 +150,7 @@
             justify-content: center;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
             z-index: 3000;
+            touch-action: pan-x; /* 允許左右滑動列表 */
         }
 
         @media (max-width: 800px) { .viz-bar { justify-content: flex-start; padding-left: 10px; } }
@@ -159,10 +160,10 @@
             background: #fff; border: 1px solid #eee; border-radius: 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             flex-shrink: 0; border-bottom: 3px solid var(--primary);
-            line-height: 1.2; cursor: grab; touch-action: none;
+            line-height: 1.2; cursor: grab;
         }
 
-        /* 拿起手感：放大與深陰影 */
+        /* 拿起手感 */
         .viz-item.dragging {
             position: fixed !important;
             z-index: 5000 !important;
@@ -173,7 +174,6 @@
             border: 2px solid var(--primary);
         }
 
-        /* 虛線佔位符 */
         .placeholder {
             min-width: 80px; height: 80px;
             border: 2px dashed var(--primary);
@@ -213,7 +213,7 @@
         let targetTimes = {}, currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
         
         const pikminSound = new Audio('pikmin_throw.mp3');
-        let isAudioEnabled = localStorage.getItem('mushroom_audio_enabled') === 'true';
+        let isAudioEnabled = false; 
         let hasUnlockedAudio = false;
 
         function updateAudioBtnUI() {
@@ -230,12 +230,10 @@
                 pikminSound.play().then(() => {
                     pikminSound.pause(); pikminSound.currentTime = 0;
                     hasUnlockedAudio = true; isAudioEnabled = true;
-                    localStorage.setItem('mushroom_audio_enabled', true);
                     updateAudioBtnUI();
                 }).catch(() => alert("音效解鎖失敗"));
             } else {
                 isAudioEnabled = !isAudioEnabled;
-                localStorage.setItem('mushroom_audio_enabled', isAudioEnabled);
                 updateAudioBtnUI();
             }
         }
@@ -270,15 +268,20 @@
             app.appendChild(d);
         }
 
-        // --- 拖拽邏輯 ---
+        // --- 優化後的拖拽邏輯 ---
         let dragItem = null, placeholder = document.createElement('div');
         placeholder.className = 'placeholder';
         let dragTimer = null;
+        let startX = 0, startY = 0;
 
         function addDragListeners(el) {
             const onStart = (e) => {
                 const touch = e.touches ? e.touches[0] : e;
+                startX = touch.clientX;
+                startY = touch.clientY;
                 const rect = el.getBoundingClientRect();
+
+                // 長按偵測
                 dragTimer = setTimeout(() => {
                     dragItem = el;
                     el.dataset.offsetX = touch.clientX - rect.left;
@@ -286,21 +289,36 @@
                     el.parentNode.insertBefore(placeholder, el);
                     el.classList.add('dragging');
                     onMove(e);
-                    window.navigator.vibrate?.(50);
+                    if(window.navigator.vibrate) window.navigator.vibrate(50);
                 }, 500);
             };
 
             const onMove = (e) => {
-                if (!dragItem) return;
                 const touch = e.touches ? e.touches[0] : e;
+                
+                // 如果長按計時器還在跑，但手指移動超過一定距離，就取消長按（判定為滑動）
+                if (dragTimer && !dragItem) {
+                    const moveX = Math.abs(touch.clientX - startX);
+                    const moveY = Math.abs(touch.clientY - startY);
+                    if (moveX > 10 || moveY > 10) {
+                        clearTimeout(dragTimer);
+                        dragTimer = null;
+                    }
+                }
+
+                if (!dragItem) return;
+                e.preventDefault(); // 進入拖拽模式後禁止原生滾動
+
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
+                
                 const after = getDragAfterElement(vizBar, touch.clientX);
                 if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
             };
 
             const onEnd = () => {
                 clearTimeout(dragTimer);
+                dragTimer = null;
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
                     dragItem.style.left = ''; dragItem.style.top = '';
@@ -311,7 +329,7 @@
                 }
             };
 
-            el.addEventListener('touchstart', onStart, { passive: false });
+            el.addEventListener('touchstart', onStart, { passive: true });
             el.addEventListener('mousedown', onStart);
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('mousemove', onMove);
@@ -333,7 +351,7 @@
             const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
             if(s.value > 59) s.value = 59;
             const total = (m.value*60 || 0) + (s.value*1 || 0);
-            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 15) * 1000) : null;
+            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 300) * 1000) : null;
             const card = document.getElementById(`card${id}`);
             if(card) card.dataset.warned = "";
             updateTime();
@@ -341,7 +359,9 @@
 
         function updateTime() {
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+            const ctEl = document.getElementById('currentTime');
+            if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+            
             if (dragItem) return;
             
             vizBar.innerHTML = "";
@@ -358,6 +378,7 @@
                     tStr = t.toLocaleTimeString('zh-TW', { hour12: false });
                     if (isReady) item.classList.add('ready');
                     if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
+                    if (diff > 10) delete card.dataset.warned;
                 }
                 item.innerHTML = `<strong>${name}</strong><span style="font-size:0.7rem;color:#888">${tStr}</span><span class="viz-cd">${cd}</span>`;
                 addDragListeners(item);
