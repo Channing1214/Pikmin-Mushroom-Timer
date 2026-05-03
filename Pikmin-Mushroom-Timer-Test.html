@@ -13,9 +13,12 @@
             --text: #333;
             --danger: #e53935;
             --gray: #9e9e9e;
-            --ready: #ff4757;
+            --ready-bg: #e0e0e0;
+            --ready-border: #bdbdbd;
             --warning-bg: #fff9e6;
             --warning-border: #ffa500;
+            --critical-bg: #ffebee;
+            --critical-border: #f44336;
         }
 
         html, body { 
@@ -84,8 +87,6 @@
             justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
             z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
         }
-        .viz-bar::-webkit-scrollbar { height: 4px; display: block; }
-        .viz-bar::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
 
         .viz-item {
             min-width: 80px; height: 80px;
@@ -99,8 +100,40 @@
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        .viz-item.warning { background-color: var(--warning-bg); border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); }
+        /* 倒數 30 秒：黃色閃爍 */
+        .viz-item.warning { 
+            border-color: var(--warning-border); 
+            border-bottom: 3px solid var(--warning-border);
+            animation: warning-blink 1s infinite;
+        }
+        @keyframes warning-blink {
+            0%, 100% { background-color: var(--warning-bg); }
+            50% { background-color: #ffffff; }
+        }
         .viz-item.warning .viz-cd { color: #d2691e; }
+
+        /* 倒數 5 秒：紅色閃爍 */
+        .viz-item.critical {
+            border-color: var(--critical-border);
+            border-bottom: 3px solid var(--critical-border);
+            animation: critical-blink 0.5s infinite;
+        }
+        @keyframes critical-blink {
+            0%, 100% { background-color: var(--critical-bg); }
+            50% { background-color: #ffffff; }
+        }
+        .viz-item.critical .viz-cd { color: var(--danger); font-size: 1rem; }
+
+        /* 已發車：灰色反灰 */
+        .viz-item.ready { 
+            background-color: var(--ready-bg) !important; 
+            border-color: var(--ready-border) !important;
+            border-bottom: 3px solid var(--gray) !important;
+            animation: none !important;
+        }
+        .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { 
+            color: var(--gray) !important; 
+        }
 
         .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
@@ -113,9 +146,6 @@
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-        .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
-        .viz-item.ready * { color: #fff !important; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     </style>
 </head>
 <body>
@@ -150,7 +180,6 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 修改：跳轉到下一行分鐘的邏輯
         function focusNextMin(currentId) {
             const idx = rowOrder.indexOf(currentId);
             if (idx !== -1 && idx < rowOrder.length - 1) {
@@ -158,7 +187,6 @@
                 const nextMinInput = document.getElementById(`min${nextId}`);
                 if (nextMinInput) nextMinInput.focus();
             } else {
-                // 如果是最後一行，收起鍵盤
                 document.getElementById(`sec${currentId}`).blur();
             }
         }
@@ -223,9 +251,13 @@
                 const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
                 targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
             }
-            saveAll();
+            // 重新輸入時，清除「自動清空」的標記
             const card = document.getElementById(`card${id}`);
-            if(card) card.dataset.warned = "";
+            if(card) {
+                card.dataset.warned = "";
+                card.dataset.autoCleared = "";
+            }
+            saveAll();
             renderVizBar(); 
         }
 
@@ -362,21 +394,39 @@
                 
                 if (t) {
                     const diff = Math.floor((t - now) / 1000);
-                    const isReady = diff <= 0;
-                    const isWarning = diff <= 30 && diff > 0;
-
-                    item.classList.toggle('ready', isReady);
-                    item.classList.toggle('warning', isWarning);
-
-                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    if (isReady) { cdEl.innerText = "已發車"; } 
+                    
+                    if (diff <= 0) {
+                        // 修改：發車當下，清空上方輸入框，但保留下方小卡
+                        if (card && !card.dataset.autoCleared) {
+                            const minInput = document.getElementById(`min${id}`);
+                            const secInput = document.getElementById(`sec${id}`);
+                            if (minInput) minInput.value = "";
+                            if (secInput) secInput.value = "";
+                            card.dataset.autoCleared = "1";
+                        }
+                        item.classList.add('ready');
+                        item.classList.remove('warning', 'critical');
+                        cdEl.innerText = "已發車";
+                    } 
                     else {
+                        const isCritical = diff <= 5; 
+                        const isWarning = diff <= 30 && diff > 5; 
+
+                        item.classList.toggle('critical', isCritical);
+                        item.classList.toggle('warning', isWarning);
+                        item.classList.remove('ready');
+
+                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
                         const mm = Math.floor(diff / 60), ss = diff % 60;
                         cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
-                        if (diff === 10 && card && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
+                        
+                        if (diff === 10 && card && !card.dataset.warned) { 
+                            playWarningBeep(); 
+                            card.dataset.warned = "1"; 
+                        }
                     }
                 } else { 
-                    item.classList.remove('ready', 'warning'); 
+                    item.classList.remove('warning', 'critical', 'ready'); 
                     targetEl.innerText = "--:--:--"; 
                     cdEl.innerText = "等待"; 
                 }
@@ -390,7 +440,14 @@
             const secInput = document.getElementById(`sec${id}`);
             if(minInput) minInput.value = "";
             if(secInput) secInput.value = "";
-            targetTimes[id] = null; saveAll(); renderVizBar(); 
+            targetTimes[id] = null; 
+            const card = document.getElementById(`card${id}`);
+            if(card) {
+                card.dataset.autoCleared = "";
+                card.dataset.warned = "";
+            }
+            saveAll(); 
+            renderVizBar(); 
         }
 
         function changeRows(d) { 
