@@ -2,7 +2,6 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <!-- 加入 user-scalable=no 與相關限制防止縮放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>搶菇計算機</title>
     <style>
@@ -17,16 +16,10 @@
             --ready: #ff4757;
         }
 
-        /* 鎖定整頁，禁止雙指縮放與彈跳 */
+        /* 禁止縮放與整頁彈跳 */
         html, body { 
-            height: 100%; 
-            width: 100%; 
-            overflow: hidden; 
-            position: fixed; 
-            margin: 0; 
-            padding: 0; 
-            /* 核心：禁用縮放手勢，僅允許單指捲動 */
-            touch-action: pan-y; 
+            height: 100%; width: 100%; overflow: hidden; position: fixed; 
+            margin: 0; padding: 0; touch-action: pan-y; 
         }
 
         body {
@@ -76,12 +69,7 @@
         }
 
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        
-        /* 核心：iOS 設定字體大於 16px 可防止點擊輸入框時畫面自動放大 */
-        input[type="text"], input[type="number"] { 
-            border: 1px solid #ddd; border-radius: 4px; font-size: 16px; padding: 5px; 
-            -webkit-user-select: text; user-select: text; 
-        }
+        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 16px; padding: 5px; -webkit-user-select: text; user-select: text; }
         input[type="text"] { width: 70px; }
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
@@ -103,8 +91,11 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             flex-shrink: 0; border-bottom: 3px solid var(--primary);
             line-height: 1.2; cursor: grab; box-sizing: border-box;
-            touch-action: pan-x; /* 允許左右滑動列表 */
         }
+
+        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
         .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
@@ -113,14 +104,10 @@
             opacity: 0.95; transform: scale(1.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
             background: #fff; margin: 0 !important;
-            /* 拖動時禁止任何手勢干擾 */
             touch-action: none !important;
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
-        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
         .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
         .viz-item.ready * { color: #fff !important; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
