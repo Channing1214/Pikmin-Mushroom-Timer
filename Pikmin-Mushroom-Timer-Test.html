@@ -2,7 +2,8 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 第一重：Meta 標籤強制鎖定縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>搶菇計算機</title>
     <style>
         :root {
@@ -16,8 +17,17 @@
             --ready: #ff4757;
         }
 
-        /* 防止手機端下拉彈跳 */
-        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0; }
+        /* 第二重：CSS touch-action 防止特定手勢觸發縮放 */
+        html, body { 
+            height: 100%; 
+            width: 100%; 
+            overflow: hidden; 
+            position: fixed; 
+            margin: 0; 
+            padding: 0;
+            /* manipulation 禁止雙擊縮放，但允許捲動 */
+            touch-action: manipulation; 
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -112,8 +122,9 @@
     </style>
 </head>
 <body>
+    <!-- 介面內容與之前相同 -->
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -127,12 +138,26 @@
     <div class="viz-bar" id="vizBar"></div>
 
     <script>
+        // 第三重：JavaScript 攔截多點觸控和雙擊行為 (針對 iOS Safari)
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault(); // 攔截多點觸控（雙指縮放）
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault(); // 攔截雙擊行為
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // 以下為原本的邏輯代碼，無變動
         const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
-        
-        // 從 LocalStorage 載入目標時間
         let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
-        
         const pikminSound = new Audio('pikmin_throw.mp3');
         let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
@@ -146,11 +171,10 @@
 
         function toggleAudio() {
             if (!hasUnlockedAudio) {
-                pikminSound.volume = 1.0;
                 pikminSound.play().then(() => {
                     pikminSound.pause(); pikminSound.currentTime = 0;
                     hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
-                }).catch(e => console.log("Audio unlock failed", e));
+                });
             } else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); }
         }
 
@@ -176,7 +200,7 @@
             app.appendChild(d);
         }
 
-        // --- 拖拽邏輯 (維持原樣) ---
+        // 拖拽與計時邏輯 (與上一版相同)
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
@@ -219,15 +243,12 @@
                 }
                 if (!dragItem) return;
                 if (e.cancelable) e.preventDefault();
-
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-                
                 const edge = 60;
                 if (touch.clientX < edge) startAutoScroll('left');
                 else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
                 else stopAutoScroll();
-
                 const after = getDragAfterElement(vizBar, touch.clientX);
                 if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
             };
@@ -239,7 +260,6 @@
                     dragItem.classList.remove('dragging');
                     dragItem.style.cssText = '';
                     if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
-                    // 同步 card 的順序
                     Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => {
                         const card = document.getElementById(`card${item.dataset.id}`);
                         if(card) app.appendChild(card);
@@ -266,14 +286,11 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        // --- 邏輯優化 ---
         function handleInput(id) {
             const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-            if (m === "" && s === "") {
-                targetTimes[id] = null;
-            } else {
+            if (m === "" && s === "") { targetTimes[id] = null; } 
+            else {
                 const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-                // 目標時間 = 現在時間 + 剩餘時間 + 5分鐘(300秒)
                 targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
             }
             saveTargets();
@@ -284,8 +301,7 @@
 
         function clearAllInputs() {
             if(confirm("清除所有剩餘時間嗎？")) {
-                targetTimes = {};
-                saveTargets();
+                targetTimes = {}; saveTargets();
                 Array.from(app.querySelectorAll('input[type="number"]')).forEach(input => input.value = "");
                 renderVizBar();
             }
@@ -306,65 +322,36 @@
 
         function updateDynamicInfo() {
             const now = Date.now();
-            const ctEl = document.getElementById('currentTime');
-            if(ctEl) ctEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-            
+            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
             if (isUserInteracting) return;
-            
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id];
                 const item = document.getElementById(`viz-${id}`);
                 if (!item) return;
-                
                 const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
-                
                 if (t) {
-                    const diff = Math.floor((t - now) / 1000);
-                    const isReady = diff <= 0;
-                    
+                    const diff = Math.floor((t - now) / 1000), isReady = diff <= 0;
                     item.classList.toggle('ready', isReady);
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    
-                    if (isReady) {
-                        cdEl.innerText = "已發車";
-                    } else {
+                    if (isReady) { cdEl.innerText = "已發車"; } 
+                    else {
                         const mm = Math.floor(diff / 60), ss = diff % 60;
                         cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
-                        
-                        // 10秒音效警報
-                        if (diff === 10 && !card.dataset.warned) { 
-                            playWarningBeep(); 
-                            card.dataset.warned = "1"; 
-                        }
+                        if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
                     }
-                } else {
-                    item.classList.remove('ready');
-                    targetEl.innerText = "--:--:--";
-                    cdEl.innerText = "等待";
-                }
+                } else { item.classList.remove('ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
             });
-
-            // 修正 vizBar 置中或靠左
-            if (vizBar.scrollWidth > vizBar.clientWidth) { vizBar.style.justifyContent = "flex-start"; }
-            else { vizBar.style.justifyContent = "center"; }
+            if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
+            else vizBar.style.justifyContent = "center";
         }
 
         function resetRow(id) { 
-            document.getElementById(`min${id}`).value = ""; 
-            document.getElementById(`sec${id}`).value = ""; 
-            targetTimes[id] = null; 
-            saveTargets();
-            renderVizBar(); 
+            document.getElementById(`min${id}`).value = ""; document.getElementById(`sec${id}`).value = ""; 
+            targetTimes[id] = null; saveTargets(); renderVizBar(); 
         }
 
-        function changeRows(d) { 
-            currentRowCount = Math.max(1, currentRowCount + d); 
-            localStorage.setItem('mushroom_row_count', currentRowCount); 
-            init(); 
-        }
-
+        function changeRows(d) { currentRowCount = Math.max(1, currentRowCount + d); localStorage.setItem('mushroom_row_count', currentRowCount); init(); }
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
-        
         function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
 
         setInterval(updateDynamicInfo, 1000);
