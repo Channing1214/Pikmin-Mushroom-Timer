@@ -16,15 +16,7 @@
             --ready: #ff4757;
         }
 
-        /* 禁止整頁滾動，防止手機端下拉彈跳 */
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
-            margin: 0;
-            padding: 0;
-        }
+        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,7 +28,6 @@
             user-select: none;
         }
 
-        /* 背景圖片淡化 */
         body::before {
             content: "";
             position: fixed;
@@ -49,12 +40,9 @@
             z-index: -1;
         }
 
-        /* 頂部固定欄 */
         .time-header {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 0; left: 0; width: 100%;
             background: rgba(253, 250, 246, 0.96);
             backdrop-filter: blur(5px);
             padding: 5px 0;
@@ -63,70 +51,30 @@
             z-index: 4000;
         }
 
-        .time-display {
-            font-size: 1.4rem;
-            color: #444;
-            font-weight: bold;
-            line-height: 1;
-            margin: 2px 0;
-        }
-
-        .row-controls {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            margin-bottom: 2px;
-        }
-
-        .btn-action {
-            padding: 2px 10px;
-            font-size: 0.75rem;
-            border-radius: 15px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-            color: #555;
-        }
-
+        .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
+        .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
+        .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
         .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
-        /* 獨立滾動區域 */
         .scroll-area {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding-top: 110px;
             padding-bottom: 130px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            display: flex; flex-direction: column; align-items: center; width: 100%;
         }
 
-        .container {
-            width: 100%;
-            max-width: 850px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
 
         .mushroom-card {
             background: rgba(255, 255, 255, 0.85);
-            padding: 3px 10px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 4px;
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #eee;
-            width: 100%;
-            max-width: fit-content;
-            touch-action: pan-y; /* 允許垂直滾動 */
+            padding: 3px 10px; border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 4px;
+            display: flex; gap: 6px; align-items: center; justify-content: center;
+            border: 1px solid #eee; width: 100%; max-width: fit-content;
+            touch-action: pan-y;
         }
 
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
@@ -135,23 +83,19 @@
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
-        /* 底部固定視覺欄 */
         .viz-bar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 0; left: 0; width: 100%;
             background: rgba(255, 255, 255, 0.96);
             border-top: 2px solid var(--primary);
             padding: 8px 0 calc(10px + env(safe-area-inset-bottom));
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            justify-content: center;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            display: flex; gap: 8px; overflow-x: auto;
+            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
             z-index: 3000;
-            touch-action: pan-x; /* 允許左右滑動列表 */
+            touch-action: pan-x;
+            scrollbar-width: none; /* Firefox */
         }
+        .viz-bar::-webkit-scrollbar { display: none; } /* Chrome/Safari */
 
         @media (max-width: 800px) { .viz-bar { justify-content: flex-start; padding-left: 10px; } }
 
@@ -163,24 +107,13 @@
             line-height: 1.2; cursor: grab;
         }
 
-        /* 拿起手感 */
         .viz-item.dragging {
-            position: fixed !important;
-            z-index: 5000 !important;
-            pointer-events: none;
-            opacity: 0.9;
-            transform: scale(1.15);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            border: 2px solid var(--primary);
+            position: fixed !important; z-index: 5000 !important;
+            pointer-events: none; opacity: 0.9; transform: scale(1.15);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25); border: 2px solid var(--primary);
         }
 
-        .placeholder {
-            min-width: 80px; height: 80px;
-            border: 2px dashed var(--primary);
-            background: rgba(107, 142, 35, 0.05);
-            border-radius: 10px;
-            flex-shrink: 0;
-        }
+        .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
 
         .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
@@ -213,49 +146,40 @@
         let targetTimes = {}, currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
         
         const pikminSound = new Audio('pikmin_throw.mp3');
-        let isAudioEnabled = false; 
-        let hasUnlockedAudio = false;
+        let isAudioEnabled = false, hasUnlockedAudio = false;
 
         function updateAudioBtnUI() {
             const btn = document.getElementById('audioBtn');
-            if (isAudioEnabled) {
-                btn.innerText = "🔊"; btn.className = "btn-action btn-audio-on";
-            } else {
-                btn.innerText = "🔇"; btn.className = "btn-action btn-audio-off";
-            }
+            btn.innerText = isAudioEnabled ? "🔊" : "🔇";
+            btn.className = isAudioEnabled ? "btn-action btn-audio-on" : "btn-action btn-audio-off";
         }
 
         function toggleAudio() {
             if (!hasUnlockedAudio) {
+                pikminSound.volume = 0;
                 pikminSound.play().then(() => {
-                    pikminSound.pause(); pikminSound.currentTime = 0;
-                    hasUnlockedAudio = true; isAudioEnabled = true;
-                    updateAudioBtnUI();
-                }).catch(() => alert("音效解鎖失敗"));
+                    pikminSound.pause(); pikminSound.currentTime = 0; pikminSound.volume = 1.0;
+                    hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
+                });
             } else {
-                isAudioEnabled = !isAudioEnabled;
-                updateAudioBtnUI();
+                isAudioEnabled = !isAudioEnabled; updateAudioBtnUI();
             }
         }
 
         function playWarningBeep() {
-            if (!isAudioEnabled) return;
-            pikminSound.currentTime = 0; pikminSound.play().catch(() => {});
+            if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(() => {}); }
         }
 
         function init() {
             app.innerHTML = "";
             for (let i = 1; i <= currentRowCount; i++) createRow(i);
-            updateAudioBtnUI();
-            updateTime();
+            updateAudioBtnUI(); updateTime();
         }
 
         function createRow(i) {
             const name = localStorage.getItem(`mushroom_name_${i}`) || `菇菇${i}`;
             const d = document.createElement('div');
-            d.className = 'mushroom-card';
-            d.id = `card${i}`;
-            d.dataset.id = i;
+            d.className = 'mushroom-card'; d.id = `card${i}`; d.dataset.id = i;
             d.innerHTML = `
                 <div class="input-group">
                     <input type="text" id="name${i}" value="${name}" oninput="saveName(${i}, this.value); updateTime();">
@@ -268,20 +192,25 @@
             app.appendChild(d);
         }
 
-        // --- 優化後的拖拽邏輯 ---
-        let dragItem = null, placeholder = document.createElement('div');
+        // --- 拖拽與自動滾動邏輯 ---
+        let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
+        let startX = 0, startY = 0, autoScrollTimer = null;
         placeholder.className = 'placeholder';
-        let dragTimer = null;
-        let startX = 0, startY = 0;
+
+        function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
+
+        function startAutoScroll(direction) {
+            if (autoScrollTimer) return;
+            autoScrollTimer = setInterval(() => {
+                vizBar.scrollLeft += (direction === 'right' ? 10 : -10);
+            }, 16);
+        }
 
         function addDragListeners(el) {
             const onStart = (e) => {
                 const touch = e.touches ? e.touches[0] : e;
-                startX = touch.clientX;
-                startY = touch.clientY;
+                startX = touch.clientX; startY = touch.clientY;
                 const rect = el.getBoundingClientRect();
-
-                // 長按偵測
                 dragTimer = setTimeout(() => {
                     dragItem = el;
                     el.dataset.offsetX = touch.clientX - rect.left;
@@ -295,30 +224,29 @@
 
             const onMove = (e) => {
                 const touch = e.touches ? e.touches[0] : e;
-                
-                // 如果長按計時器還在跑，但手指移動超過一定距離，就取消長按（判定為滑動）
                 if (dragTimer && !dragItem) {
-                    const moveX = Math.abs(touch.clientX - startX);
-                    const moveY = Math.abs(touch.clientY - startY);
-                    if (moveX > 10 || moveY > 10) {
-                        clearTimeout(dragTimer);
-                        dragTimer = null;
+                    if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
+                        clearTimeout(dragTimer); dragTimer = null;
                     }
                 }
-
                 if (!dragItem) return;
-                e.preventDefault(); // 進入拖拽模式後禁止原生滾動
+                e.preventDefault();
 
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-                
+
+                // --- 邊緣自動滾動偵測 ---
+                const edgeThreshold = 50;
+                if (touch.clientX < edgeThreshold) startAutoScroll('left');
+                else if (touch.clientX > window.innerWidth - edgeThreshold) startAutoScroll('right');
+                else stopAutoScroll();
+
                 const after = getDragAfterElement(vizBar, touch.clientX);
                 if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
             };
 
             const onEnd = () => {
-                clearTimeout(dragTimer);
-                dragTimer = null;
+                clearTimeout(dragTimer); stopAutoScroll();
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
                     dragItem.style.left = ''; dragItem.style.top = '';
@@ -351,57 +279,43 @@
             const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
             if(s.value > 59) s.value = 59;
             const total = (m.value*60 || 0) + (s.value*1 || 0);
-            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 300) * 1000) : null;
-            const card = document.getElementById(`card${id}`);
-            if(card) card.dataset.warned = "";
+            targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 15) * 1000) : null;
+            if(document.getElementById(`card${id}`)) document.getElementById(`card${id}`).dataset.warned = "";
             updateTime();
         }
 
         function updateTime() {
             const now = new Date();
-            const ctEl = document.getElementById('currentTime');
-            if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
-            
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
             if (dragItem) return;
-            
             vizBar.innerHTML = "";
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id], name = document.getElementById(`name${id}`).value;
                 const item = document.createElement('div');
-                item.className = 'viz-item';
-                item.dataset.id = id;
+                item.className = 'viz-item'; item.dataset.id = id;
                 let isReady = false, tStr = "--:--:--", cd = "等待";
                 if (t) {
-                    const diff = Math.floor((t - now) / 1000);
-                    isReady = diff <= 0;
+                    const diff = Math.floor((t - now) / 1000); isReady = diff <= 0;
                     cd = isReady ? "已發車" : `${Math.floor(Math.abs(diff)/60)}:${(Math.abs(diff)%60).toString().padStart(2,'0')}`;
                     tStr = t.toLocaleTimeString('zh-TW', { hour12: false });
                     if (isReady) item.classList.add('ready');
                     if (diff === 10 && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
-                    if (diff > 10) delete card.dataset.warned;
                 }
                 item.innerHTML = `<strong>${name}</strong><span style="font-size:0.7rem;color:#888">${tStr}</span><span class="viz-cd">${cd}</span>`;
-                addDragListeners(item);
-                vizBar.appendChild(item);
+                addDragListeners(item); vizBar.appendChild(item);
             });
         }
 
         function resetRow(id) {
-            document.getElementById(`min${id}`).value = "";
-            document.getElementById(`sec${id}`).value = "";
+            document.getElementById(`min${id}`).value = ""; document.getElementById(`sec${id}`).value = "";
             targetTimes[id] = null; updateTime();
         }
 
         function changeRows(d) {
-            currentRowCount = Math.max(1, currentRowCount + d);
-            localStorage.setItem('mushroom_row_count', currentRowCount);
-            init();
+            currentRowCount = Math.max(1, currentRowCount + d); localStorage.setItem('mushroom_row_count', currentRowCount); init();
         }
 
-        function resetToInitial() {
-            if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); }
-        }
-
+        function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
         function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
 
         setInterval(updateTime, 1000);
