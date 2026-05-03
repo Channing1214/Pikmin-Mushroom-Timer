@@ -14,6 +14,7 @@
             --danger: #e53935;
             --gray: #9e9e9e;
             --ready: #ff4757;
+            /* 預警顏色 */
             --warning-bg: #fff9e6;
             --warning-border: #ffa500;
         }
@@ -99,6 +100,7 @@
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
+        /* 預警狀態 */
         .viz-item.warning { background-color: var(--warning-bg); border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); }
         .viz-item.warning .viz-cd { color: #d2691e; }
 
@@ -150,43 +152,60 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 核心邏輯：手動或位數滿跳轉
-        function jump(id, type) {
+        // --- 全自動跳轉核心邏輯 ---
+        function jumpFocus(id, type) {
             if (type === 'min') {
                 const secInput = document.getElementById(`sec${id}`);
                 if (secInput) secInput.focus();
-            } else {
+            } else if (type === 'sec') {
                 const currentIndex = rowOrder.indexOf(id.toString());
                 if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
                     const nextId = rowOrder[currentIndex + 1];
                     const nextMin = document.getElementById(`min${nextId}`);
                     if (nextMin) nextMin.focus();
                 } else {
-                    document.activeElement.blur(); // 最後一行收起鍵盤
+                    document.activeElement.blur(); // 最後一行收鍵盤
                 }
             }
         }
 
-        function handleBlur(el, id, type) {
-            // 如果欄位不為空且失去焦點（收起小鍵盤），則觸發跳轉
-            if (el.value.length >= 1) {
-                // 使用 setTimeout 避免與其他點擊衝突
+        function handleInput(id, type, val) {
+            // 計算剩餘時間
+            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+            if (m === "" && s === "") { targetTimes[id] = null; } 
+            else {
+                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
+                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
+            }
+            saveAll();
+            const card = document.getElementById(`card${id}`);
+            if(card) card.dataset.warned = "";
+
+            // 滿 2 位自動跳轉
+            if (val.length >= 2) jumpFocus(id, type);
+            renderVizBar();
+        }
+
+        function handleBlur(id, type, val) {
+            // 滿 1 位按離開(blur)自動跳轉
+            if (val.length === 1) {
+                // 延遲跳轉以確保鍵盤邏輯正常觸發
                 setTimeout(() => {
-                    // 如果當前焦點不在任何輸入框上，代表玩家點了空白或按了收起
                     if (document.activeElement.tagName !== 'INPUT') {
-                        jump(id, type);
+                        jumpFocus(id, type);
                     }
                 }, 50);
             }
         }
 
-        function handleKeydown(e, type, id) {
+        function handleKeydown(e, id, type) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                jump(id, type);
+                jumpFocus(id, type);
             }
         }
 
+        // --- 初始化與基礎功能 ---
         function init() {
             if (rowOrder.length === 0) {
                 for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
@@ -209,37 +228,21 @@
             d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
             d.innerHTML = `
                 <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-                
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'min');"
-                        onblur="handleBlur(this, '${id}', 'min')"
-                        onkeydown="handleKeydown(event, 'min', '${id}')">分
+                        oninput="handleInput('${id}', 'min', this.value)" 
+                        onblur="handleBlur('${id}', 'min', this.value)"
+                        onkeydown="handleKeydown(event, '${id}', 'min')">分
                 </div>
-
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'sec');"
-                        onblur="handleBlur(this, '${id}', 'sec')"
-                        onkeydown="handleKeydown(event, 'sec', '${id}')">秒
+                        oninput="handleInput('${id}', 'sec', this.value)" 
+                        onblur="handleBlur('${id}', 'sec', this.value)"
+                        onkeydown="handleKeydown(event, '${id}', 'sec')">秒
                 </div>
-
                 <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
             `;
             app.appendChild(d);
-        }
-
-        function handleInput(id) {
-            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-            if (m === "" && s === "") { targetTimes[id] = null; } 
-            else {
-                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
-            }
-            saveAll();
-            const card = document.getElementById(`card${id}`);
-            if(card) card.dataset.warned = "";
-            renderVizBar(); 
         }
 
         function updateAudioBtnUI() {
@@ -259,6 +262,7 @@
 
         function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
+        // --- 拖曳排序功能 (持久化修正) ---
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
@@ -318,13 +322,18 @@
                     dragItem.classList.remove('dragging');
                     dragItem.style.cssText = '';
                     if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
+                    
+                    // 更新順序紀錄並存檔
                     const items = Array.from(vizBar.querySelectorAll('.viz-item'));
                     rowOrder = items.map(item => item.dataset.id);
                     saveAll();
+
+                    // 同步上方輸入卡片順序
                     rowOrder.forEach(id => {
                         const card = document.getElementById(`card${id}`);
                         if(card) app.appendChild(card);
                     });
+                    
                     dragItem = null; 
                     renderVizBar();
                 }
@@ -376,7 +385,7 @@
                 if (t) {
                     const diff = Math.floor((t - now) / 1000);
                     const isReady = diff <= 0;
-                    const isWarning = diff <= 30 && diff > 0;
+                    const isWarning = diff <= 30 && diff > 0; // 30秒預警
 
                     item.classList.toggle('ready', isReady);
                     item.classList.toggle('warning', isWarning);
@@ -398,11 +407,17 @@
             else vizBar.style.justifyContent = "center";
         }
 
+        function clearAllInputs() {
+            if(confirm("清除所有剩餘時間嗎？")) {
+                targetTimes = {}; saveAll();
+                Array.from(app.querySelectorAll('input[type="number"]')).forEach(input => input.value = "");
+                renderVizBar();
+            }
+        }
+
         function resetRow(id) { 
-            const minInput = document.getElementById(`min${id}`);
-            const secInput = document.getElementById(`sec${id}`);
-            if(minInput) minInput.value = "";
-            if(secInput) secInput.value = "";
+            const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
+            if(m) m.value = ""; if(s) s.value = "";
             targetTimes[id] = null; saveAll(); renderVizBar(); 
         }
 
@@ -415,8 +430,7 @@
                 rowOrder.pop();
                 currentRowCount--;
             }
-            saveAll(); 
-            init(); 
+            saveAll(); init(); 
         }
 
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
