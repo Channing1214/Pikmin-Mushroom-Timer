@@ -150,15 +150,27 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 修改：處理分鐘與秒數的自動跳轉邏輯
+        // 修改：處理自動跳轉邏輯
         function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (type === 'min') {
                     document.getElementById(`sec${id}`).focus();
                 } else {
-                    e.target.blur(); // 秒數按 Enter 直接收鍵盤
+                    focusNextRow(id); // 秒數按 Enter 跳到下一行分鐘
                 }
+            }
+        }
+
+        // 新增：跳到下一行分鐘的邏輯
+        function focusNextRow(currentId) {
+            const currentIndex = rowOrder.indexOf(currentId);
+            if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
+                const nextId = rowOrder[currentIndex + 1];
+                const nextMinInput = document.getElementById(`min${nextId}`);
+                if (nextMinInput) nextMinInput.focus();
+            } else {
+                document.getElementById(`sec${currentId}`).blur(); // 最後一行則收起鍵盤
             }
         }
 
@@ -194,7 +206,7 @@
 
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) this.blur();"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextRow('${id}');"
                         onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
 
@@ -395,6 +407,12 @@
 
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
         function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
+
+        function clearAllInputs() {
+            rowOrder.forEach(id => {
+                resetRow(id);
+            });
+        }
 
         setInterval(updateDynamicInfo, 1000);
         init();
