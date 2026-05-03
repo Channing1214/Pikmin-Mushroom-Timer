@@ -217,7 +217,7 @@
         const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
         if(s.value > 59) s.value = 59;
         const total = (m.value*60 || 0) + (s.value*1 || 0);
-        targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 300) * 1000) : null;
+        targetTimes[id] = (m.value || s.value) ? new Date(Date.now() + (total + 15) * 1000) : null;
         document.getElementById(`card${id}`).dataset.warned = ""; 
         updateTime();
     }
