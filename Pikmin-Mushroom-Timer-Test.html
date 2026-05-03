@@ -147,7 +147,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -168,8 +168,15 @@
         let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
 
-        const pikminSound = new Audio('pikmin_throw.mp3');
-        let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
+        // 音訊設定
+        const pikminSoundFile = 'pikmin_throw.mp3';
+        // 這是一段 1 秒的 Base64 靜音 MP3
+        const silentAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFhYAAAAbAAAAGluZm86UmF3IERhdGEgY29udmVydGVkIGJ5IG1wM2xhYmVsLmNvbSAtIDY0IGticHMgLSBNb25vIC0gNDQxMDAgSHogLSBTaWxlbnQgTVAzAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZgAAAA8AAAACAAACAAAfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fH///////AAAAU0VOR08AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/uQZAMAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/+5BkBYAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/+5BkBoAAAc0ZpX0AAAALpDSvUAAAByHkbXAAAAAADAAADAAH/";
+        
+        let pikminSound = new Audio();
+        let isAudioEnabled = false;
+        let hasUnlockedAudio = false;
+        let isUserInteracting = false;
 
         function saveAll() {
             localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -263,27 +270,29 @@
             btn.className = isAudioEnabled ? "btn-action btn-audio-on" : "btn-action btn-audio-off";
         }
 
-        // 修改點：按下按鈕時完全靜音解鎖
+        // 核心改動：點擊時使用「靜音音源」解鎖 iOS 限制
         function toggleAudio() {
             if (!hasUnlockedAudio) {
-                // 將音量設為 0 並播放一次，這會解鎖瀏覽器的音訊限制且不會發出聲音
-                const originalVolume = pikminSound.volume;
-                pikminSound.volume = 0;
+                // 1. 使用靜音音源解鎖
+                pikminSound.src = silentAudioSrc;
                 pikminSound.play().then(() => {
+                    // 2. 播完（或開始播）後，立刻換回正式音檔並載入
                     pikminSound.pause();
-                    pikminSound.currentTime = 0;
-                    pikminSound.volume = originalVolume; // 恢復原本音量
+                    pikminSound.src = pikminSoundFile;
+                    pikminSound.load(); 
                     hasUnlockedAudio = true;
-                }).catch(e => console.log("Audio unlock failed:", e));
+                }).catch(e => {
+                    console.log("Audio unlock failed:", e);
+                });
             }
             isAudioEnabled = !isAudioEnabled;
             updateAudioBtnUI();
         }
 
         function playWarningBeep() { 
-            if (isAudioEnabled) { 
+            if (isAudioEnabled && hasUnlockedAudio) { 
                 pikminSound.currentTime = 0; 
-                pikminSound.play().catch(()=>{}); 
+                pikminSound.play().catch(e => console.log("Play failed:", e)); 
             } 
         }
 
@@ -428,6 +437,7 @@
                         const mm = Math.floor(diff / 60), ss = diff % 60;
                         cdEl.innerText = `${mm}:${ss.toString().padStart(2, '0')}`;
                         
+                        // 倒數 10 秒警示
                         if (diff === 10 && card && !card.dataset.warned) { 
                             playWarningBeep(); 
                             card.dataset.warned = "1"; 
