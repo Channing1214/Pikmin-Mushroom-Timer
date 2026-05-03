@@ -150,40 +150,15 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 核心邏輯：手動或位數滿跳轉
-        function jump(id, type) {
-            if (type === 'min') {
-                const secInput = document.getElementById(`sec${id}`);
-                if (secInput) secInput.focus();
-            } else {
-                const currentIndex = rowOrder.indexOf(id.toString());
-                if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
-                    const nextId = rowOrder[currentIndex + 1];
-                    const nextMin = document.getElementById(`min${nextId}`);
-                    if (nextMin) nextMin.focus();
-                } else {
-                    document.activeElement.blur(); // 最後一行收起鍵盤
-                }
-            }
-        }
-
-        function handleBlur(el, id, type) {
-            // 如果欄位不為空且失去焦點（收起小鍵盤），則觸發跳轉
-            if (el.value.length >= 1) {
-                // 使用 setTimeout 避免與其他點擊衝突
-                setTimeout(() => {
-                    // 如果當前焦點不在任何輸入框上，代表玩家點了空白或按了收起
-                    if (document.activeElement.tagName !== 'INPUT') {
-                        jump(id, type);
-                    }
-                }, 50);
-            }
-        }
-
+        // 修改：處理分鐘與秒數的自動跳轉邏輯
         function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                jump(id, type);
+                if (type === 'min') {
+                    document.getElementById(`sec${id}`).focus();
+                } else {
+                    e.target.blur(); // 秒數按 Enter 直接收鍵盤
+                }
             }
         }
 
@@ -212,15 +187,14 @@
                 
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'min');"
-                        onblur="handleBlur(this, '${id}', 'min')"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                        onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
                         onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
 
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'sec');"
-                        onblur="handleBlur(this, '${id}', 'sec')"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) this.blur();"
                         onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
 
