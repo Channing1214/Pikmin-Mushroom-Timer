@@ -120,7 +120,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -150,17 +150,40 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 修改：處理勾勾(Enter/V)跳轉
+        // 核心邏輯：手動或位數滿跳轉
+        function jump(id, type) {
+            if (type === 'min') {
+                const secInput = document.getElementById(`sec${id}`);
+                if (secInput) secInput.focus();
+            } else {
+                const currentIndex = rowOrder.indexOf(id.toString());
+                if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
+                    const nextId = rowOrder[currentIndex + 1];
+                    const nextMin = document.getElementById(`min${nextId}`);
+                    if (nextMin) nextMin.focus();
+                } else {
+                    document.activeElement.blur(); // 最後一行收起鍵盤
+                }
+            }
+        }
+
+        function handleBlur(el, id, type) {
+            // 如果欄位不為空且失去焦點（收起小鍵盤），則觸發跳轉
+            if (el.value.length >= 1) {
+                // 使用 setTimeout 避免與其他點擊衝突
+                setTimeout(() => {
+                    // 如果當前焦點不在任何輸入框上，代表玩家點了空白或按了收起
+                    if (document.activeElement.tagName !== 'INPUT') {
+                        jump(id, type);
+                    }
+                }, 50);
+            }
+        }
+
         function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (type === 'min') {
-                    // 分鐘按勾勾 -> 跳轉秒數
-                    document.getElementById(`sec${id}`).focus();
-                } else {
-                    // 秒數按勾勾 -> 收起鍵盤
-                    e.target.blur();
-                }
+                jump(id, type);
             }
         }
 
@@ -189,13 +212,15 @@
                 
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'min');"
+                        onblur="handleBlur(this, '${id}', 'min')"
                         onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
 
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) this.blur();"
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) jump('${id}', 'sec');"
+                        onblur="handleBlur(this, '${id}', 'sec')"
                         onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
 
