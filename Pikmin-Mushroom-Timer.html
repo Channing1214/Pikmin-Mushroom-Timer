@@ -5,48 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搶菇計算機</title>
     <style>
-        :root { --primary: #6b8e23; --accent: #ff7f50; --bg: #fdfaf6; --card-bg: #ffffff; --text: #333; --danger: #e53935; --gray: #9e9e9e; --ready: #ff4757; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; padding-top: 135px; }
-        
-        .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.98); backdrop-filter: blur(5px); padding: 5px 0; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; }
+        :root {
+            --primary: #6b8e23;
+            --accent: #ff7f50;
+            --bg: #fdfaf6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --danger: #e53935;
+            --gray: #9e9e9e;
+            --ready: #ff4757;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 135px;
+        }
+        .time-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(253, 250, 246, 0.98); backdrop-filter: blur(5px);
+            padding: 5px 0; text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000;
+        }
         h1 { color: var(--primary); margin: 0; font-size: clamp(1.1rem, 4vw, 1.3rem); margin-bottom: 2px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .time-display { font-size: clamp(1.4rem, 5vw, 1.6rem); color: #444; font-weight: bold; line-height: 1.1; margin-bottom: 5px; }
-        
         .row-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 5px; flex-wrap: wrap; }
         .btn-action { padding: 4px 12px; font-size: 0.85rem; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; transition: 0.2s; }
         .btn-action:hover { background: #f0f0f0; border-color: var(--primary); color: var(--primary); }
         .btn-reset { border-color: var(--accent); color: var(--accent); }
         .btn-reset:hover { background: #fff5f0; border-color: var(--accent); color: var(--accent); }
-
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; }
-        
-        .mushroom-card { 
-            background: var(--card-bg); padding: 4px 15px; border-radius: 10px; box-shadow: 0 3px 5px rgba(0,0,0,0.05); 
-            margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; 
-            justify-content: center; border: 1px solid #eee; width: 95%; max-width: fit-content;
+        .mushroom-card {
+            background: var(--card-bg); padding: 4px 15px; border-radius: 10px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.05); margin-bottom: 4px;
+            display: flex; flex-wrap: wrap; gap: 8px 12px;
+            align-items: center; justify-content: center;
+            border: 1px solid #eee; width: 95%; max-width: fit-content;
         }
-        
         .input-group { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
         input[type="text"] { width: 80px; padding: 7px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
         input[type="number"] { width: 40px; padding: 7px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 1rem; }
-        
         .btn-calc { flex-shrink: 0; padding: 7px 15px; background-color: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; }
-        
-        .result { flex-shrink: 0; font-weight: bold; color: var(--accent); font-size: 1rem; padding: 4px 15px; background-color: #fff3e0; border-radius: 4px; min-width: 155px; text-align: center; transition: 0.3s; }
+        .result {
+            flex-shrink: 0; font-weight: bold; color: var(--accent); font-size: 0.95rem;
+            padding: 4px 12px; background-color: #fff3e0; border-radius: 4px;
+            min-width: 180px; text-align: center; transition: 0.3s; line-height: 1.2;
+        }
+        .result .countdown { display: block; font-size: 0.8rem; color: #666; font-family: monospace; }
         .result.ready { background-color: var(--ready); color: white; animation: blink 1s infinite; }
-        
+        .result.ready .countdown { color: white; }
         .btn-row-clear { flex-shrink: 0; padding: 7px 12px; background-color: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 6px; cursor: pointer; height: 36px; display: flex; align-items: center; }
         .btn-row-clear:hover { background-color: var(--danger); color: white; }
-
         .move-controls { display: flex; flex-direction: column; gap: 2px; height: 36px; justify-content: space-between; }
         .btn-move { padding: 0 8px; font-size: 9px; background: #eee; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; color: #666; height: 17px; display: flex; align-items: center; justify-content: center; }
-
-        @media (max-width: 600px) {
-            body { padding-top: 150px; }
-            .mushroom-card { padding: 8px 10px; width: 98%; gap: 6px; }
-            .result { min-width: 130px; font-size: 0.9rem; }
-        }
-
+        @media (max-width: 600px) { body { padding-top: 150px; } .mushroom-card { padding: 8px 10px; width: 98%; gap: 6px; } .result { min-width: 150px; font-size: 0.85rem; } }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -64,7 +79,7 @@
 
     <script>
         const app = document.getElementById('calculatorApp');
-        let targetTimes = {}; 
+        let targetTimes = {};
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -74,7 +89,7 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            gain.gain.value = 0.05; 
+            gain.gain.value = 0.05;
             osc.frequency.value = 880;
             osc.start();
             setTimeout(() => osc.stop(), 150);
@@ -82,9 +97,7 @@
 
         function init() {
             app.innerHTML = "";
-            for (let i = 1; i <= currentRowCount; i++) {
-                createRow(i);
-            }
+            for (let i = 1; i <= currentRowCount; i++) createRow(i);
         }
 
         function createRow(i) {
@@ -95,9 +108,12 @@
             card.innerHTML = `
                 <div class="input-group"><input type="text" id="name${i}" value="${savedName}" oninput="saveName(${i}, this.value)"></div>
                 <div class="input-group"><input type="number" id="min${i}" placeholder="分" oninput="limitLen(this)" onkeyup="if(value.length>=2)document.getElementById('sec${i}').focus()" onkeydown="checkEnter(event, ${i})"><label style="font-size:0.8rem">分</label></div>
-                <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="limitSec(this)" onkeydown="checkEnter(event, ${i})"><label style="font-size:0.8rem">秒</label></div>
+                <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="limitSec(this, ${i})" onkeydown="checkEnter(event, ${i})"><label style="font-size:0.8rem">秒</label></div>
                 <button class="btn-calc" onclick="calculate(${i})">計算</button>
-                <span class="result" id="result${i}">等待計算...</span>
+                <div class="result" id="resultBox${i}">
+                    <span id="result${i}">等待計算...</span>
+                    <span class="countdown" id="cd${i}"></span>
+                </div>
                 <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
                 <div class="move-controls">
                     <button class="btn-move" onclick="moveRow(${i}, -1)">▲</button>
@@ -105,6 +121,67 @@
                 </div>
             `;
             app.appendChild(card);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
+            
+            Object.keys(targetTimes).forEach(id => {
+                const resBox = document.getElementById(`resultBox${id}`);
+                const cdEl = document.getElementById(`cd${id}`);
+                if (!resBox || !targetTimes[id]) return;
+
+                const diff = targetTimes[id] - now;
+                
+                if (diff <= 0) {
+                    cdEl.innerText = "!! 發車 !!";
+                    if (!resBox.classList.contains('ready')) {
+                        resBox.classList.add('ready');
+                        playBeep();
+                    }
+                } else {
+                    resBox.classList.remove('ready');
+                    const m = Math.floor(diff / 1000 / 60);
+                    const s = Math.floor((diff / 1000) % 60);
+                    cdEl.innerText = `倒數 ${m}分${s.toString().padStart(2, '0')}秒`;
+                    
+                    // 最後 10 秒預警
+                    if (diff < 10000) resBox.style.borderColor = "var(--ready)";
+                    else resBox.style.borderColor = "transparent";
+                }
+            });
+        }
+        setInterval(updateTime, 1000);
+
+        function limitLen(el) { if(el.value.length > 2) el.value = el.value.slice(0,2); }
+        
+        function limitSec(el, id) {
+            if(el.value.length > 2) el.value = el.value.slice(0,2);
+            if(parseInt(el.value) > 59) el.value = 59;
+            if(el.value.length === 2) calculate(id);
+        }
+
+        function calculate(id) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const name = document.getElementById(`name${id}`).value || `菇菇${id}`;
+            const min = parseInt(document.getElementById(`min${id}`).value) || 0;
+            const sec = parseInt(document.getElementById(`sec${id}`).value) || 0;
+            const now = new Date();
+            const target = new Date(now.getTime() + (min * 60 + sec + 300) * 1000);
+            targetTimes[id] = target;
+            const timeStr = target.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById(`result${id}`).innerText = `${name} -> ${timeStr}`;
+            document.getElementById(`resultBox${id}`).classList.remove('ready');
+        }
+
+        function resetRow(id) {
+            document.getElementById(`min${id}`).value = "";
+            document.getElementById(`sec${id}`).value = "";
+            document.getElementById(`result${id}`).innerText = "等待計算...";
+            document.getElementById(`cd${id}`).innerText = "";
+            document.getElementById(`resultBox${id}`).classList.remove('ready');
+            delete targetTimes[id];
         }
 
         function changeRows(delta) {
@@ -122,55 +199,6 @@
                 targetTimes = {};
                 init();
             }
-        }
-
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
-            Object.keys(targetTimes).forEach(id => {
-                const resEl = document.getElementById(`result${id}`);
-                if (resEl && targetTimes[id] && now >= targetTimes[id]) {
-                    if (!resEl.classList.contains('ready')) {
-                        resEl.classList.add('ready');
-                        playBeep();
-                    }
-                } else if (resEl) {
-                    resEl.classList.remove('ready');
-                }
-            });
-        }
-        setInterval(updateTime, 1000);
-
-        function limitLen(el) { if(el.value.length > 2) el.value = el.value.slice(0,2); }
-        function limitSec(el) { limitLen(el); if(parseInt(el.value) > 59) el.value = 59; }
-        
-        function checkEnter(event, id) {
-            if (event.key === "Enter") {
-                calculate(id);
-            }
-        }
-
-        function saveName(id, value) { localStorage.setItem(`mushroom_name_${id}`, value); }
-
-        function calculate(id) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const name = document.getElementById(`name${id}`).value || `菇菇${id}`;
-            const min = parseInt(document.getElementById(`min${id}`).value) || 0;
-            const sec = parseInt(document.getElementById(`sec${id}`).value) || 0;
-            const now = new Date();
-            const target = new Date(now.getTime() + (min * 60 + sec + 300) * 1000);
-            targetTimes[id] = target;
-            const timeStr = target.toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById(`result${id}`).innerText = `${name} -> ${timeStr}`;
-            document.getElementById(`result${id}`).classList.remove('ready');
-        }
-
-        function resetRow(id) {
-            document.getElementById(`min${id}`).value = "";
-            document.getElementById(`sec${id}`).value = "";
-            document.getElementById(`result${id}`).innerText = "等待計算...";
-            document.getElementById(`result${id}`).classList.remove('ready');
-            delete targetTimes[id];
         }
 
         function moveRow(id, direction) {
@@ -191,6 +219,9 @@
                 localStorage.setItem(`mushroom_name_${idx + 1}`, nameInput.value);
             });
         }
+
+        function saveName(id, value) { localStorage.setItem(`mushroom_name_${id}`, value); }
+        function checkEnter(event, id) { if (event.key === "Enter") calculate(id); }
 
         init();
     </script>
