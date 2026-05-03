@@ -72,29 +72,20 @@
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
-        /* --- 下方狀態欄：修正為置中顯示且支援捲動 --- */
         .viz-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: rgba(255, 255, 255, 0.98); border-top: 2px solid var(--primary);
             padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
             display: flex; gap: 8px; 
-            overflow-x: auto;
-            overflow-y: hidden;
-            justify-content: center; /* 核心：內容少時置中 */
+            overflow-x: auto; overflow-y: hidden;
+            justify-content: center;
             box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
             z-index: 3000; touch-action: pan-x;
             scrollbar-width: thin;
         }
-        /* 當內容超過寬度時，自動切換為靠左排列以確保能捲動到末端 */
-        .viz-bar::after { content: ''; display: block; flex-shrink: 0; width: 1px; height: 1px; }
 
         .viz-bar::-webkit-scrollbar { height: 4px; display: block; }
         .viz-bar::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
-
-        /* 確保內容寬度不會被縮減，撐開捲動區域 */
-        .viz-content-wrapper {
-            display: flex; gap: 8px; min-width: max-content; padding: 0 15px;
-        }
 
         .viz-item {
             min-width: 80px; height: 80px;
@@ -102,15 +93,18 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             flex-shrink: 0; border-bottom: 3px solid var(--primary);
             line-height: 1.2; cursor: grab;
+            box-sizing: border-box; /* 確保寬度鎖定準確 */
         }
 
         .viz-item.pressing { background-color: #f0f0f0; }
 
+        /* 拿起時禁止跑位的關鍵 */
         .viz-item.dragging {
-            position: fixed !important; z-index: 5000 !important;
-            pointer-events: none; opacity: 0.95; transform: scale(1.2);
+            position: fixed !important; z-index: 9999 !important;
+            pointer-events: none; opacity: 0.95; transform: scale(1.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
             background: #fff;
+            margin: 0 !important; /* 防止外距干擾 */
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
@@ -191,28 +185,31 @@
 
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null;
+        let initialRect = null; // 儲存觸碰瞬間的座標
         placeholder.className = 'placeholder';
 
         function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
         function startAutoScroll(dir) {
             if (autoScrollTimer) return;
-            autoScrollTimer = setInterval(() => {
-                vizBar.scrollLeft += (dir === 'right' ? 12 : -12);
-            }, 16);
+            autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? 12 : -12); }, 16);
         }
 
         function addDragListeners(el) {
             const onStart = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX; startY = touch.clientY;
+                initialRect = el.getBoundingClientRect(); // 瞬間存下位置
+
                 el.classList.add('pressing');
                 
                 if (dragTimer) clearTimeout(dragTimer);
                 dragTimer = setTimeout(() => {
                     dragItem = el;
-                    const rect = el.getBoundingClientRect();
-                    dragItem.dataset.offsetX = touch.clientX - rect.left;
-                    dragItem.dataset.offsetY = touch.clientY - rect.top;
+                    // 使用 initialRect 確保計算 offset 時不會因為 0.4 秒內的微動而跑掉
+                    dragItem.dataset.offsetX = startX - initialRect.left;
+                    dragItem.dataset.offsetY = startY - initialRect.top;
+                    
+                    dragItem.style.width = initialRect.width + 'px'; // 鎖定寬度
                     
                     el.classList.remove('pressing');
                     el.parentNode.insertBefore(placeholder, el);
@@ -224,7 +221,7 @@
             };
 
             const onMove = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 if (dragTimer && !dragItem) {
                     if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
                         clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
@@ -233,12 +230,13 @@
                 if (!dragItem) return;
                 e.preventDefault();
 
+                // 拿起後完全跟隨手指，不再跑位
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
                 
-                const edgeThreshold = 60;
-                if (touch.clientX < edgeThreshold) startAutoScroll('left');
-                else if (touch.clientX > window.innerWidth - edgeThreshold) startAutoScroll('right');
+                const edge = 60;
+                if (touch.clientX < edge) startAutoScroll('left');
+                else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
                 else stopAutoScroll();
 
                 const after = getDragAfterElement(vizBar, touch.clientX);
@@ -250,12 +248,15 @@
                 stopAutoScroll();
                 if (dragItem) {
                     dragItem.classList.remove('dragging');
-                    dragItem.style.left = ''; dragItem.style.top = '';
+                    dragItem.style.left = ''; dragItem.style.top = ''; dragItem.style.width = '';
                     if (placeholder.parentNode) {
                         placeholder.parentNode.insertBefore(dragItem, placeholder);
                         placeholder.remove();
                     }
-                    Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => app.appendChild(document.getElementById(`card${item.dataset.id}`)));
+                    Array.from(vizBar.querySelectorAll('.viz-item')).forEach(item => {
+                        const card = document.getElementById(`card${item.dataset.id}`);
+                        if(card) app.appendChild(card);
+                    });
                     dragItem = null; updateTime();
                 }
             };
@@ -306,7 +307,6 @@
             if(ctEl) ctEl.innerText = now.toLocaleTimeString('zh-TW', { hour12: false });
             if (dragItem) return;
             
-            // 每次更新前檢查內容寬度以決定是否居中
             vizBar.innerHTML = "";
             Array.from(app.children).forEach(card => {
                 const id = card.dataset.id, t = targetTimes[id], name = document.getElementById(`name${id}`).value;
@@ -325,7 +325,6 @@
                 addDragListeners(item); vizBar.appendChild(item);
             });
 
-            // 動態調整：若小卡很多，取消居中改為靠左，讓捲動行為正確
             if (vizBar.scrollWidth > vizBar.clientWidth) {
                 vizBar.style.justifyContent = "flex-start";
                 vizBar.style.paddingLeft = "10px";
