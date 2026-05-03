@@ -150,19 +150,18 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // 修改：處理自動跳轉邏輯
         function handleKeydown(e, type, id) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 if (type === 'min') {
                     document.getElementById(`sec${id}`).focus();
                 } else {
-                    focusNextRow(id); // 秒數按 Enter 跳到下一行分鐘
+                    focusNextRow(id);
                 }
             }
         }
 
-        // 新增：跳到下一行分鐘的邏輯
+        // 跳到下一行分鐘
         function focusNextRow(currentId) {
             const currentIndex = rowOrder.indexOf(currentId);
             if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
@@ -170,7 +169,7 @@
                 const nextMinInput = document.getElementById(`min${nextId}`);
                 if (nextMinInput) nextMinInput.focus();
             } else {
-                document.getElementById(`sec${currentId}`).blur(); // 最後一行則收起鍵盤
+                document.getElementById(`sec${currentId}`).blur(); 
             }
         }
 
@@ -199,14 +198,13 @@
                 
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
-                        onblur="if(this.value !== '') document.getElementById('sec${id}').focus();"
+                        oninput="handleInput('${id}'); if(this.value.length >= 1) document.getElementById('sec${id}').focus();"
                         onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
 
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextRow('${id}');"
+                        oninput="handleInput('${id}'); if(this.value.length >= 1) focusNextRow('${id}');"
                         onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
 
