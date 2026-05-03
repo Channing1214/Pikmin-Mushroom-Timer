@@ -20,134 +20,142 @@
             --critical-bg: #ffebee;
             --critical-border: #f44336;
         }
-code
-Code
-html, body { 
-        height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
-        touch-action: manipulation; 
-    }
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--bg);
-        color: var(--text);
-        display: flex;
-        flex-direction: column;
-        -webkit-user-select: none; user-select: none;
-        -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
-    }
+        html, body { 
+            height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
+            touch-action: manipulation; 
+        }
 
-    body::before {
-        content: ""; position: fixed; inset: 0;
-        background-image: url('pikmin.png');
-        background-repeat: no-repeat; background-position: center; background-size: cover;
-        opacity: 0.15; z-index: -1;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+        }
 
-    .time-header {
-        position: fixed; top: 0; left: 0; width: 100%;
-        background: rgba(253, 250, 246, 0.96); padding: 5px 0;
-        text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
-    }
+        body::before {
+            content: ""; position: fixed; inset: 0;
+            background-image: url('pikmin.png');
+            background-repeat: no-repeat; background-position: center; background-size: cover;
+            opacity: 0.15; z-index: -1;
+        }
 
-    .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
-    .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
-    .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
-    
-    .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
-    .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
+        .time-header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(253, 250, 246, 0.96); padding: 5px 0;
+            text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
+        }
 
-    .scroll-area {
-        flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-        padding-top: 110px; padding-bottom: 130px;
-        display: flex; flex-direction: column; align-items: center; width: 100%;
-    }
+        .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
+        .row-controls { display: flex; gap: 5px; justify-content: center; margin-bottom: 2px; }
+        .btn-action { padding: 2px 10px; font-size: 0.75rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; }
+        
+        .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
+        .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
-    .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .scroll-area {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-top: 110px; padding-bottom: 130px;
+            display: flex; flex-direction: column; align-items: center; width: 100%;
+        }
 
-    .mushroom-card {
-        background: var(--card-bg);
-        padding: 3px 10px; border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 3px;
-        display: flex; gap: 6px; align-items: center; justify-content: center;
-        border: 1px solid #eee; width: 100%; max-width: fit-content;
-        touch-action: pan-y;
-    }
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-    .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-    input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
-    input[type="text"] { width: 70px; }
-    input[type="number"] { width: 36px; text-align: center; }
-    .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+        .mushroom-card {
+            background: var(--card-bg);
+            padding: 3px 10px; border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 3px;
+            display: flex; gap: 6px; align-items: center; justify-content: center;
+            border: 1px solid #eee; width: 100%; max-width: fit-content;
+            touch-action: pan-y;
+        }
 
-    .viz-bar {
-        position: fixed; bottom: 0; left: 0; width: 100%;
-        background: #fff; border-top: 2px solid var(--primary);
-        padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
-        display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
-        justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-        z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
-    }
+        .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
+        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
+        input[type="text"] { width: 70px; }
+        input[type="number"] { width: 36px; text-align: center; }
+        
+        .btn-row-clear { 
+            padding: 4px 6px; 
+            background: #f5f5f5; 
+            color: var(--gray); 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .viz-item {
-        min-width: 80px; height: 80px;
-        background: #fff; border: 1px solid #eee; border-radius: 10px;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        flex-shrink: 0; border-bottom: 3px solid var(--primary);
-        line-height: 1.2; cursor: grab; box-sizing: border-box;
-    }
+        .viz-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #fff; border-top: 2px solid var(--primary);
+            padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
+            display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
+        }
 
-    .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-    .viz-item .viz-target { font-size: 0.7rem; color: #888; }
-    .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+        .viz-item {
+            min-width: 80px; height: 80px;
+            background: #fff; border: 1px solid #eee; border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            flex-shrink: 0; border-bottom: 3px solid var(--primary);
+            line-height: 1.2; cursor: grab; box-sizing: border-box;
+        }
 
-    /* 倒數 30 秒：黃色閃爍 */
-    .viz-item.warning { 
-        border-color: var(--warning-border); 
-        border-bottom: 3px solid var(--warning-border);
-        animation: warning-blink 1s infinite;
-    }
-    @keyframes warning-blink {
-        0%, 100% { background-color: var(--warning-bg); }
-        50% { background-color: #ffffff; }
-    }
-    .viz-item.warning .viz-cd { color: #d2691e; }
+        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-    /* 倒數 5 秒：紅色閃爍 */
-    .viz-item.critical {
-        border-color: var(--critical-border);
-        border-bottom: 3px solid var(--critical-border);
-        animation: critical-blink 0.5s infinite;
-    }
-    @keyframes critical-blink {
-        0%, 100% { background-color: var(--critical-bg); }
-        50% { background-color: #ffffff; }
-    }
-    .viz-item.critical .viz-cd { color: var(--danger); font-size: 1rem; }
+        .viz-item.warning { 
+            border-color: var(--warning-border); 
+            border-bottom: 3px solid var(--warning-border);
+            animation: warning-blink 1s infinite;
+        }
+        @keyframes warning-blink {
+            0%, 100% { background-color: var(--warning-bg); }
+            50% { background-color: #ffffff; }
+        }
+        .viz-item.warning .viz-cd { color: #d2691e; }
 
-    /* 已發車：灰色反灰 */
-    .viz-item.ready { 
-        background-color: var(--ready-bg) !important; 
-        border-color: var(--ready-border) !important;
-        border-bottom: 3px solid var(--gray) !important;
-        animation: none !important;
-    }
-    .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { 
-        color: var(--gray) !important; 
-    }
+        .viz-item.critical {
+            border-color: var(--critical-border);
+            border-bottom: 3px solid var(--critical-border);
+            animation: critical-blink 0.5s infinite;
+        }
+        @keyframes critical-blink {
+            0%, 100% { background-color: var(--critical-bg); }
+            50% { background-color: #ffffff; }
+        }
+        .viz-item.critical .viz-cd { color: var(--danger); font-size: 1rem; }
 
-    .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
+        .viz-item.ready { 
+            background-color: var(--ready-bg) !important; 
+            border-color: var(--ready-border) !important;
+            border-bottom: 3px solid var(--gray) !important;
+            animation: none !important;
+        }
+        .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { 
+            color: var(--gray) !important; 
+        }
 
-    .viz-item.dragging {
-        position: fixed !important; z-index: 9999 !important;
-        opacity: 0.95; transform: scale(1.15);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
-        background: #fff; margin: 0 !important;
-        touch-action: none !important;
-    }
+        .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
-    .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-</style>
+        .viz-item.dragging {
+            position: fixed !important; z-index: 9999 !important;
+            opacity: 0.95; transform: scale(1.15);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
+            background: #fff; margin: 0 !important;
+            touch-action: none !important;
+        }
+
+        .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
+    </style>
 </head>
 <body>
     <div class="time-header">
@@ -163,8 +171,7 @@ html, body {
     </div>
     <div class="scroll-area"><div class="container" id="app"></div></div>
     <div class="viz-bar" id="vizBar"></div>
-code
-Code
+
 <script>
     document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
@@ -189,7 +196,8 @@ Code
             const nextMinInput = document.getElementById(`min${nextId}`);
             if (nextMinInput) nextMinInput.focus();
         } else {
-            document.getElementById(`sec${currentId}`).blur();
+            const secInput = document.getElementById(`sec${currentId}`);
+            if(secInput) secInput.blur();
         }
     }
 
@@ -241,7 +249,7 @@ Code
                     onkeydown="handleKeydown(event, 'sec', '${id}')">秒
             </div>
 
-            <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
+            <button class="btn-row-clear" onclick="resetRow('${id}')">🧹</button>
         `;
         app.appendChild(d);
     }
@@ -253,7 +261,6 @@ Code
             const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
             targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
         }
-        // 重新輸入時，清除「自動清空」的標記
         const card = document.getElementById(`card${id}`);
         if(card) {
             card.dataset.warned = "";
@@ -398,7 +405,6 @@ Code
                 const diff = Math.floor((t - now) / 1000);
                 
                 if (diff <= 0) {
-                    // 修改：發車當下，清空上方輸入框，但保留下方小卡
                     if (card && !card.dataset.autoCleared) {
                         const minInput = document.getElementById(`min${id}`);
                         const secInput = document.getElementById(`sec${id}`);
@@ -477,3 +483,5 @@ Code
     setInterval(updateDynamicInfo, 1000);
     init();
 </script>
+</body>
+</html>
