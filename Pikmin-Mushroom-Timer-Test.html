@@ -29,7 +29,6 @@
             -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* 背景圖片 */
         body::before {
             content: ""; position: fixed; inset: 0;
             background-image: url('pikmin.png');
@@ -37,7 +36,6 @@
             opacity: 0.15; z-index: -1;
         }
 
-        /* 頂部固定欄 */
         .time-header {
             position: fixed; top: 0; left: 0; width: 100%;
             background: rgba(253, 250, 246, 0.96); padding: 5px 0;
@@ -51,7 +49,6 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; font-size: 1rem !important; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; font-size: 1rem !important; }
 
-        /* 滾動區域 */
         .scroll-area {
             flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-top: 110px; padding-bottom: 130px;
@@ -75,7 +72,6 @@
         input[type="number"] { width: 36px; text-align: center; }
         .btn-row-clear { padding: 5px 8px; background: #f5f5f5; color: var(--gray); border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
 
-        /* 底部狀態欄 */
         .viz-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #fff; border-top: 2px solid var(--primary);
@@ -106,10 +102,10 @@
             opacity: 0.95; transform: scale(1.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary);
             background: #fff; margin: 0 !important;
+            touch-action: none !important; /* 強制禁用所有手勢以確保移動順暢 */
         }
 
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
-        
         .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
         .viz-item.ready * { color: #fff !important; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
@@ -180,13 +176,13 @@
         function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
         function startAutoScroll(dir) {
             if (autoScrollTimer) return;
-            const scrollSpeed = 4; // 速度已調慢為 4
+            const scrollSpeed = 4;
             autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? scrollSpeed : -scrollSpeed); }, 16);
         }
 
         function addDragListeners(el) {
             const onStart = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX; startY = touch.clientY;
                 initialRect = el.getBoundingClientRect();
                 isUserInteracting = true; el.classList.add('pressing');
@@ -207,7 +203,7 @@
             };
 
             const onMove = (e) => {
-                const touch = e.touches ? e.touches : e;
+                const touch = e.touches ? e.touches[0] : e;
                 if (dragTimer && !dragItem) {
                     if (Math.abs(touch.clientX - startX) > 20 || Math.abs(touch.clientY - startY) > 20) {
                         clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
@@ -215,13 +211,18 @@
                     }
                 }
                 if (!dragItem) return;
+                
+                // 核心修復：進入拖移模式時，完全攔截瀏覽器事件
                 if (e.cancelable) e.preventDefault();
+
                 dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
                 dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
+                
                 const edge = 60;
                 if (touch.clientX < edge) startAutoScroll('left');
                 else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
                 else stopAutoScroll();
+
                 const after = getDragAfterElement(vizBar, touch.clientX);
                 if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
             };
@@ -241,7 +242,8 @@
                 }
             };
 
-            el.addEventListener('touchstart', onStart, { passive: true });
+            // 使用 passive: false 強制獲取控制權
+            el.addEventListener('touchstart', onStart, { passive: false });
             window.addEventListener('touchmove', onMove, { passive: false });
             window.addEventListener('touchend', onEnd);
             el.addEventListener('mousedown', onStart);
