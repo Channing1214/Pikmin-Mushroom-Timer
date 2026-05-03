@@ -14,7 +14,6 @@
             --danger: #e53935;
             --gray: #9e9e9e;
             --ready: #ff4757;
-            /* 預警顏色 */
             --warning-bg: #fff9e6;
             --warning-border: #ffa500;
         }
@@ -100,7 +99,6 @@
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        /* 預警狀態 */
         .viz-item.warning { background-color: var(--warning-bg); border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); }
         .viz-item.warning .viz-cd { color: #d2691e; }
 
@@ -122,7 +120,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
@@ -152,60 +150,20 @@
             localStorage.setItem('mushroom_row_count', currentRowCount);
         }
 
-        // --- 全自動跳轉核心邏輯 ---
-        function jumpFocus(id, type) {
-            if (type === 'min') {
-                const secInput = document.getElementById(`sec${id}`);
-                if (secInput) secInput.focus();
-            } else if (type === 'sec') {
-                const currentIndex = rowOrder.indexOf(id.toString());
-                if (currentIndex !== -1 && currentIndex < rowOrder.length - 1) {
-                    const nextId = rowOrder[currentIndex + 1];
-                    const nextMin = document.getElementById(`min${nextId}`);
-                    if (nextMin) nextMin.focus();
+        // 修改：處理勾勾(Enter/V)跳轉
+        function handleKeydown(e, type, id) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (type === 'min') {
+                    // 分鐘按勾勾 -> 跳轉秒數
+                    document.getElementById(`sec${id}`).focus();
                 } else {
-                    document.activeElement.blur(); // 最後一行收鍵盤
+                    // 秒數按勾勾 -> 收起鍵盤
+                    e.target.blur();
                 }
             }
         }
 
-        function handleInput(id, type, val) {
-            // 計算剩餘時間
-            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-            if (m === "" && s === "") { targetTimes[id] = null; } 
-            else {
-                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
-            }
-            saveAll();
-            const card = document.getElementById(`card${id}`);
-            if(card) card.dataset.warned = "";
-
-            // 滿 2 位自動跳轉
-            if (val.length >= 2) jumpFocus(id, type);
-            renderVizBar();
-        }
-
-        function handleBlur(id, type, val) {
-            // 滿 1 位按離開(blur)自動跳轉
-            if (val.length === 1) {
-                // 延遲跳轉以確保鍵盤邏輯正常觸發
-                setTimeout(() => {
-                    if (document.activeElement.tagName !== 'INPUT') {
-                        jumpFocus(id, type);
-                    }
-                }, 50);
-            }
-        }
-
-        function handleKeydown(e, id, type) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                jumpFocus(id, type);
-            }
-        }
-
-        // --- 初始化與基礎功能 ---
         function init() {
             if (rowOrder.length === 0) {
                 for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
@@ -228,21 +186,35 @@
             d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
             d.innerHTML = `
                 <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
+                
                 <div class="input-group">
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                        oninput="handleInput('${id}', 'min', this.value)" 
-                        onblur="handleBlur('${id}', 'min', this.value)"
-                        onkeydown="handleKeydown(event, '${id}', 'min')">分
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                        onkeydown="handleKeydown(event, 'min', '${id}')">分
                 </div>
+
                 <div class="input-group">
                     <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                        oninput="handleInput('${id}', 'sec', this.value)" 
-                        onblur="handleBlur('${id}', 'sec', this.value)"
-                        onkeydown="handleKeydown(event, '${id}', 'sec')">秒
+                        oninput="handleInput('${id}'); if(this.value.length >= 2) this.blur();"
+                        onkeydown="handleKeydown(event, 'sec', '${id}')">秒
                 </div>
+
                 <button class="btn-row-clear" onclick="resetRow('${id}')">✖</button>
             `;
             app.appendChild(d);
+        }
+
+        function handleInput(id) {
+            const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+            if (m === "" && s === "") { targetTimes[id] = null; } 
+            else {
+                const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
+                targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
+            }
+            saveAll();
+            const card = document.getElementById(`card${id}`);
+            if(card) card.dataset.warned = "";
+            renderVizBar(); 
         }
 
         function updateAudioBtnUI() {
@@ -262,7 +234,6 @@
 
         function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
-        // --- 拖曳排序功能 (持久化修正) ---
         let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
         let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
         placeholder.className = 'placeholder';
@@ -322,18 +293,13 @@
                     dragItem.classList.remove('dragging');
                     dragItem.style.cssText = '';
                     if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
-                    
-                    // 更新順序紀錄並存檔
                     const items = Array.from(vizBar.querySelectorAll('.viz-item'));
                     rowOrder = items.map(item => item.dataset.id);
                     saveAll();
-
-                    // 同步上方輸入卡片順序
                     rowOrder.forEach(id => {
                         const card = document.getElementById(`card${id}`);
                         if(card) app.appendChild(card);
                     });
-                    
                     dragItem = null; 
                     renderVizBar();
                 }
@@ -385,7 +351,7 @@
                 if (t) {
                     const diff = Math.floor((t - now) / 1000);
                     const isReady = diff <= 0;
-                    const isWarning = diff <= 30 && diff > 0; // 30秒預警
+                    const isWarning = diff <= 30 && diff > 0;
 
                     item.classList.toggle('ready', isReady);
                     item.classList.toggle('warning', isWarning);
@@ -407,17 +373,11 @@
             else vizBar.style.justifyContent = "center";
         }
 
-        function clearAllInputs() {
-            if(confirm("清除所有剩餘時間嗎？")) {
-                targetTimes = {}; saveAll();
-                Array.from(app.querySelectorAll('input[type="number"]')).forEach(input => input.value = "");
-                renderVizBar();
-            }
-        }
-
         function resetRow(id) { 
-            const m = document.getElementById(`min${id}`), s = document.getElementById(`sec${id}`);
-            if(m) m.value = ""; if(s) s.value = "";
+            const minInput = document.getElementById(`min${id}`);
+            const secInput = document.getElementById(`sec${id}`);
+            if(minInput) minInput.value = "";
+            if(secInput) secInput.value = "";
             targetTimes[id] = null; saveAll(); renderVizBar(); 
         }
 
@@ -430,7 +390,8 @@
                 rowOrder.pop();
                 currentRowCount--;
             }
-            saveAll(); init(); 
+            saveAll(); 
+            init(); 
         }
 
         function resetToInitial() { if(confirm("重置所有數據？")){ localStorage.clear(); location.reload(); } }
