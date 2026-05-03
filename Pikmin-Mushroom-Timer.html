@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搶菇計算機Ver3</title>
+    <title>搶菇計算機</title>
     <style>
         :root {
             --primary: #6b8e23;
@@ -21,12 +21,12 @@
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 135px;
-            padding-bottom: 130px;
+            padding-top: 110px;
+            padding-bottom: 120px;
         }
 
         .time-header {
@@ -36,54 +36,45 @@
             width: 100%;
             background: rgba(253, 250, 246, 0.98);
             backdrop-filter: blur(5px);
-            padding: 5px 0;
+            padding: 3px 0;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             z-index: 1000;
         }
 
         h1 {
             color: var(--primary);
             margin: 0;
-            font-size: clamp(1.1rem, 4vw, 1.3rem);
-            margin-bottom: 2px;
+            font-size: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 5px;
         }
 
         .time-display {
-            font-size: clamp(1.4rem, 5vw, 1.6rem);
+            font-size: 1.4rem;
             color: #444;
             font-weight: bold;
-            line-height: 1.1;
-            margin-bottom: 5px;
+            line-height: 1;
+            margin: 2px 0;
         }
 
         .row-controls {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             justify-content: center;
-            margin-bottom: 5px;
-            flex-wrap: wrap;
+            margin-bottom: 2px;
         }
 
         .btn-action {
-            padding: 4px 12px;
-            font-size: 0.85rem;
-            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            border-radius: 15px;
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
             color: #555;
-            transition: 0.2s;
-        }
-
-        .btn-action:hover {
-            background: #f0f0f0;
-            border-color: var(--primary);
-            color: var(--primary);
         }
 
         .container {
@@ -96,58 +87,46 @@
 
         .mushroom-card {
             background: var(--card-bg);
-            padding: 8px 15px;
-            border-radius: 10px;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.05);
-            margin-bottom: 4px;
+            padding: 3px 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 3px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px 15px;
+            flex-wrap: nowrap;
+            gap: 6px;
             align-items: center;
             justify-content: center;
             border: 1px solid #eee;
-            width: 95%;
+            width: 100%;
             max-width: fit-content;
         }
 
         .input-group {
             display: flex;
-            flex-shrink: 0;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
+            font-size: 0.8rem;
+            white-space: nowrap;
         }
 
-        input[type="text"] { width: 85px; padding: 7px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
-        input[type="number"] { width: 45px; padding: 7px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 1rem; }
+        input[type="text"] { width: 70px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; }
+        input[type="number"] { width: 36px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 0.9rem; }
 
-        .btn-calc {
-            padding: 7px 18px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .result { display: none; }
+        .btn-calc, .result { display: none; }
 
         .btn-row-clear { 
-            padding: 7px 12px; 
+            padding: 5px 8px; 
             background-color: #f5f5f5; 
             color: var(--gray); 
             border: 1px solid #ddd; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            height: 38px; 
+            border-radius: 4px; 
+            font-size: 0.8rem;
+            cursor: pointer;
         }
-        .btn-row-clear:hover { background-color: var(--danger); color: white; }
 
-        .move-controls { display: flex; flex-direction: column; gap: 2px; height: 38px; justify-content: space-between; }
-        .btn-move { padding: 0 10px; font-size: 9px; background: #eee; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; height: 18px; }
+        .move-controls { display: flex; flex-direction: column; gap: 1px; }
+        .btn-move { padding: 0 5px; font-size: 8px; background: #eee; border: 1px solid #ccc; border-radius: 3px; height: 14px; cursor: pointer; }
 
-        /* --- 底部視覺化看板 --- */
         .viz-bar {
             position: fixed;
             bottom: 0;
@@ -155,41 +134,38 @@
             width: 100%;
             background: #fff;
             border-top: 2px solid var(--primary);
-            padding: 12px 0;
+            padding: 8px 0;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             overflow-x: auto;
             justify-content: center;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
             z-index: 2000;
             scrollbar-width: none;
         }
 
         @media (max-width: 800px) {
-            .viz-bar { justify-content: flex-start; padding-left: 15px; }
+            .viz-bar { justify-content: flex-start; padding-left: 10px; }
         }
 
-        .viz-bar::-webkit-scrollbar { display: none; }
-
         .viz-item {
-            min-width: 95px;
-            height: 95px;
+            min-width: 80px;
+            height: 80px;
             background: #fff;
             border: 1px solid #eee;
-            border-radius: 15px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border-bottom: 4px solid var(--primary);
-            line-height: 1.3;
+            border-bottom: 3px solid var(--primary);
+            line-height: 1.2;
         }
 
-        .viz-item strong { font-size: 0.9rem; color: #333; margin-bottom: 4px; width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .viz-item .viz-target { font-size: 0.75rem; color: #888; margin-bottom: 2px; }
-        .viz-item .viz-cd { font-size: 0.85rem; color: var(--accent); font-weight: bold; font-family: monospace; }
+        .viz-item strong { font-size: 0.8rem; color: #333; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
         .viz-item.ready { background: var(--ready); border-color: var(--ready); animation: blink 1s infinite; }
         .viz-item.ready * { color: #fff !important; }
@@ -203,9 +179,9 @@
         <h1>🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
-            <button class="btn-action" onclick="changeRows(1)">➕ 增加行數</button>
-            <button class="btn-action" onclick="changeRows(-1)">➖ 減少行數</button>
-            <button class="btn-action btn-reset" onclick="resetToInitial()">🔄 恢復初始狀態</button>
+            <button class="btn-action" onclick="changeRows(1)">➕ 增加</button>
+            <button class="btn-action" onclick="changeRows(-1)">➖ 減少</button>
+            <button class="btn-action btn-reset" onclick="resetToInitial()">🔄 重置</button>
         </div>
     </div>
 
@@ -218,22 +194,17 @@
         let targetTimes = {};
         let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
 
-        // 音效設定：修改為 0.5 秒長音
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playWarningBeep() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             osc.type = 'square';
             osc.frequency.value = 1000;
             gain.gain.value = 0.15;
-            
             osc.start();
-            // 修改點：持續時間調整為 0.5 秒 (500 毫秒)
             setTimeout(() => osc.stop(), 500);
         }
 
@@ -250,11 +221,13 @@
             card.id = `card${i}`;
             card.dataset.id = i; 
             card.innerHTML = `
-                <div class="input-group"><input type="text" id="name${i}" value="${savedName}" oninput="saveName(${i}, this.value); updateTime();"></div>
-                <div class="input-group"><input type="number" id="min${i}" placeholder="分" oninput="limitLen(this)" onkeyup="if(value.length>=2)document.getElementById('sec${i}').focus()"><label style="font-size:0.8rem">分</label></div>
-                <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="limitSec(this, ${i})"><label style="font-size:0.8rem">秒</label></div>
-                <button class="btn-calc" onclick="calculate(${i})">計算</button>
-                <div class="result" id="resultBox${i}"></div>
+                <div class="input-group">
+                    <input type="text" id="name${i}" value="${savedName}" oninput="saveName(${i}, this.value); updateTime();">
+                    <span style="margin-left:2px">剩餘</span>
+                </div>
+                <div class="input-group"><input type="number" id="min${i}" placeholder="分" oninput="handleInput(${i})" onkeyup="if(value.length>=2)document.getElementById('sec${i}').focus()">分</div>
+                <div class="input-group"><input type="number" id="sec${i}" placeholder="秒" oninput="handleInput(${i})">秒</div>
+                <button class="btn-calc" onclick="calculate(${i})">算</button>
                 <button class="btn-row-clear" onclick="resetRow(${i})">✖</button>
                 <div class="move-controls">
                     <button class="btn-move" onclick="moveRow(${i}, -1)">▲</button>
@@ -262,6 +235,15 @@
                 </div>
             `;
             app.appendChild(card);
+        }
+
+        function handleInput(id) {
+            const minEl = document.getElementById(`min${id}`);
+            const secEl = document.getElementById(`sec${id}`);
+            if(minEl.value.length > 2) minEl.value = minEl.value.slice(0,2);
+            if(secEl.value.length > 2) secEl.value = secEl.value.slice(0,2);
+            if(parseInt(secEl.value) > 59) secEl.value = 59;
+            calculate(id);
         }
 
         function updateTime() {
@@ -281,18 +263,12 @@
                     const diff = targetTimes[id] - now;
                     const diffSeconds = Math.floor(diff / 1000);
                     const targetStr = targetTimes[id].toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    
                     vizData.push({ name, diff, targetStr, hasCalc: true });
-
-                    // 10 秒整預警
                     if (diffSeconds === 10 && !card.dataset.warned) {
                         playWarningBeep();
                         card.dataset.warned = "true";
                     }
-                    
-                    if (diffSeconds > 10) {
-                        delete card.dataset.warned;
-                    }
+                    if (diffSeconds > 10) delete card.dataset.warned;
                 } else {
                     vizData.push({ name, diff: null, targetStr: '--:--:--', hasCalc: false });
                 }
@@ -300,49 +276,34 @@
 
             vizBar.innerHTML = vizData.map(item => {
                 let isReady = false;
-                let timeStr = "等待計算";
+                let timeStr = "等待";
                 if (item.hasCalc) {
                     isReady = item.diff <= 0;
                     const m = Math.floor(Math.abs(item.diff) / 1000 / 60);
                     const s = Math.floor((Math.abs(item.diff) / 1000) % 60);
                     timeStr = isReady ? "已發車" : `${m}:${s.toString().padStart(2, '0')}`;
                 }
-                return `
-                    <div class="viz-item ${isReady ? 'ready' : ''}">
-                        <strong>${item.name}</strong>
-                        <span class="viz-target">${item.targetStr}</span>
-                        <span class="viz-cd">${timeStr}</span>
-                    </div>
-                `;
+                return `<div class="viz-item ${isReady ? 'ready' : ''}"><strong>${item.name}</strong><span class="viz-target">${item.targetStr}</span><span class="viz-cd">${timeStr}</span></div>`;
             }).join('');
         }
 
         function calculate(id) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            const min = parseInt(document.getElementById(`min${id}`).value) || 0;
-            const sec = parseInt(document.getElementById(`sec${id}`).value) || 0;
-            const now = new Date();
-            const target = new Date(now.getTime() + (min * 60 + sec + 300) * 1000);
+            const minStr = document.getElementById(`min${id}`).value;
+            const secStr = document.getElementById(`sec${id}`).value;
+            if (minStr === "" && secStr === "") return;
+            const min = parseInt(minStr) || 0;
+            const sec = parseInt(secStr) || 0;
+            const target = new Date(Date.now() + (min * 60 + sec + 300) * 1000);
             targetTimes[id] = target;
-            
             const card = document.getElementById(`card${id}`);
             if(card) delete card.dataset.warned;
-            
             updateTime();
         }
 
-        function limitLen(el) { if(el.value.length > 2) el.value = el.value.slice(0,2); }
-        function limitSec(el, id) {
-            if(el.value.length > 2) el.value = el.value.slice(0,2);
-            if(parseInt(el.value) > 59) el.value = 59;
-            if(el.value.length === 2) calculate(id);
-        }
-
         function resetRow(id) {
-            const minEl = document.getElementById(`min${id}`);
-            const secEl = document.getElementById(`sec${id}`);
-            if(minEl) minEl.value = "";
-            if(secEl) secEl.value = "";
+            document.getElementById(`min${id}`).value = "";
+            document.getElementById(`sec${id}`).value = "";
             delete targetTimes[id];
             updateTime();
         }
@@ -354,7 +315,7 @@
         }
 
         function resetToInitial() {
-            if(confirm("確定要將所有設定恢復到初始狀態嗎？")) {
+            if(confirm("確定要重置嗎？")) {
                 localStorage.clear();
                 currentRowCount = 5;
                 targetTimes = {};
@@ -383,9 +344,7 @@
             });
         }
 
-        function saveName(id, value) { 
-            localStorage.setItem(`mushroom_name_${id}`, value); 
-        }
+        function saveName(id, value) { localStorage.setItem(`mushroom_name_${id}`, value); }
 
         setInterval(updateTime, 1000);
         init();
