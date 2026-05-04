@@ -6,166 +6,64 @@
     <title>搶菇計算機-測試版</title>
     <style>
         :root {
-            --primary: #6b8e23;
-            --accent: #ff7f50;
-            --bg: #fdfaf6;
-            --card-bg: #ffffff;
-            --text: #333;
-            --danger: #e53935;
-            --gray: #9e9e9e;
-            --ready-bg: #e0e0e0;
-            --ready-border: #bdbdbd;
-            --warning-bg: #fff9e6;
-            --warning-border: #ffa500;
-            --critical-bg: #ffebee;
-            --critical-border: #f44336;
+            --primary: #6b8e23; --accent: #ff7f50; --bg: #fdfaf6; --card-bg: #ffffff;
+            --text: #333; --danger: #e53935; --gray: #9e9e9e; --ready-bg: #e0e0e0;
+            --ready-border: #bdbdbd; --warning-bg: #fff176; --warning-border: #fbc02d;
+            --critical-bg: #ffebee; --critical-border: #f44336;
         }
 
-        html, body { 
-            height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0;
-            touch-action: manipulation; 
-        }
+        html, body { height: 100%; width: 100%; overflow: hidden; position: fixed; margin: 0; padding: 0; touch-action: manipulation; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
+        body::before { content: ""; position: fixed; inset: 0; background-image: url('pikmin.png'); background-repeat: no-repeat; background-position: center; background-size: cover; opacity: 0.15; z-index: -1; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            -webkit-user-select: none; user-select: none;
-            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
-        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
 
-        body::before {
-            content: ""; position: fixed; inset: 0;
-            background-image: url('pikmin.png');
-            background-repeat: no-repeat; background-position: center; background-size: cover;
-            opacity: 0.15; z-index: -1;
-        }
-
-        .time-header {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background: rgba(253, 250, 246, 0.96); padding: 5px 0;
-            text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000;
-        }
-
+        .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
-        
-        .row-controls { display: flex; gap: 0; justify-content: center; margin-bottom: 2px; }
+        .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
 
-        .btn-action { 
-            padding: 1px 8px; 
-            font-size: 0.7rem; 
-            border-radius: 15px; 
-            border: 1px solid #ddd; 
-            background: white; 
-            cursor: pointer; 
-            color: #555; 
-            margin: 0 2px;
-            transition: transform 0.1s, background-color 0.1s;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-
-        .btn-action:active {
-            background-color: #f0f0f0 !important;
-            transform: scale(0.95);
-        }
-        
+        .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; margin: 0 2px; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; }
 
-        .scroll-area {
-            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-top: 100px; padding-bottom: 130px;
-            display: flex; flex-direction: column; align-items: center; width: 100%;
-        }
-
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .row-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; width: 100%; max-width: fit-content; }
 
-        .mushroom-card {
-            background: var(--card-bg);
-            padding: 3px 10px; border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 3px;
-            display: flex; gap: 6px; align-items: center; justify-content: center;
-            border: 1px solid #eee; width: 100%; max-width: fit-content;
-            touch-action: pan-y;
-        }
-
+        .mushroom-card { background: var(--card-bg); padding: 3px 8px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; }
         .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"], input[type="number"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; -webkit-user-select: text; user-select: text; }
-        input[type="text"] { width: 70px; }
-        input[type="number"] { width: 36px; text-align: center; }
+        input[type="text"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; width: 65px; -webkit-user-select: text; user-select: text; }
         
-        .btn-small { 
-            width: 28px; height: 28px; 
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s, background-color 0.1s;
-            padding: 0; margin: 0;
-        }
-        .btn-small:active { transform: scale(0.9); }
-        .btn-row-clear { background: #f5f5f5; color: var(--gray); }
-        .btn-row-clear:active { background-color: #e0e0e0 !important; }
-        .btn-row-delete { background: #fff1f0; color: var(--danger); border-color: #ffa39e; font-size: 0.7rem; }
-        .btn-row-delete:active { background-color: #ffccc7 !important; }
+        .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: white; padding: 0 4px; }
+        .time-box input[type="number"] { border: none !important; width: 24px; text-align: center; font-size: 0.9rem; padding: 5px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; }
+        .time-box span { font-size: 0.7rem; color: #888; margin: 0 1px; }
 
-        .btn-add-row {
-            margin: 10px 0;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 2px dashed var(--primary);
-            color: var(--primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
+        .btn-small-reset { width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: transparent; color: #ccc; font-size: 1.2rem; }
+        .btn-small-reset:active { background-color: #f0f0f0; color: var(--primary); transform: scale(0.8) rotate(-45deg); }
+        .btn-row-delete { width: 34px; height: 34px; border-radius: 6px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        .btn-add-row { margin: 8px 0; width: 34px; height: 34px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        .viz-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #fff; border-top: 2px solid var(--primary);
-            padding: 8px 0 calc(12px + env(safe-area-inset-bottom));
-            display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
-            justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-            z-index: 3000; touch-action: pan-x; scrollbar-width: thin;
-        }
-
-        .viz-item {
-            min-width: 80px; height: 80px;
-            background: #fff; border: 1px solid #eee; border-radius: 10px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            flex-shrink: 0; border-bottom: 3px solid var(--primary);
-            line-height: 1.2; cursor: grab; box-sizing: border-box;
-        }
-
-        .viz-item strong { font-size: 0.8rem; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; }
+        .viz-item { min-width: 64px; height: 64px; background: #fff; border: 1px solid #eee; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 3px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; padding: 2px; }
+        .viz-item strong { font-size: 0.8rem; width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        .viz-item.warning { border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); animation: warning-blink 1s infinite; }
-        @keyframes warning-blink { 0%, 100% { background-color: var(--warning-bg); } 50% { background-color: #ffffff; } }
-
-        .viz-item.critical { border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
+        .warning { border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
+        @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
+        .critical { border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffffff; } }
 
-        .viz-item.ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 3px solid var(--gray) !important; }
-        .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { color: var(--gray) !important; }
-
-        .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
-
-        .viz-item.dragging {
-            position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important;
-        }
-
-        .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
+        .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 3px solid var(--gray) !important; }
+        .ready strong, .ready .viz-target, .ready .viz-cd { color: var(--gray) !important; }
+        
+        .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; }
+        .placeholder { min-width: 64px; height: 64px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 8px; flex-shrink: 0; }
+        .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -173,200 +71,77 @@
         <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
-            <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 清除</button>
+            <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
     </div>
-    <div class="scroll-area">
-        <div class="container" id="app"></div>
-        <button class="btn-add-row" onclick="changeRows(1)">➕</button>
-    </div>
+    <div class="scroll-area"><div class="container" id="app"></div><button class="btn-add-row" onclick="changeRows(1)">➕</button></div>
     <div class="viz-bar" id="vizBar"></div>
 
 <script>
-    document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
-
     const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
-    let currentRowCount = parseInt(localStorage.getItem('mushroom_row_count')) || 5;
-
     const pikminSound = new Audio('pikmin_throw.mp3');
     let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
         localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
-        localStorage.setItem('mushroom_row_count', currentRowCount);
-    }
-
-    // [新增] 自動跳轉到下一行分輸入框
-    function focusNextRowMin(currentId) {
-        const idx = rowOrder.indexOf(currentId);
-        if (idx !== -1 && idx < rowOrder.length - 1) {
-            const nextId = rowOrder[idx + 1];
-            const nextMinInput = document.getElementById(`min${nextId}`);
-            if (nextMinInput) nextMinInput.focus();
-        }
     }
 
     function init() {
-        if (rowOrder.length === 0) {
-            for (let i = 1; i <= currentRowCount; i++) rowOrder.push(i.toString());
-        } else {
-            currentRowCount = rowOrder.length;
-        }
+        if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
-        rowOrder.forEach(id => createRow(id));
-        updateAudioBtnUI(); 
+        rowOrder.forEach((id, idx) => createRow(id, idx));
         renderVizBar();
     }
 
-    function createRow(id) {
-        const name = localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`;
-        const d = document.createElement('div');
-        d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
-        d.innerHTML = `
-            <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-            
-            <div class="input-group">
-                <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
-                    oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
-                    onblur="if(this.value.length > 0) document.getElementById('sec${id}').focus();">分
+    function createRow(id, index) {
+        const savedName = localStorage.getItem(`mushroom_name_${id}`) || "";
+        const wrapper = document.createElement('div');
+        wrapper.className = 'row-wrapper'; wrapper.id = `wrapper${id}`;
+        wrapper.innerHTML = `
+            <div class="mushroom-card" id="card${id}" data-id="${id}">
+                <div class="input-group">
+                    <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
+                    <span style="font-size:0.7rem">剩餘</span>
+                </div>
+                <div class="time-box">
+                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="0" oninput="if(this.value.length >= 1) document.getElementById('min${id}').focus(); handleInput('${id}');">
+                    <span>時</span>
+                    <input type="number" id="min${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('sec${id}').focus(); } handleInput('${id}');">
+                    <span>分</span>
+                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); focusNextRowHour('${id}'); } handleInput('${id}');">
+                    <span>秒</span>
+                </div>
+                <button class="btn-small-reset" onclick="resetRow('${id}')">↺</button>
             </div>
-
-            <div class="input-group">
-                <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
-                    oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextRowMin('${id}');"
-                    onblur="if(this.value.length > 0) focusNextRowMin('${id}');">秒
-            </div>
-
-            <button class="btn-small btn-row-clear" onclick="resetRow('${id}')">🧹</button>
-            <button class="btn-small btn-row-delete" onclick="deleteSpecificRow('${id}')">✖</button>
+            <button class="btn-row-delete" onclick="deleteSpecificRow('${id}')">✖</button>
         `;
-        app.appendChild(d);
+        app.appendChild(wrapper);
+    }
+
+    function focusNextRowHour(id) {
+        const idx = rowOrder.indexOf(id);
+        if (idx < rowOrder.length - 1) document.getElementById(`hr${rowOrder[idx+1]}`).focus();
     }
 
     function handleInput(id) {
-        const m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-        if (m === "" && s === "") { targetTimes[id] = null; } 
-        else {
-            const totalSec = (parseInt(m)||0) * 60 + (parseInt(s)||0);
-            targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
-        }
+        const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+        if (!h && !m && !s) targetTimes[id] = null;
+        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 15) * 1000; //300
         const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
-        saveAll();
-        renderVizBar(); 
-    }
-
-    function updateAudioBtnUI() {
-        const btn = document.getElementById('audioBtn');
-        btn.innerText = isAudioEnabled ? "🔊" : "🔇";
-        btn.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
-    }
-
-    function toggleAudio() {
-        if (!hasUnlockedAudio) {
-            pikminSound.play().then(() => {
-                pikminSound.pause(); pikminSound.currentTime = 0;
-                hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI();
-            });
-        } else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); }
-    }
-
-    function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
-
-    // 拖拽邏輯
-    let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
-    let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
-    placeholder.className = 'placeholder';
-
-    function stopAutoScroll() { clearInterval(autoScrollTimer); autoScrollTimer = null; }
-    function startAutoScroll(dir) {
-        if (autoScrollTimer) return;
-        autoScrollTimer = setInterval(() => { vizBar.scrollLeft += (dir === 'right' ? 5 : -5); }, 16);
-    }
-
-    function addDragListeners(el) {
-        const onStart = (e) => {
-            const touch = e.touches ? e.touches[0] : e;
-            startX = touch.clientX; startY = touch.clientY;
-            initialRect = el.getBoundingClientRect();
-            isUserInteracting = true; el.classList.add('pressing');
-            if (dragTimer) clearTimeout(dragTimer);
-            dragTimer = setTimeout(() => {
-                dragItem = el;
-                dragItem.style.left = initialRect.left + 'px';
-                dragItem.style.top = initialRect.top + 'px';
-                dragItem.style.width = initialRect.width + 'px';
-                dragItem.style.height = initialRect.height + 'px';
-                dragItem.dataset.offsetX = startX - initialRect.left;
-                dragItem.dataset.offsetY = startY - initialRect.top;
-                el.classList.remove('pressing');
-                el.parentNode.insertBefore(placeholder, el);
-                el.classList.add('dragging');
-                if(window.navigator.vibrate) window.navigator.vibrate(50);
-            }, 300);
-        };
-        const onMove = (e) => {
-            const touch = e.touches ? e.touches[0] : e;
-            if (dragTimer && !dragItem) {
-                if (Math.abs(touch.clientX - startX) > 20 || Math.abs(touch.clientY - startY) > 20) {
-                    clearTimeout(dragTimer); el.classList.remove('pressing'); dragTimer = null;
-                    isUserInteracting = false; 
-                }
-            }
-            if (!dragItem) return;
-            if (e.cancelable) e.preventDefault();
-            dragItem.style.left = (touch.clientX - parseFloat(dragItem.dataset.offsetX)) + 'px';
-            dragItem.style.top = (touch.clientY - parseFloat(dragItem.dataset.offsetY)) + 'px';
-            const edge = 60;
-            if (touch.clientX < edge) startAutoScroll('left');
-            else if (touch.clientX > window.innerWidth - edge) startAutoScroll('right');
-            else stopAutoScroll();
-            const after = getDragAfterElement(vizBar, touch.clientX);
-            if (!after) vizBar.appendChild(placeholder); else vizBar.insertBefore(placeholder, after);
-        };
-        const onEnd = () => {
-            clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
-            isUserInteracting = false; stopAutoScroll();
-            if (dragItem) {
-                dragItem.classList.remove('dragging');
-                dragItem.style.cssText = '';
-                if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
-                rowOrder = Array.from(vizBar.querySelectorAll('.viz-item')).map(item => item.dataset.id);
-                saveAll();
-                rowOrder.forEach(id => app.appendChild(document.getElementById(`card${id}`)));
-                dragItem = null; 
-                renderVizBar();
-            }
-        };
-        el.addEventListener('touchstart', onStart, { passive: false });
-        window.addEventListener('touchmove', onMove, { passive: false });
-        window.addEventListener('touchend', onEnd);
-        el.addEventListener('mousedown', onStart);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onEnd);
-    }
-
-    function getDragAfterElement(container, x) {
-        const elements = [...container.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')];
-        return elements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = x - (box.left + box.width / 2);
-            if (offset < 0 && offset > closest.offset) return { offset: Number(offset), element: child };
-            else return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
+        saveAll(); renderVizBar(); 
     }
 
     function renderVizBar() {
         if (isUserInteracting) return;
         vizBar.innerHTML = "";
-        rowOrder.forEach(id => {
-            const nameInput = document.getElementById(`name${id}`);
-            const name = nameInput ? nameInput.value : (localStorage.getItem(`mushroom_name_${id}`) || `菇菇${id}`);
+        rowOrder.forEach((id, idx) => {
+            const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
             item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
@@ -387,59 +162,88 @@
                 const diff = Math.floor((t - now) / 1000);
                 if (diff <= 0) {
                     if (card && !card.dataset.autoCleared) {
-                        const mI = document.getElementById(`min${id}`), sI = document.getElementById(`sec${id}`);
-                        if (mI) mI.value = ""; if (sI) sI.value = "";
+                        ['hr','min','sec'].forEach(k => document.getElementById(k+id).value = "");
                         card.dataset.autoCleared = "1";
                     }
-                    item.classList.add('ready'); item.classList.remove('warning', 'critical'); cdEl.innerText = "已發車";
+                    item.className = 'viz-item ready'; cdEl.innerText = "已發車";
                 } else {
-                    item.classList.toggle('critical', diff <= 5);
-                    item.classList.toggle('warning', diff <= 30 && diff > 5);
-                    item.classList.remove('ready');
+                    item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    cdEl.innerText = `${Math.floor(diff / 60)}:${(diff % 60).toString().padStart(2, '0')}`;
+                    const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+                    cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
                     if (diff === 10 && card && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
                 }
-            } else { item.classList.remove('warning', 'critical', 'ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
+            } else { item.className = 'viz-item'; targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
         });
-        if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
-        else vizBar.style.justifyContent = "center";
     }
 
-    function resetRow(id) { 
-        const mI = document.getElementById(`min${id}`), sI = document.getElementById(`sec${id}`);
-        if(mI) mI.value = ""; if(sI) sI.value = "";
-        targetTimes[id] = null; 
-        const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.autoCleared = ""; card.dataset.warned = ""; }
-        saveAll(); renderVizBar(); 
+    function toggleAudio() {
+        if (!hasUnlockedAudio) { pikminSound.play().then(() => { hasUnlockedAudio = true; isAudioEnabled = true; updateAudioBtnUI(); }); }
+        else { isAudioEnabled = !isAudioEnabled; updateAudioBtnUI(); if(isAudioEnabled) playWarningBeep(); }
     }
+    function updateAudioBtnUI() { const b = document.getElementById('audioBtn'); b.innerText = isAudioEnabled ? "🔊" : "🔇"; b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off"); }
+    function playWarningBeep() { if (isAudioEnabled) { pikminSound.pause(); pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
-    function changeRows(d) { 
-        if (d > 0) {
-            const maxId = rowOrder.length > 0 ? Math.max(...rowOrder.map(Number)) : 0;
-            const nextId = (maxId + 1).toString();
-            rowOrder.push(nextId); createRow(nextId); currentRowCount = rowOrder.length; saveAll(); renderVizBar();
-        }
+    let dragItem = null, placeholder = document.createElement('div'), dragTimer = null, startX, startY;
+    placeholder.className = 'placeholder';
+
+    function addDragListeners(el) {
+        const onStart = (e) => {
+            const t = e.touches ? e.touches[0] : e; startX = t.clientX; startY = t.clientY;
+            isUserInteracting = true; el.classList.add('pressing');
+            dragTimer = setTimeout(() => {
+                dragItem = el; const r = el.getBoundingClientRect();
+                Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
+                dragItem.dataset.ox = startX - r.left; dragItem.dataset.oy = startY - r.top;
+                el.classList.replace('pressing', 'dragging'); el.parentNode.insertBefore(placeholder, el);
+            }, 300);
+        };
+        const onMove = (e) => {
+            if (!dragItem) return; e.preventDefault();
+            const t = e.touches ? e.touches[0] : e;
+            dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
+            const after = [...vizBar.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')].reduce((c, el) => {
+                const b = el.getBoundingClientRect(); const o = t.clientX - (b.left + b.width/2);
+                return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
+            }, { offset: -Infinity }).element;
+            after ? vizBar.insertBefore(placeholder, after) : vizBar.appendChild(placeholder);
+        };
+        const onEnd = () => {
+            clearTimeout(dragTimer);
+            if (dragItem) {
+                dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
+                if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
+                placeholder.remove();
+                rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
+                saveAll(); rowOrder.forEach(id => app.appendChild(document.getElementById(`wrapper${id}`)));
+                rowOrder.forEach((id, i) => document.getElementById(`name${id}`).placeholder = `菇菇${i+1}`);
+                dragItem = null; isUserInteracting = false; renderVizBar();
+            } else { el.classList.remove('pressing'); isUserInteracting = false; }
+        };
+        el.addEventListener('touchstart', onStart); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
+        el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
     }
 
     function deleteSpecificRow(id) {
-        if(rowOrder.length <= 1) return;
-        if(confirm("確定要刪除這一行嗎？")) {
-            const idx = rowOrder.indexOf(id);
-            if(idx > -1) {
-                rowOrder.splice(idx, 1);
-                document.getElementById(`card${id}`).remove();
-                delete targetTimes[id];
-                localStorage.removeItem(`mushroom_name_${id}`);
-                currentRowCount = rowOrder.length; saveAll(); renderVizBar();
-            }
+        if(rowOrder.length > 1 && confirm("確定要刪除？")) {
+            rowOrder.splice(rowOrder.indexOf(id), 1); document.getElementById(`wrapper${id}`).remove();
+            delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
+            saveAll(); rowOrder.forEach((id, i) => document.getElementById(`name${id}`).placeholder = `菇菇${i+1}`); renderVizBar();
         }
     }
-
-    function resetToInitial() { if(confirm("確定要重置所有數據？(包含菇菇名稱與排序)")){ localStorage.clear(); location.reload(); } }
-    function saveName(id, val) { localStorage.setItem(`mushroom_name_${id}`, val); }
-    function clearAllInputs() { if(confirm("確定要清除所有已輸入的時間嗎？")) { rowOrder.forEach(id => resetRow(id)); } }
+    function changeRows() {
+        const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
+        rowOrder.push(id); createRow(id, rowOrder.length - 1); saveAll(); renderVizBar();
+    }
+    function resetRow(id) {
+        ['hr','min','sec'].forEach(k => document.getElementById(k+id).value = "");
+        targetTimes[id] = null; const card = document.getElementById(`card${id}`);
+        if(card) { card.dataset.autoCleared = card.dataset.warned = ""; }
+        saveAll(); renderVizBar();
+    }
+    function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
+    function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
+    function saveName(id, v) { localStorage.setItem(`mushroom_name_${id}`, v); }
 
     setInterval(updateDynamicInfo, 1000); init();
 </script>
