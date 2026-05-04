@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機V5</title>
+    <title>搶菇計算機-測試版</title>
     <style>
         :root {
             --primary: #6b8e23;
@@ -109,11 +109,8 @@
             padding: 0; margin: 0;
         }
         .btn-small:active { transform: scale(0.9); }
-
         .btn-row-clear { background: #f5f5f5; color: var(--gray); }
         .btn-row-clear:active { background-color: #e0e0e0 !important; }
-
-        /* 刪除按鈕樣式 */
         .btn-row-delete { background: #fff1f0; color: var(--danger); border-color: #ffa39e; font-size: 0.7rem; }
         .btn-row-delete:active { background-color: #ffccc7 !important; }
 
@@ -152,37 +149,28 @@
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
 
-        .viz-item.warning { 
-            border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border);
-            animation: warning-blink 1s infinite;
-        }
+        .viz-item.warning { border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); animation: warning-blink 1s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: var(--warning-bg); } 50% { background-color: #ffffff; } }
 
-        .viz-item.critical {
-            border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border);
-            animation: critical-blink 0.5s infinite;
-        }
+        .viz-item.critical { border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffffff; } }
 
-        .viz-item.ready { 
-            background-color: var(--ready-bg) !important; 
-            border-color: var(--ready-border) !important;
-            border-bottom: 3px solid var(--gray) !important;
-        }
+        .viz-item.ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 3px solid var(--gray) !important; }
         .viz-item.ready strong, .viz-item.ready .viz-target, .viz-item.ready .viz-cd { color: var(--gray) !important; }
 
         .viz-item.pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
         .viz-item.dragging {
             position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important;
         }
+
         .placeholder { min-width: 80px; height: 80px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; }
     </style>
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機V5 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 清除</button>
@@ -213,23 +201,13 @@
         localStorage.setItem('mushroom_row_count', currentRowCount);
     }
 
-    function focusNextMin(currentId) {
+    // [新增] 自動跳轉到下一行分輸入框
+    function focusNextRowMin(currentId) {
         const idx = rowOrder.indexOf(currentId);
         if (idx !== -1 && idx < rowOrder.length - 1) {
             const nextId = rowOrder[idx + 1];
             const nextMinInput = document.getElementById(`min${nextId}`);
             if (nextMinInput) nextMinInput.focus();
-        } else {
-            const secInput = document.getElementById(`sec${currentId}`);
-            if(secInput) secInput.blur();
-        }
-    }
-
-    function handleKeydown(e, type, id) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if (type === 'min') document.getElementById(`sec${id}`).focus();
-            else focusNextMin(id);
         }
     }
 
@@ -251,8 +229,19 @@
         d.className = 'mushroom-card'; d.id = `card${id}`; d.dataset.id = id;
         d.innerHTML = `
             <div class="input-group"><input type="text" id="name${id}" value="${name}" oninput="saveName('${id}', this.value); renderVizBar();"><span style="font-size:0.8rem">剩餘</span></div>
-            <div class="input-group"><input type="number" id="min${id}" inputmode="numeric" placeholder="分" oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();" onkeydown="handleKeydown(event, 'min', '${id}')">分</div>
-            <div class="input-group"><input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextMin('${id}');" onkeydown="handleKeydown(event, 'sec', '${id}')">秒</div>
+            
+            <div class="input-group">
+                <input type="number" id="min${id}" inputmode="numeric" placeholder="分" 
+                    oninput="handleInput('${id}'); if(this.value.length >= 2) document.getElementById('sec${id}').focus();"
+                    onblur="if(this.value.length > 0) document.getElementById('sec${id}').focus();">分
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="sec${id}" inputmode="numeric" placeholder="秒" 
+                    oninput="handleInput('${id}'); if(this.value.length >= 2) focusNextRowMin('${id}');"
+                    onblur="if(this.value.length > 0) focusNextRowMin('${id}');">秒
+            </div>
+
             <button class="btn-small btn-row-clear" onclick="resetRow('${id}')">🧹</button>
             <button class="btn-small btn-row-delete" onclick="deleteSpecificRow('${id}')">✖</button>
         `;
@@ -268,7 +257,8 @@
         }
         const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
-        saveAll(); renderVizBar(); 
+        saveAll();
+        renderVizBar(); 
     }
 
     function updateAudioBtnUI() {
@@ -288,6 +278,7 @@
 
     function playWarningBeep() { if (isAudioEnabled) { pikminSound.currentTime = 0; pikminSound.play().catch(()=>{}); } }
 
+    // 拖拽邏輯
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let startX = 0, startY = 0, autoScrollTimer = null, initialRect = null;
     placeholder.className = 'placeholder';
@@ -342,12 +333,14 @@
             clearTimeout(dragTimer); dragTimer = null; el.classList.remove('pressing');
             isUserInteracting = false; stopAutoScroll();
             if (dragItem) {
-                dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
+                dragItem.classList.remove('dragging');
+                dragItem.style.cssText = '';
                 if (placeholder.parentNode) { placeholder.parentNode.insertBefore(dragItem, placeholder); placeholder.remove(); }
                 rowOrder = Array.from(vizBar.querySelectorAll('.viz-item')).map(item => item.dataset.id);
                 saveAll();
                 rowOrder.forEach(id => app.appendChild(document.getElementById(`card${id}`)));
-                dragItem = null; renderVizBar();
+                dragItem = null; 
+                renderVizBar();
             }
         };
         el.addEventListener('touchstart', onStart, { passive: false });
@@ -394,8 +387,8 @@
                 const diff = Math.floor((t - now) / 1000);
                 if (diff <= 0) {
                     if (card && !card.dataset.autoCleared) {
-                        const minI = document.getElementById(`min${id}`), secI = document.getElementById(`sec${id}`);
-                        if (minI) minI.value = ""; if (secI) secI.value = "";
+                        const mI = document.getElementById(`min${id}`), sI = document.getElementById(`sec${id}`);
+                        if (mI) mI.value = ""; if (sI) sI.value = "";
                         card.dataset.autoCleared = "1";
                     }
                     item.classList.add('ready'); item.classList.remove('warning', 'critical'); cdEl.innerText = "已發車";
@@ -404,16 +397,18 @@
                     item.classList.toggle('warning', diff <= 30 && diff > 5);
                     item.classList.remove('ready');
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    cdEl.innerText = `${Math.floor(diff/60)}:${(diff%60).toString().padStart(2,'0')}`;
+                    cdEl.innerText = `${Math.floor(diff / 60)}:${(diff % 60).toString().padStart(2, '0')}`;
                     if (diff === 10 && card && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
                 }
             } else { item.classList.remove('warning', 'critical', 'ready'); targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
         });
+        if (vizBar.scrollWidth > vizBar.clientWidth) vizBar.style.justifyContent = "flex-start";
+        else vizBar.style.justifyContent = "center";
     }
 
     function resetRow(id) { 
-        const minI = document.getElementById(`min${id}`), secI = document.getElementById(`sec${id}`);
-        if(minI) minI.value = ""; if(secI) secI.value = "";
+        const mI = document.getElementById(`min${id}`), sI = document.getElementById(`sec${id}`);
+        if(mI) mI.value = ""; if(sI) sI.value = "";
         targetTimes[id] = null; 
         const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.autoCleared = ""; card.dataset.warned = ""; }
