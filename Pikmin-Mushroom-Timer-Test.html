@@ -19,7 +19,7 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* --- 最上方固定區塊：還原為緊湊樣式 --- */
+        /* --- 最上方固定區塊 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
@@ -29,7 +29,7 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; }
 
-        /* --- 中間部分：採用您提供的寬鬆好點擊樣式 --- */
+        /* --- 中間部分 --- */
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 95%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
@@ -47,11 +47,15 @@
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
         
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
+        /* 修改："剩" 字向下靠 */
+        .input-group span { align-self: flex-end; margin-bottom: 6px; } 
+
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
         
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
-        .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px; font-weight: normal; }
+        /* 修改："時分秒" 向下靠 */
+        .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
         .btn-small-reset:active { color: var(--primary); background: #eee; transform: scale(0.8) rotate(-45deg); }
@@ -189,7 +193,6 @@
             const card = document.getElementById(`card${id}`);
             const vizItem = document.getElementById(`viz-${id}`);
             
-            // 計算蘑菇卡片在容器中的範圍
             const cardLeft = card.offsetLeft;
             const cardRight = cardLeft + card.offsetWidth;
             const rowHeight = wrapper.offsetHeight;
@@ -202,7 +205,6 @@
                 const el = document.createElement('div');
                 el.className = 'pikmin-worker';
                 squad.appendChild(el);
-                // 調整：初始隨機位置在 mushroom-card 範圍內
                 workers.push({ 
                     el: el, 
                     x: cardLeft + Math.random() * (card.offsetWidth - 45), 
@@ -216,7 +218,6 @@
                 const progress = timestamp - startTime;
                 workers.forEach(p => {
                     p.x += p.speed;
-                    // 調整：碰到 mushroom-card 的邊界反彈
                     if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
                     p.el.style.left = p.x + 'px';
                     p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
@@ -229,7 +230,6 @@
             function startCarrying() {
                 if (vizItem) vizItem.classList.add('viz-item-exit');
                 
-                // 找到名稱輸入框的位置
                 const nameInput = document.getElementById(`name${id}`);
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
 
@@ -247,10 +247,9 @@
                     renderVizBar(); 
                 }, 400); 
 
-                // 調整：所有皮克敏集合到 name 的位置準備搬運
                 workers.forEach((p, i) => {
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    p.el.style.left = (nameX + (i * 8)) + 'px'; // 密集排列在名稱下方
+                    p.el.style.left = (nameX + (i * 8)) + 'px';
                     p.el.style.transform = 'scaleX(1)';
                     p.el.style.bottom = '-10px';
                 });
@@ -260,7 +259,7 @@
                     wrapper.style.marginBottom = `-${rowHeight}px`;
                     wrapper.style.opacity = "0.7";
                     wrapper.style.pointerEvents = "none";
-                }, 400); // 稍微延遲讓集合動作明顯一點
+                }, 400);
                 
                 setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
