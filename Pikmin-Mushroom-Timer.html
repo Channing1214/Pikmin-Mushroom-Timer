@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機V7</title>
+    <title>搶菇計算機V8</title>
     <style>
         :root {
             --primary: #6b8e23; --accent: #ff7f50; --bg: #fdfaf6; --card-bg: #ffffff;
@@ -19,6 +19,7 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
+        /* --- 最上方固定區塊 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
@@ -28,47 +29,86 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; }
 
+        /* --- 中間部分 --- */
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .row-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; width: 100%; max-width: fit-content; }
-
-        .mushroom-card { background: var(--card-bg); padding: 3px 8px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; }
-        .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; padding: 5px; width: 65px; -webkit-user-select: text; user-select: text; }
+        .container { width: 95%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: white; padding: 0 4px; }
-        .time-box input[type="number"] { border: none !important; width: 24px; text-align: center; font-size: 0.9rem; padding: 5px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; }
-        .time-box span { font-size: 0.7rem; color: #888; margin: 0 1px; }
+        .row-wrapper { 
+            display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center;
+            position: relative;
+            transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+        }
+        .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes row-pop-in {
+            0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; }
+            100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
+        }
 
-        .btn-small-reset { width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: transparent; color: #ccc; font-size: 1.2rem; }
-        .btn-small-reset:active { background-color: #f0f0f0; color: var(--primary); transform: scale(0.8) rotate(-45deg); }
-        .btn-row-delete { width: 34px; height: 34px; border-radius: 6px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
+        
+        .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
+        /* 修改："剩" 字向下靠 */
+        .input-group span { align-self: flex-end; margin-bottom: 6px; } 
 
-        .btn-add-row { margin: 8px 0; width: 34px; height: 34px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
+        
+        .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
+        .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
+        /* 修改："時分秒" 向下靠 */
+        .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
+
+        .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
+        .btn-small-reset:active { color: var(--primary); background: #eee; transform: scale(0.8) rotate(-45deg); }
+        
+        .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
+
+        .btn-add-row { margin: 10px 0; width: 44px; height: 44px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; }
-        .viz-item { min-width: 64px; height: 64px; background: #fff; border: 1px solid #eee; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 3px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; padding: 2px; }
-        .viz-item strong { font-size: 0.8rem; width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+        /* --- 下方狀態列與其他 --- */
+        .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
+        
+        .viz-item { 
+            min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; 
+            padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap;
+            transition: opacity 0.4s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s;
+        }
+        .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes viz-pop-fast {
+            0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
+            100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
+        }
+        .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+        .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
 
-        .warning { border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
+        .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
-        .critical { border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
+        .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffffff; } }
-
-        .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 3px solid var(--gray) !important; }
-        .ready strong, .ready .viz-target, .ready .viz-cd { color: var(--gray) !important; }
+        .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; }
-        .placeholder { min-width: 64px; height: 64px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 8px; flex-shrink: 0; }
+        .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
+
+        .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
+        .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
+        .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
+        @keyframes carry-out-dash {
+            0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+            15% { transform: translate(0, -25px) rotate(2deg); opacity: 1; }
+            80% { transform: translate(110vw, -30px) rotate(10deg); opacity: 1; }
+            100% { transform: translate(140vw, -35px) rotate(15deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機V7 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機V8 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -76,13 +116,18 @@
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
     </div>
-    <div class="scroll-area"><div class="container" id="app"></div><button class="btn-add-row" onclick="changeRows(1)">➕</button></div>
+    <div class="scroll-area">
+        <div class="container" id="app"></div>
+        <button class="btn-add-row" onclick="changeRows()">➕</button>
+    </div>
     <div class="viz-bar" id="vizBar"></div>
 
 <script>
     const app = document.getElementById('app'), vizBar = document.getElementById('vizBar');
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
+    let deletingIds = new Set(); 
+    let newlyAddedId = null; 
     const pikminSound = new Audio('pikmin_throw.mp3');
     let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
@@ -94,22 +139,23 @@
     function init() {
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
-        rowOrder.forEach((id, idx) => createRow(id, idx));
+        rowOrder.forEach((id, idx) => createRow(id, idx, false));
         renderVizBar();
     }
 
-    function createRow(id, index) {
+    function createRow(id, index, isNew = false) {
         const savedName = localStorage.getItem(`mushroom_name_${id}`) || "";
         const wrapper = document.createElement('div');
-        wrapper.className = 'row-wrapper'; wrapper.id = `wrapper${id}`;
+        wrapper.className = 'row-wrapper' + (isNew ? ' row-new' : ''); 
+        wrapper.id = `wrapper${id}`;
         wrapper.innerHTML = `
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
-                    <span style="font-size:0.7rem">剩餘</span>
+                    <span style="font-size:0.7rem">剩</span>
                 </div>
                 <div class="time-box">
-                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="0" oninput="if(this.value.length >= 1) document.getElementById('min${id}').focus(); handleInput('${id}');">
+                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('min${id}').focus(); } handleInput('${id}');">
                     <span>時</span>
                     <input type="number" id="min${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('sec${id}').focus(); } handleInput('${id}');">
                     <span>分</span>
@@ -119,31 +165,116 @@
                 <button class="btn-small-reset" onclick="resetRow('${id}')">↺</button>
             </div>
             <button class="btn-row-delete" onclick="deleteSpecificRow('${id}')">✖</button>
+            <div class="pikmin-squad" id="squad${id}"></div>
         `;
         app.appendChild(wrapper);
+        if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
     }
 
-    function focusNextRowHour(id) {
-        const idx = rowOrder.indexOf(id);
-        if (idx < rowOrder.length - 1) document.getElementById(`hr${rowOrder[idx+1]}`).focus();
+    function changeRows() {
+        const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
+        newlyAddedId = id; 
+        rowOrder.push(id);
+        createRow(id, rowOrder.length - 1, true); 
+        saveAll();
+        renderVizBar();
+        setTimeout(() => {
+            const scrollArea = document.querySelector('.scroll-area');
+            scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
+            vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
+            newlyAddedId = null; 
+        }, 50);
     }
 
-    function handleInput(id) {
-        const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-        if (!h && !m && !s) targetTimes[id] = null;
-        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
-        const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
-        saveAll(); renderVizBar(); 
+    function deleteSpecificRow(id) {
+        if(rowOrder.length > 1 && confirm("確定要讓皮克敏大隊把它搬走嗎？")) {
+            const wrapper = document.getElementById(`wrapper${id}`);
+            const squad = document.getElementById(`squad${id}`);
+            const card = document.getElementById(`card${id}`);
+            const vizItem = document.getElementById(`viz-${id}`);
+            
+            const cardLeft = card.offsetLeft;
+            const cardRight = cardLeft + card.offsetWidth;
+            const rowHeight = wrapper.offsetHeight;
+            
+            deletingIds.add(id); 
+            squad.style.display = 'block';
+            
+            const workers = [];
+            for(let i=0; i<5; i++) {
+                const el = document.createElement('div');
+                el.className = 'pikmin-worker';
+                squad.appendChild(el);
+                workers.push({ 
+                    el: el, 
+                    x: cardLeft + Math.random() * (card.offsetWidth - 45), 
+                    speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
+                });
+            }
+
+            let startTime = null;
+            function animateScramble(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                workers.forEach(p => {
+                    p.x += p.speed;
+                    if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
+                    p.el.style.left = p.x + 'px';
+                    p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+                });
+                if (progress < 1200) requestAnimationFrame(animateScramble);
+                else startCarrying();
+            }
+            requestAnimationFrame(animateScramble);
+
+            function startCarrying() {
+                if (vizItem) vizItem.classList.add('viz-item-exit');
+                
+                const nameInput = document.getElementById(`name${id}`);
+                const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
+
+                setTimeout(() => {
+                    const idx = rowOrder.indexOf(id);
+                    if (idx > -1) rowOrder.splice(idx, 1);
+                    delete targetTimes[id];
+                    localStorage.removeItem(`mushroom_name_${id}`);
+                    deletingIds.delete(id);
+                    saveAll();
+                    rowOrder.forEach((rid, i) => {
+                        const el = document.getElementById(`name${rid}`);
+                        if(el) el.placeholder = `菇菇${i+1}`;
+                    });
+                    renderVizBar(); 
+                }, 400); 
+
+                workers.forEach((p, i) => {
+                    p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    p.el.style.left = (nameX + (i * 8)) + 'px';
+                    p.el.style.transform = 'scaleX(1)';
+                    p.el.style.bottom = '-10px';
+                });
+
+                setTimeout(() => {
+                    wrapper.classList.add('carrying');
+                    wrapper.style.marginBottom = `-${rowHeight}px`;
+                    wrapper.style.opacity = "0.7";
+                    wrapper.style.pointerEvents = "none";
+                }, 400);
+                
+                setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
+            }
+        }
     }
 
     function renderVizBar() {
         if (isUserInteracting) return;
         vizBar.innerHTML = "";
         rowOrder.forEach((id, idx) => {
+            if (deletingIds.has(id)) return;
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
-            item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
+            item.className = 'viz-item' + (id === newlyAddedId ? ' viz-new' : ''); 
+            item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
             addDragListeners(item); vizBar.appendChild(item);
         });
@@ -152,9 +283,11 @@
 
     function updateDynamicInfo() {
         const now = Date.now();
-        document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+        const timeEl = document.getElementById('currentTime');
+        if(timeEl) timeEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
         if (isUserInteracting) return;
         rowOrder.forEach(id => {
+            if (deletingIds.has(id)) return;
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
             if (!item) return;
             const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
@@ -162,7 +295,7 @@
                 const diff = Math.floor((t - now) / 1000);
                 if (diff <= 0) {
                     if (card && !card.dataset.autoCleared) {
-                        ['hr','min','sec'].forEach(k => document.getElementById(k+id).value = "");
+                        ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
                         card.dataset.autoCleared = "1";
                     }
                     item.className = 'viz-item ready'; cdEl.innerText = "已發車";
@@ -173,8 +306,28 @@
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
                     if (diff === 10 && card && !card.dataset.warned) { playWarningBeep(); card.dataset.warned = "1"; }
                 }
-            } else { item.className = 'viz-item'; targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
+            } else { 
+                if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
+                targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
+            }
         });
+    }
+
+    function focusNextRowHour(id) {
+        const idx = rowOrder.indexOf(id);
+        if (idx < rowOrder.length - 1) {
+            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`);
+            if(nextEl) nextEl.focus();
+        }
+    }
+
+    function handleInput(id) {
+        const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+        if (!h && !m && !s) targetTimes[id] = null;
+        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
+        const card = document.getElementById(`card${id}`);
+        if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
+        saveAll(); renderVizBar(); 
     }
 
     function toggleAudio() {
@@ -215,8 +368,8 @@
                 if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
                 placeholder.remove();
                 rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
-                saveAll(); rowOrder.forEach(id => app.appendChild(document.getElementById(`wrapper${id}`)));
-                rowOrder.forEach((id, i) => document.getElementById(`name${id}`).placeholder = `菇菇${i+1}`);
+                saveAll(); rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
+                rowOrder.forEach((id, i) => { const el=document.getElementById(`name${id}`); if(el) el.placeholder = `菇菇${i+1}`; });
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { el.classList.remove('pressing'); isUserInteracting = false; }
         };
@@ -224,19 +377,8 @@
         el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
     }
 
-    function deleteSpecificRow(id) {
-        if(rowOrder.length > 1 && confirm("確定要刪除？")) {
-            rowOrder.splice(rowOrder.indexOf(id), 1); document.getElementById(`wrapper${id}`).remove();
-            delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
-            saveAll(); rowOrder.forEach((id, i) => document.getElementById(`name${id}`).placeholder = `菇菇${i+1}`); renderVizBar();
-        }
-    }
-    function changeRows() {
-        const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
-        rowOrder.push(id); createRow(id, rowOrder.length - 1); saveAll(); renderVizBar();
-    }
     function resetRow(id) {
-        ['hr','min','sec'].forEach(k => document.getElementById(k+id).value = "");
+        ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
         targetTimes[id] = null; const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.autoCleared = card.dataset.warned = ""; }
         saveAll(); renderVizBar();
