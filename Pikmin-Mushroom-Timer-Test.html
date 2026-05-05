@@ -19,6 +19,7 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
+        /* --- 最上方固定區塊：還原為緊湊樣式 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
@@ -28,67 +29,66 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; }
 
+        /* --- 中間部分：採用您提供的寬鬆好點擊樣式 --- */
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .container { width: 95%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { 
-            display: flex; align-items: center; gap: 4px; margin-bottom: 5px; width: 100%; max-width: fit-content;
+            display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center;
             position: relative;
             transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
         }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes row-pop-in {
             0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; }
-            100% { opacity: 1; transform: scale(1) translateY(0); max-height: 100px; }
+            100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
         }
 
-        /* 緊湊化卡片內邊距與間隙 */
-        .mushroom-card { background: var(--card-bg); padding: 3px 6px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; gap: 3px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
-        .input-group { display: flex; align-items: center; gap: 2px; font-size: 0.8rem; white-space: nowrap; }
-        input[type="text"] { border: 1px solid #ddd; border-radius: 4px; font-size: 0.85rem; padding: 4px; width: 60px; -webkit-user-select: text; user-select: text; }
+        .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
         
-        .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; background: white; padding: 0 2px; }
-        /* 緊湊化輸入框寬度 */
-        .time-box input[type="number"] { border: none !important; width: 22px; text-align: center; font-size: 0.85rem; padding: 5px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; }
-        /* 緊湊化標籤文字 */
-        .time-box span { font-size: 0.65rem; color: #999; margin: 0; font-weight: normal; }
-
-        /* 重設按鈕微調，保持在後方但不過度拉開 */
-        .btn-small-reset { margin-left: 6px; width: 28px; height: 28px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: transparent; color: #ccc; font-size: 1.1rem; }
-        .btn-small-reset:active { color: var(--primary); transform: scale(0.8) rotate(-45deg); }
+        .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
+        input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
         
-        .btn-row-delete { width: 34px; height: 34px; border-radius: 6px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
+        .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
+        .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
+        .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px; font-weight: normal; }
 
-        .btn-add-row { margin: 8px 0; width: 34px; height: 34px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
+        .btn-small-reset:active { color: var(--primary); background: #eee; transform: scale(0.8) rotate(-45deg); }
+        
+        .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
+
+        .btn-add-row { margin: 10px 0; width: 44px; height: 44px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
+        /* --- 下方狀態列與其他 --- */
         .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
         
         .viz-item { 
-            min-width: 64px; width: 64px; height: 64px; background: #fff; border: 1px solid #eee; border-radius: 8px; 
+            min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            flex-shrink: 0; border-bottom: 3px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; 
-            padding: 2px; margin: 0 3px; overflow: hidden; white-space: nowrap;
+            flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; 
+            padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap;
             transition: opacity 0.4s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s;
         }
         .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes viz-pop-fast {
             0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
-            100% { opacity: 1; width: 64px; min-width: 64px; margin: 0 3px; transform: scale(1) translateY(0); }
+            100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
         }
-        .viz-item strong { font-size: 0.75rem; width: 60px; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-        .viz-item .viz-target { font-size: 0.65rem; color: #888; }
-        .viz-item .viz-cd { font-size: 0.75rem; color: var(--accent); font-weight: bold; }
+        .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
+        .viz-item .viz-target { font-size: 0.7rem; color: #888; }
+        .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
         .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
 
-        .warning { border-color: var(--warning-border); border-bottom: 3px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
+        .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
-        .critical { border-color: var(--critical-border); border-bottom: 3px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
+        .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffffff; } }
-        .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 3px solid var(--gray) !important; }
+        .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; }
-        .placeholder { min-width: 64px; height: 64px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 8px; flex-shrink: 0; margin: 0 3px; }
+        .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
@@ -148,7 +148,7 @@
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
-                    <span style="font-size:0.65rem">剩</span>
+                    <span style="font-size:0.7rem">剩</span>
                 </div>
                 <div class="time-box">
                     <input type="number" id="hr${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('min${id}').focus(); } handleInput('${id}');">
@@ -188,24 +188,36 @@
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
             const vizItem = document.getElementById(`viz-${id}`);
-            const cardWidth = card.offsetWidth;
+            
+            // 計算蘑菇卡片在容器中的範圍
+            const cardLeft = card.offsetLeft;
+            const cardRight = cardLeft + card.offsetWidth;
             const rowHeight = wrapper.offsetHeight;
+            
             deletingIds.add(id); 
             squad.style.display = 'block';
+            
             const workers = [];
             for(let i=0; i<5; i++) {
                 const el = document.createElement('div');
                 el.className = 'pikmin-worker';
                 squad.appendChild(el);
-                workers.push({ el: el, x: Math.random() * (cardWidth - 40), speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) });
+                // 調整：初始隨機位置在 mushroom-card 範圍內
+                workers.push({ 
+                    el: el, 
+                    x: cardLeft + Math.random() * (card.offsetWidth - 45), 
+                    speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
+                });
             }
+
             let startTime = null;
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const progress = timestamp - startTime;
                 workers.forEach(p => {
                     p.x += p.speed;
-                    if (p.x <= -10 || p.x >= cardWidth - 30) p.speed *= -1;
+                    // 調整：碰到 mushroom-card 的邊界反彈
+                    if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
                     p.el.style.left = p.x + 'px';
                     p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                 });
@@ -213,8 +225,14 @@
                 else startCarrying();
             }
             requestAnimationFrame(animateScramble);
+
             function startCarrying() {
                 if (vizItem) vizItem.classList.add('viz-item-exit');
+                
+                // 找到名稱輸入框的位置
+                const nameInput = document.getElementById(`name${id}`);
+                const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
+
                 setTimeout(() => {
                     const idx = rowOrder.indexOf(id);
                     if (idx > -1) rowOrder.splice(idx, 1);
@@ -228,18 +246,22 @@
                     });
                     renderVizBar(); 
                 }, 400); 
+
+                // 調整：所有皮克敏集合到 name 的位置準備搬運
                 workers.forEach((p, i) => {
-                    p.el.style.transition = 'all 0.3s ease';
-                    p.el.style.left = (i * (cardWidth / 5) + 2) + 'px';
+                    p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    p.el.style.left = (nameX + (i * 8)) + 'px'; // 密集排列在名稱下方
                     p.el.style.transform = 'scaleX(1)';
                     p.el.style.bottom = '-10px';
                 });
+
                 setTimeout(() => {
                     wrapper.classList.add('carrying');
                     wrapper.style.marginBottom = `-${rowHeight}px`;
                     wrapper.style.opacity = "0.7";
                     wrapper.style.pointerEvents = "none";
-                }, 300);
+                }, 400); // 稍微延遲讓集合動作明顯一點
+                
                 setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
         }
