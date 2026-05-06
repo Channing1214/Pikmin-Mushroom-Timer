@@ -47,12 +47,16 @@
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
         
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
-        .input-group span { align-self: flex-end; margin-bottom: 6px; } 
+        
+        /* 這裡只針對「剩」字往下移動 (從 6px 改為 2px) */
+        .input-group span { align-self: flex-end; margin-bottom: 2px; } 
 
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
         
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
+        
+        /* 這裡還原「時分秒」的高度 (還原為 6px) */
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
@@ -60,7 +64,6 @@
         
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
 
-        /* + 的按鈕縮小 (36px) */
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
@@ -87,7 +90,6 @@
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         
-        /* 紅色閃爍背景非白色 */
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         
@@ -110,11 +112,11 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版5 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
-            <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
+            <button class="btn-action" onclick="resetToInitial()">🔄 重置數據</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
     </div>
@@ -131,11 +133,52 @@
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
 
-    const pikminSound = new Audio('pikmin_throw.mp3');
-    pikminSound.preload = 'auto';
-    pikminSound.load(); 
+    // --- 音訊系統 ---
+    let audioCtx = null;
+    let isAudioEnabled = false;
+    let isUserInteracting = false; 
 
-    let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playWarningBeep() {
+        if (!isAudioEnabled || !audioCtx) return;
+        initAudioContext();
+        const playNote = (delay, freq, duration, volume = 0.1) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+            gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + delay + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + duration);
+        };
+        playNote(0, 880, 0.1);
+        playNote(0.08, 1108, 0.15);
+    }
+
+    function toggleAudio() {
+        initAudioContext();
+        isAudioEnabled = !isAudioEnabled;
+        updateAudioBtnUI();
+        if (isAudioEnabled) playWarningBeep(); 
+    }
+
+    function updateAudioBtnUI() {
+        const b = document.getElementById('audioBtn');
+        b.innerText = isAudioEnabled ? "🔊" : "🔇";
+        b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
+    }
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -158,14 +201,14 @@
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
-                    <span style="font-size:1.1rem">剩</span>
+                    <span>剩</span>
                 </div>
                 <div class="time-box">
-                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('min${id}').focus(); } handleInput('${id}');">
+                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('min${id}').focus(); } handleInput('${id}');">
                     <span>時</span>
-                    <input type="number" id="min${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('sec${id}').focus(); } handleInput('${id}');">
+                    <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); document.getElementById('sec${id}').focus(); } handleInput('${id}');">
                     <span>分</span>
-                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="00" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); focusNextRowHour('${id}'); } handleInput('${id}');">
+                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="if(this.value.length >= 2) { this.value = this.value.slice(0,2); focusNextRowHour('${id}'); } handleInput('${id}');">
                     <span>秒</span>
                 </div>
                 <button class="btn-small-reset" onclick="resetRow('${id}')">↺</button>
@@ -198,14 +241,11 @@
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
             const vizItem = document.getElementById(`viz-${id}`);
-            
             const cardLeft = card.offsetLeft;
             const cardRight = cardLeft + card.offsetWidth;
             const rowHeight = wrapper.offsetHeight;
-            
             deletingIds.add(id); 
             squad.style.display = 'block';
-            
             const workers = [];
             for(let i=0; i<5; i++) {
                 const el = document.createElement('div');
@@ -217,7 +257,6 @@
                     speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
                 });
             }
-
             let startTime = null;
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -232,12 +271,10 @@
                 else startCarrying();
             }
             requestAnimationFrame(animateScramble);
-
             function startCarrying() {
                 if (vizItem) vizItem.classList.add('viz-item-exit');
                 const nameInput = document.getElementById(`name${id}`);
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
-
                 setTimeout(() => {
                     const idx = rowOrder.indexOf(id);
                     if (idx > -1) rowOrder.splice(idx, 1);
@@ -251,21 +288,18 @@
                     });
                     renderVizBar(); 
                 }, 400); 
-
                 workers.forEach((p, i) => {
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     p.el.style.left = (nameX + (i * 8)) + 'px';
                     p.el.style.transform = 'scaleX(1)';
                     p.el.style.bottom = '-10px';
                 });
-
                 setTimeout(() => {
                     wrapper.classList.add('carrying');
                     wrapper.style.marginBottom = `-${rowHeight}px`;
                     wrapper.style.opacity = "0.7";
                     wrapper.style.pointerEvents = "none";
                 }, 400);
-                
                 setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
         }
@@ -290,9 +324,7 @@
         const now = Date.now();
         const timeEl = document.getElementById('currentTime');
         if(timeEl) timeEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-        
         if (isUserInteracting) return;
-
         rowOrder.forEach(id => {
             if (deletingIds.has(id)) return;
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
@@ -311,7 +343,6 @@
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
                     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
-                    
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
                         playWarningBeep(); 
                         card.dataset.warned = "1"; 
@@ -339,49 +370,6 @@
         const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
         saveAll(); renderVizBar(); 
-    }
-
-    function toggleAudio() {
-        if (!hasUnlockedAudio) { 
-            pikminSound.play().then(() => { 
-                pikminSound.pause();
-                pikminSound.currentTime = 0;
-                hasUnlockedAudio = true; 
-                isAudioEnabled = true; 
-                updateAudioBtnUI(); 
-                setTimeout(playWarningBeep, 200);
-            }).catch(e => {
-                console.error("解鎖失敗:", e);
-                alert("請確保手機未處於靜音模式並調大音量。");
-            }); 
-        } else { 
-            isAudioEnabled = !isAudioEnabled; 
-            updateAudioBtnUI(); 
-            if(isAudioEnabled) playWarningBeep(); 
-        }
-    }
-
-    function updateAudioBtnUI() { 
-        const b = document.getElementById('audioBtn'); 
-        b.innerText = isAudioEnabled ? "🔊" : "🔇"; 
-        b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off"); 
-    }
-    
-    function playWarningBeep() { 
-        if (isAudioEnabled) { 
-            try {
-                const soundClone = pikminSound.cloneNode(true);
-                soundClone.volume = 1.0;
-                const playPromise = soundClone.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        soundClone.onended = () => { soundClone.remove(); };
-                    }).catch(err => console.log("副本播放受阻", err));
-                }
-            } catch (e) {
-                console.error("Audio error", e);
-            }
-        } 
     }
 
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null, startX, startY;
