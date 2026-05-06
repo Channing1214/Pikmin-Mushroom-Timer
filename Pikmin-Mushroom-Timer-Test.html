@@ -47,12 +47,14 @@
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
         
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
+        /* "剩" 字向下靠 */
         .input-group span { align-self: flex-end; margin-bottom: 6px; } 
 
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
         
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
+        /* "時分秒" 向下靠 */
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
@@ -60,11 +62,11 @@
         
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
 
-        /* 縮小後的 + 按鈕 */
+        /* + 的按鈕縮小 (36px) */
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        /* --- 下方狀態列 --- */
+        /* --- 下方狀態列與其他 --- */
         .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
         
         .viz-item { 
@@ -74,14 +76,20 @@
             padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap;
             transition: opacity 0.4s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s;
         }
+        .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes viz-pop-fast {
+            0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
+            100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
+        }
         .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+        .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
 
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         
-        /* 修正：紅色閃爍背景非白色 */
+        /* 紅色閃爍背景非白色 */
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         
@@ -104,7 +112,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版4 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -124,10 +132,9 @@
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
-    
-    // 音效
+
+    // 音效物件
     const pikminSound = new Audio('pikmin_throw.mp3');
-    pikminSound.preload = 'auto';
     let isAudioEnabled = false, hasUnlockedAudio = false, isUserInteracting = false; 
 
     function saveAll() {
@@ -172,11 +179,15 @@
 
     function changeRows() {
         const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
-        newlyAddedId = id; rowOrder.push(id);
-        createRow(id, rowOrder.length - 1, true); saveAll(); renderVizBar();
+        newlyAddedId = id; 
+        rowOrder.push(id);
+        createRow(id, rowOrder.length - 1, true); 
+        saveAll();
+        renderVizBar();
         setTimeout(() => {
             const scrollArea = document.querySelector('.scroll-area');
             scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
+            vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
             newlyAddedId = null; 
         }, 50);
     }
@@ -186,35 +197,77 @@
             const wrapper = document.getElementById(`wrapper${id}`);
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
-            const cardLeft = card.offsetLeft, cardRight = cardLeft + card.offsetWidth, rowHeight = wrapper.offsetHeight;
-            deletingIds.add(id); squad.style.display = 'block';
+            const vizItem = document.getElementById(`viz-${id}`);
+            
+            const cardLeft = card.offsetLeft;
+            const cardRight = cardLeft + card.offsetWidth;
+            const rowHeight = wrapper.offsetHeight;
+            
+            deletingIds.add(id); 
+            squad.style.display = 'block';
+            
             const workers = [];
             for(let i=0; i<5; i++) {
-                const el = document.createElement('div'); el.className = 'pikmin-worker'; squad.appendChild(el);
-                workers.push({ el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) });
+                const el = document.createElement('div');
+                el.className = 'pikmin-worker';
+                squad.appendChild(el);
+                workers.push({ 
+                    el: el, 
+                    x: cardLeft + Math.random() * (card.offsetWidth - 45), 
+                    speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
+                });
             }
+
             let startTime = null;
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const progress = timestamp - startTime;
                 workers.forEach(p => {
-                    p.x += p.speed; if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
-                    p.el.style.left = p.x + 'px'; p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+                    p.x += p.speed;
+                    if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
+                    p.el.style.left = p.x + 'px';
+                    p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                 });
-                if (progress < 1200) requestAnimationFrame(animateScramble); else startCarrying();
+                if (progress < 1200) requestAnimationFrame(animateScramble);
+                else startCarrying();
             }
             requestAnimationFrame(animateScramble);
+
             function startCarrying() {
-                const item = document.getElementById(`viz-${id}`); if (item) item.style.display = 'none';
-                const nameX = (cardLeft + (document.getElementById(`name${id}`)?.offsetLeft || 0));
-                const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
-                delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
-                deletingIds.delete(id); saveAll(); renderVizBar();
+                if (vizItem) vizItem.classList.add('viz-item-exit');
+                
+                const nameInput = document.getElementById(`name${id}`);
+                const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
+
+                setTimeout(() => {
+                    const idx = rowOrder.indexOf(id);
+                    if (idx > -1) rowOrder.splice(idx, 1);
+                    delete targetTimes[id];
+                    localStorage.removeItem(`mushroom_name_${id}`);
+                    deletingIds.delete(id);
+                    saveAll();
+                    rowOrder.forEach((rid, i) => {
+                        const el = document.getElementById(`name${rid}`);
+                        if(el) el.placeholder = `菇菇${i+1}`;
+                    });
+                    renderVizBar(); 
+                }, 400); 
+
                 workers.forEach((p, i) => {
-                    p.el.style.transition = 'all 0.4s'; p.el.style.left = (nameX + (i * 8)) + 'px'; p.el.style.bottom = '-10px';
+                    p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    p.el.style.left = (nameX + (i * 8)) + 'px';
+                    p.el.style.transform = 'scaleX(1)';
+                    p.el.style.bottom = '-10px';
                 });
-                setTimeout(() => { wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`; }, 400);
-                setTimeout(() => wrapper.remove(), 2500);
+
+                setTimeout(() => {
+                    wrapper.classList.add('carrying');
+                    wrapper.style.marginBottom = `-${rowHeight}px`;
+                    wrapper.style.opacity = "0.7";
+                    wrapper.style.pointerEvents = "none";
+                }, 400);
+                
+                setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
         }
     }
@@ -226,7 +279,8 @@
             if (deletingIds.has(id)) return;
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
-            item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
+            item.className = 'viz-item' + (id === newlyAddedId ? ' viz-new' : ''); 
+            item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
             addDragListeners(item); vizBar.appendChild(item);
         });
@@ -257,13 +311,16 @@
                     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
                     
-                    // 修正音效觸發：只要進入 10 秒內且沒響過就響
+                    // 修正：當進入 10 秒且尚未警告過時觸發
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
                         playWarningBeep(); 
                         card.dataset.warned = "1"; 
                     }
                 }
-            } else { item.className = 'viz-item'; targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; }
+            } else { 
+                if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
+                targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
+            }
         });
     }
 
@@ -284,40 +341,40 @@
         saveAll(); renderVizBar(); 
     }
 
-    // 優化手機音效解鎖
     function toggleAudio() {
         if (!hasUnlockedAudio) { 
-            // 在點擊瞬間播放並暫停，這是手機 Safari 最穩定的解鎖方式
             pikminSound.play().then(() => { 
                 pikminSound.pause();
                 pikminSound.currentTime = 0;
                 hasUnlockedAudio = true; 
                 isAudioEnabled = true; 
                 updateAudioBtnUI(); 
-                // 響一聲提示解鎖成功
                 setTimeout(playWarningBeep, 100);
-            }).catch(e => {
-                alert("音效啟動失敗，請確認手機非靜音模式後再試一次。");
-            }); 
+            }).catch(e => console.log("Audio unlock failed", e)); 
         } else { 
             isAudioEnabled = !isAudioEnabled; 
             updateAudioBtnUI(); 
             if(isAudioEnabled) playWarningBeep(); 
         }
     }
-    function updateAudioBtnUI() { const b = document.getElementById('audioBtn'); b.innerText = isAudioEnabled ? "🔊" : "🔇"; b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off"); }
+
+    function updateAudioBtnUI() { 
+        const b = document.getElementById('audioBtn'); 
+        b.innerText = isAudioEnabled ? "🔊" : "🔇"; 
+        b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off"); 
+    }
     
+    // 修正：使用副本播放，避免多個菇菇同時觸發時互相干擾
     function playWarningBeep() { 
         if (isAudioEnabled) { 
-            pikminSound.pause(); 
-            pikminSound.currentTime = 0; 
-            const p = pikminSound.play(); 
-            if (p !== undefined) p.catch(() => {});
+            const soundClone = pikminSound.cloneNode();
+            soundClone.play().catch(() => {});
         } 
     }
 
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null, startX, startY;
     placeholder.className = 'placeholder';
+
     function addDragListeners(el) {
         const onStart = (e) => {
             const t = e.touches ? e.touches[0] : e; startX = t.clientX; startY = t.clientY;
@@ -347,21 +404,28 @@
                 placeholder.remove();
                 rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
                 saveAll(); rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
+                rowOrder.forEach((id, i) => { const el=document.getElementById(`name${id}`); if(el) el.placeholder = `菇菇${i+1}`; });
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { el.classList.remove('pressing'); isUserInteracting = false; }
         };
-        el.addEventListener('touchstart', onStart, {passive: true}); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
-        el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
+        el.addEventListener('touchstart', onStart, {passive: true}); 
+        window.addEventListener('touchmove', onMove, {passive:false}); 
+        window.addEventListener('touchend', onEnd);
+        el.addEventListener('mousedown', onStart); 
+        window.addEventListener('mousemove', onMove); 
+        window.addEventListener('mouseup', onEnd);
     }
 
     function resetRow(id) {
         ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
-        targetTimes[id] = null; const card = document.getElementById(`card${id}`); if(card) { card.dataset.autoCleared = card.dataset.warned = ""; }
+        targetTimes[id] = null; const card = document.getElementById(`card${id}`);
+        if(card) { card.dataset.autoCleared = card.dataset.warned = ""; }
         saveAll(); renderVizBar();
     }
     function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
     function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
     function saveName(id, v) { localStorage.setItem(`mushroom_name_${id}`, v); }
+
     setInterval(updateDynamicInfo, 1000); init();
 </script>
 </body>
