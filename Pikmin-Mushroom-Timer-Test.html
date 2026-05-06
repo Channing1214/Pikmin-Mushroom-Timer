@@ -48,7 +48,7 @@
         
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
-        /* 這裡只針對「剩」字往下移動 (從 6px 改為 2px) */
+        /* 「剩」字往下移 */
         .input-group span { align-self: flex-end; margin-bottom: 2px; } 
 
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
@@ -56,7 +56,7 @@
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         
-        /* 這裡還原「時分秒」的高度 (還原為 6px) */
+        /* 「時分秒」還原高度 */
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
@@ -67,7 +67,7 @@
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        /* --- 下方狀態列與其他 --- */
+        /* --- 下方狀態列 --- */
         .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
         
         .viz-item { 
@@ -112,7 +112,7 @@
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版6 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -133,45 +133,43 @@
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
 
-    // --- 音訊系統 ---
-    let audioCtx = null;
+    // --- 音訊系統 (換回 pikmin_throw.mp3) ---
+    const pikminSound = new Audio('pikmin_throw.mp3');
     let isAudioEnabled = false;
-    let isUserInteracting = false; 
-
-    function initAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-    }
+    let hasUnlockedAudio = false; 
+    let isUserInteracting = false;
 
     function playWarningBeep() {
-        if (!isAudioEnabled || !audioCtx) return;
-        initAudioContext();
-        const playNote = (delay, freq, duration, volume = 0.1) => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
-            gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
-            gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + delay + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(audioCtx.currentTime + delay);
-            osc.stop(audioCtx.currentTime + delay + duration);
-        };
-        playNote(0, 880, 0.1);
-        playNote(0.08, 1108, 0.15);
+        if (isAudioEnabled) {
+            try {
+                // 使用 cloneNode 允許聲音重疊播放（多個菇菇同時倒數時）
+                const soundClone = pikminSound.cloneNode(true);
+                soundClone.volume = 1.0;
+                soundClone.play().catch(e => console.log("播放受阻:", e));
+            } catch (e) {
+                console.error("音訊播放錯誤", e);
+            }
+        }
     }
 
     function toggleAudio() {
-        initAudioContext();
-        isAudioEnabled = !isAudioEnabled;
-        updateAudioBtnUI();
-        if (isAudioEnabled) playWarningBeep(); 
+        if (!hasUnlockedAudio) {
+            // 第一次點擊時「暖機」音訊，獲取瀏覽器播放許可
+            pikminSound.play().then(() => {
+                pikminSound.pause();
+                pikminSound.currentTime = 0;
+                hasUnlockedAudio = true;
+                isAudioEnabled = true;
+                updateAudioBtnUI();
+                playWarningBeep(); // 點擊時立即播放一次測試聲音
+            }).catch(e => {
+                alert("請確認手機不是靜音模式並調高音量。");
+            });
+        } else {
+            isAudioEnabled = !isAudioEnabled;
+            updateAudioBtnUI();
+            if (isAudioEnabled) playWarningBeep(); // 按下啟動時播一次
+        }
     }
 
     function updateAudioBtnUI() {
@@ -179,6 +177,7 @@
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
+    // ------------------
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -343,6 +342,8 @@
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
                     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+                    
+                    // 倒數 10 秒內播放聲音
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
                         playWarningBeep(); 
                         card.dataset.warned = "1"; 
