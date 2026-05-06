@@ -19,6 +19,7 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
+        /* --- 最上方固定區塊 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
@@ -28,33 +29,66 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .container { width: 95%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        /* --- 中間滾動區域 --- */
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; scrollbar-width: none; -ms-overflow-style: none; }
+        .scroll-area::-webkit-scrollbar { display: none; }
         
-        .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        
+        .row-wrapper { 
+            display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center;
+            position: relative;
+            transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+        }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes row-pop-in { 0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; } 100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; } }
+        @keyframes row-pop-in {
+            0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; }
+            100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
+        }
+
+        .row-spacer { width: 38px; flex-shrink: 0; visibility: hidden; }
 
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
+        
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
-        /* 介面細節修正：剩字下移，時分秒不動 */
-        .input-group span { align-self: flex-end; margin-bottom: 2px; } 
+        /* 剩字底部與時分秒對齊 (統一 margin 6px) */
+        .input-group span { align-self: flex-end; margin-bottom: 6px; } 
+
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
+        
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
-        .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        
+        .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
 
-        .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
-        .viz-item { min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap; transition: opacity 0.4s ease, width 0.4s, min-width 0.4s, margin 0.4s, transform 0.3s; }
+        /* --- 下方狀態列 --- */
+        .viz-bar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); 
+            padding: 6px 0 calc(8px + env(safe-area-inset-bottom));
+            display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; 
+            justify-content: flex-start;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; 
+        }
+
+        .viz-bar::before, .viz-bar::after { content: ''; min-width: 25px; margin: auto; }
+        
+        .viz-item { 
+            min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; 
+            padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap;
+            transition: opacity 0.4s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s;
+        }
         .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
-        
+        .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
+
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
@@ -63,6 +97,7 @@
         
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; }
         .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
+        .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
@@ -70,9 +105,9 @@
         @keyframes carry-out-dash { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 15% { transform: translate(0, -25px) rotate(2deg); opacity: 1; } 80% { transform: translate(110vw, -30px) rotate(10deg); opacity: 1; } 100% { transform: translate(140vw, -35px) rotate(15deg); opacity: 0; } }
     </style>
 </head>
-<body>
+<body onclick="resumeAudioContext()">
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版9 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -93,32 +128,33 @@
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
 
-    // --- Web Audio API 聲音引擎 ---
-    let audioCtx = null;
-    let soundBuffer = null;
-    let isAudioEnabled = false;
-    let isUserInteracting = false;
+    // --- 加強版音訊引擎 (解決手機失效問題) ---
+    let audioCtx = null, soundBuffer = null, isAudioEnabled = false;
 
-    // 預加載音檔
     async function loadSound() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
             const response = await fetch('pikmin_throw.mp3');
+            if (!response.ok) throw new Error('找不到音檔');
             const arrayBuffer = await response.arrayBuffer();
             soundBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-        } catch (e) {
-            console.error("音檔讀取失敗", e);
+            console.log("音檔載入成功");
+        } catch (e) { 
+            console.error("音檔載入失敗", e);
+            soundBuffer = null;
+        }
+    }
+
+    // 每次點擊網頁都嘗試恢復 Context
+    function resumeAudioContext() {
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
         }
     }
 
     function playWarningBeep() {
         if (!isAudioEnabled || !soundBuffer || !audioCtx) return;
-        
-        // 關鍵：每次播放前強制恢復 Context，防止手機版休眠
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
+        resumeAudioContext();
         const source = audioCtx.createBufferSource();
         source.buffer = soundBuffer;
         source.connect(audioCtx.destination);
@@ -126,21 +162,15 @@
     }
 
     async function toggleAudio() {
-        // 初始化音訊
-        if (!audioCtx) {
-            await loadSound();
-        }
+        if (!audioCtx) await loadSound();
+        resumeAudioContext();
         
-        // 解鎖 iOS 靜音權限
-        if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-        }
-
         isAudioEnabled = !isAudioEnabled;
         updateAudioBtnUI();
         
         if (isAudioEnabled) {
-            playWarningBeep(); // 啟動時測試
+            if (!soundBuffer) await loadSound();
+            playWarningBeep(); 
         }
     }
 
@@ -149,7 +179,7 @@
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
-    // ----------------------------
+    // ----------------------------------------
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -169,6 +199,7 @@
         wrapper.className = 'row-wrapper' + (isNew ? ' row-new' : ''); 
         wrapper.id = `wrapper${id}`;
         wrapper.innerHTML = `
+            <div class="row-spacer"></div>
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
@@ -193,17 +224,17 @@
 
     function changeRows() {
         const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
-        newlyAddedId = id; 
-        rowOrder.push(id);
+        newlyAddedId = id; rowOrder.push(id);
         createRow(id, rowOrder.length - 1, true); 
-        saveAll();
+        saveAll(); 
         renderVizBar();
+        
         setTimeout(() => {
             const scrollArea = document.querySelector('.scroll-area');
             scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
             vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
             newlyAddedId = null; 
-        }, 50);
+        }, 150);
     }
 
     function deleteSpecificRow(id) {
@@ -212,33 +243,22 @@
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
             const vizItem = document.getElementById(`viz-${id}`);
-            const cardLeft = card.offsetLeft;
-            const cardRight = cardLeft + card.offsetWidth;
-            const rowHeight = wrapper.offsetHeight;
-            deletingIds.add(id); 
-            squad.style.display = 'block';
+            const cardLeft = card.offsetLeft, cardRight = cardLeft + card.offsetWidth, rowHeight = wrapper.offsetHeight;
+            deletingIds.add(id); squad.style.display = 'block';
             const workers = [];
             for(let i=0; i<5; i++) {
-                const el = document.createElement('div');
-                el.className = 'pikmin-worker';
-                squad.appendChild(el);
-                workers.push({ 
-                    el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), 
-                    speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
-                });
+                const el = document.createElement('div'); el.className = 'pikmin-worker'; squad.appendChild(el);
+                workers.push({ el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) });
             }
             let startTime = null;
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const progress = timestamp - startTime;
                 workers.forEach(p => {
-                    p.x += p.speed;
-                    if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
-                    p.el.style.left = p.x + 'px';
-                    p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+                    p.x += p.speed; if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
+                    p.el.style.left = p.x + 'px'; p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                 });
-                if (progress < 1200) requestAnimationFrame(animateScramble);
-                else startCarrying();
+                if (progress < 1200) requestAnimationFrame(animateScramble); else startCarrying();
             }
             requestAnimationFrame(animateScramble);
             function startCarrying() {
@@ -246,35 +266,26 @@
                 const nameInput = document.getElementById(`name${id}`);
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
                 setTimeout(() => {
-                    const idx = rowOrder.indexOf(id);
-                    if (idx > -1) rowOrder.splice(idx, 1);
-                    delete targetTimes[id];
-                    localStorage.removeItem(`mushroom_name_${id}`);
-                    deletingIds.delete(id);
-                    saveAll();
-                    rowOrder.forEach((rid, i) => {
-                        const el = document.getElementById(`name${rid}`);
-                        if(el) el.placeholder = `菇菇${i+1}`;
-                    });
+                    const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
+                    delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
+                    deletingIds.delete(id); saveAll();
+                    rowOrder.forEach((rid, i) => { const el = document.getElementById(`name${rid}`); if(el) el.placeholder = `菇菇${i+1}`; });
                     renderVizBar(); 
                 }, 400); 
                 workers.forEach((p, i) => {
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    p.el.style.left = (nameX + (i * 8)) + 'px';
-                    p.el.style.transform = 'scaleX(1)';
-                    p.el.style.bottom = '-10px';
+                    p.el.style.left = (nameX + (i * 8)) + 'px'; p.el.style.transform = 'scaleX(1)'; p.el.style.bottom = '-10px';
                 });
                 setTimeout(() => {
-                    wrapper.classList.add('carrying');
-                    wrapper.style.marginBottom = `-${rowHeight}px`;
-                    wrapper.style.opacity = "0.7";
-                    wrapper.style.pointerEvents = "none";
+                    wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`;
+                    wrapper.style.opacity = "0.7"; wrapper.style.pointerEvents = "none";
                 }, 400);
                 setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
         }
     }
 
+    let isUserInteracting = false;
     function renderVizBar() {
         if (isUserInteracting) return;
         vizBar.innerHTML = "";
@@ -282,7 +293,7 @@
             if (deletingIds.has(id)) return;
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
-            item.className = 'viz-item' + (id === newlyAddedId ? ' viz-new' : ''); 
+            item.className = 'viz-item'; 
             item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
             addDragListeners(item); vizBar.appendChild(item);
@@ -313,15 +324,12 @@
                     targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
                     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
-                    
-                    // 倒數 10 秒觸發
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
-                        playWarningBeep(); 
-                        card.dataset.warned = "1"; 
+                        playWarningBeep(); card.dataset.warned = "1"; 
                     }
                 }
             } else { 
-                if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
+                item.className = 'viz-item'; 
                 targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
             }
         });
@@ -330,8 +338,7 @@
     function focusNextRowHour(id) {
         const idx = rowOrder.indexOf(id);
         if (idx < rowOrder.length - 1) {
-            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`);
-            if(nextEl) nextEl.focus();
+            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`); if(nextEl) nextEl.focus();
         }
     }
 
@@ -360,8 +367,7 @@
         };
         const onMove = (e) => {
             if (!dragItem) return; e.preventDefault();
-            const t = e.touches ? e.touches[0] : e;
-            dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
+            const t = e.touches ? e.touches[0] : e; dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
             const after = [...vizBar.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')].reduce((c, el) => {
                 const b = el.getBoundingClientRect(); const o = t.clientX - (b.left + b.width/2);
                 return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
@@ -380,12 +386,8 @@
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { el.classList.remove('pressing'); isUserInteracting = false; }
         };
-        el.addEventListener('touchstart', onStart, {passive: true}); 
-        window.addEventListener('touchmove', onMove, {passive:false}); 
-        window.addEventListener('touchend', onEnd);
-        el.addEventListener('mousedown', onStart); 
-        window.addEventListener('mousemove', onMove); 
-        window.addEventListener('mouseup', onEnd);
+        el.addEventListener('touchstart', onStart, {passive: true}); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
+        el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
     }
 
     function resetRow(id) {
