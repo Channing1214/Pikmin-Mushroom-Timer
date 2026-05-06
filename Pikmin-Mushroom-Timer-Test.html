@@ -19,7 +19,6 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* --- 最上方固定區塊 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
@@ -29,90 +28,51 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
-        /* --- 中間部分 --- */
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 95%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
-        .row-wrapper { 
-            display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center;
-            position: relative;
-            transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
-        }
+        .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes row-pop-in {
-            0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; }
-            100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
-        }
+        @keyframes row-pop-in { 0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; } 100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; } }
 
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
-        
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
-        /* 「剩」字往下移 */
+        /* 介面細節修正：剩字下移，時分秒不動 */
         .input-group span { align-self: flex-end; margin-bottom: 2px; } 
-
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
-        
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
-        
-        /* 「時分秒」還原高度 */
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
-        .btn-small-reset:active { color: var(--primary); background: #eee; transform: scale(0.8) rotate(-45deg); }
-        
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
-
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        /* --- 下方狀態列 --- */
         .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
-        
-        .viz-item { 
-            min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; box-sizing: border-box; 
-            padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap;
-            transition: opacity 0.4s ease, width 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s;
-        }
-        .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        @keyframes viz-pop-fast {
-            0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
-            100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
-        }
+        .viz-item { min-width: 68px; width: 68px; height: 68px; background: #fff; border: 1px solid #eee; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 4px solid var(--primary); line-height: 1.2; cursor: grab; padding: 4px; margin: 0 4px; overflow: hidden; white-space: nowrap; transition: opacity 0.4s ease, width 0.4s, min-width 0.4s, margin 0.4s, transform 0.3s; }
         .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
-        .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
-
+        
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
-        
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
-        
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; }
         .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
-        .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
         .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
-        @keyframes carry-out-dash {
-            0% { transform: translate(0, 0) rotate(0); opacity: 1; }
-            15% { transform: translate(0, -25px) rotate(2deg); opacity: 1; }
-            80% { transform: translate(110vw, -30px) rotate(10deg); opacity: 1; }
-            100% { transform: translate(140vw, -35px) rotate(15deg); opacity: 0; }
-        }
+        @keyframes carry-out-dash { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 15% { transform: translate(0, -25px) rotate(2deg); opacity: 1; } 80% { transform: translate(110vw, -30px) rotate(10deg); opacity: 1; } 100% { transform: translate(140vw, -35px) rotate(15deg); opacity: 0; } }
     </style>
 </head>
 <body>
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版6 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -133,42 +93,54 @@
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
 
-    // --- 音訊系統 (換回 pikmin_throw.mp3) ---
-    const pikminSound = new Audio('pikmin_throw.mp3');
+    // --- Web Audio API 聲音引擎 ---
+    let audioCtx = null;
+    let soundBuffer = null;
     let isAudioEnabled = false;
-    let hasUnlockedAudio = false; 
     let isUserInteracting = false;
 
-    function playWarningBeep() {
-        if (isAudioEnabled) {
-            try {
-                // 使用 cloneNode 允許聲音重疊播放（多個菇菇同時倒數時）
-                const soundClone = pikminSound.cloneNode(true);
-                soundClone.volume = 1.0;
-                soundClone.play().catch(e => console.log("播放受阻:", e));
-            } catch (e) {
-                console.error("音訊播放錯誤", e);
-            }
+    // 預加載音檔
+    async function loadSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            const response = await fetch('pikmin_throw.mp3');
+            const arrayBuffer = await response.arrayBuffer();
+            soundBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        } catch (e) {
+            console.error("音檔讀取失敗", e);
         }
     }
 
-    function toggleAudio() {
-        if (!hasUnlockedAudio) {
-            // 第一次點擊時「暖機」音訊，獲取瀏覽器播放許可
-            pikminSound.play().then(() => {
-                pikminSound.pause();
-                pikminSound.currentTime = 0;
-                hasUnlockedAudio = true;
-                isAudioEnabled = true;
-                updateAudioBtnUI();
-                playWarningBeep(); // 點擊時立即播放一次測試聲音
-            }).catch(e => {
-                alert("請確認手機不是靜音模式並調高音量。");
-            });
-        } else {
-            isAudioEnabled = !isAudioEnabled;
-            updateAudioBtnUI();
-            if (isAudioEnabled) playWarningBeep(); // 按下啟動時播一次
+    function playWarningBeep() {
+        if (!isAudioEnabled || !soundBuffer || !audioCtx) return;
+        
+        // 關鍵：每次播放前強制恢復 Context，防止手機版休眠
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = soundBuffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+    }
+
+    async function toggleAudio() {
+        // 初始化音訊
+        if (!audioCtx) {
+            await loadSound();
+        }
+        
+        // 解鎖 iOS 靜音權限
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+
+        isAudioEnabled = !isAudioEnabled;
+        updateAudioBtnUI();
+        
+        if (isAudioEnabled) {
+            playWarningBeep(); // 啟動時測試
         }
     }
 
@@ -177,7 +149,7 @@
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
-    // ------------------
+    // ----------------------------
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -251,8 +223,7 @@
                 el.className = 'pikmin-worker';
                 squad.appendChild(el);
                 workers.push({ 
-                    el: el, 
-                    x: cardLeft + Math.random() * (card.offsetWidth - 45), 
+                    el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), 
                     speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) 
                 });
             }
@@ -343,7 +314,7 @@
                     const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
                     cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
                     
-                    // 倒數 10 秒內播放聲音
+                    // 倒數 10 秒觸發
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
                         playWarningBeep(); 
                         card.dataset.warned = "1"; 
