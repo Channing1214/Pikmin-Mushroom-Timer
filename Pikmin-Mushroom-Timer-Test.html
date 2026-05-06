@@ -29,9 +29,8 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
-        /* --- 中間滾動區域 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; scrollbar-width: none; -ms-overflow-style: none; }
-        .scroll-area::-webkit-scrollbar { display: none; }
+        /* --- 中間區域 (還原捲軸顯示) --- */
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
@@ -46,27 +45,27 @@
             100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
         }
 
-        .row-spacer { width: 38px; flex-shrink: 0; visibility: hidden; }
-
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
         
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
-        
-        /* 剩字底部與時分秒對齊 (統一 margin 6px) */
+        /* 剩字底部對齊 (margin 6px) */
         .input-group span { align-self: flex-end; margin-bottom: 6px; } 
 
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
         
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
+        /* 時分秒單位高度保持 6px */
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
         
+        /* + 按鈕防變形 */
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        /* --- 下方狀態列 --- */
+        /* --- 下方狀態列 (智慧置中 + 邊距留白) --- */
         .viz-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); 
             padding: 6px 0 calc(8px + env(safe-area-inset-bottom));
@@ -107,7 +106,7 @@
 </head>
 <body onclick="resumeAudioContext()">
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版9 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
@@ -128,30 +127,20 @@
     let deletingIds = new Set(); 
     let newlyAddedId = null; 
 
-    // --- 加強版音訊引擎 (解決手機失效問題) ---
+    // --- Web Audio API 聲音引擎 ---
     let audioCtx = null, soundBuffer = null, isAudioEnabled = false;
-
     async function loadSound() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
             const response = await fetch('pikmin_throw.mp3');
-            if (!response.ok) throw new Error('找不到音檔');
+            if (!response.ok) throw new Error('音檔載入失敗');
             const arrayBuffer = await response.arrayBuffer();
             soundBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            console.log("音檔載入成功");
-        } catch (e) { 
-            console.error("音檔載入失敗", e);
-            soundBuffer = null;
-        }
+        } catch (e) { console.error(e); }
     }
-
-    // 每次點擊網頁都嘗試恢復 Context
     function resumeAudioContext() {
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
-
     function playWarningBeep() {
         if (!isAudioEnabled || !soundBuffer || !audioCtx) return;
         resumeAudioContext();
@@ -160,26 +149,21 @@
         source.connect(audioCtx.destination);
         source.start(0);
     }
-
     async function toggleAudio() {
         if (!audioCtx) await loadSound();
         resumeAudioContext();
-        
         isAudioEnabled = !isAudioEnabled;
         updateAudioBtnUI();
-        
         if (isAudioEnabled) {
-            if (!soundBuffer) await loadSound();
+            if(!soundBuffer) await loadSound();
             playWarningBeep(); 
         }
     }
-
     function updateAudioBtnUI() {
         const b = document.getElementById('audioBtn');
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
-    // ----------------------------------------
 
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
@@ -199,7 +183,6 @@
         wrapper.className = 'row-wrapper' + (isNew ? ' row-new' : ''); 
         wrapper.id = `wrapper${id}`;
         wrapper.innerHTML = `
-            <div class="row-spacer"></div>
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
@@ -228,7 +211,6 @@
         createRow(id, rowOrder.length - 1, true); 
         saveAll(); 
         renderVizBar();
-        
         setTimeout(() => {
             const scrollArea = document.querySelector('.scroll-area');
             scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
