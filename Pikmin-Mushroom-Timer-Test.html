@@ -1,10 +1,11 @@
 --- START OF FILE text/plain ---
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機</title>
+    <title>搶菇計算機-測試版</title>
     <style>
         /* --- 基礎變數與設定 --- */
         :root {
@@ -26,7 +27,6 @@
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
-        .version-info { position: absolute; bottom: 2px; right: 8px; font-size: 0.6rem; color: #bbb; pointer-events: none; }
 
         .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; margin: 0 2px; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
@@ -34,12 +34,13 @@
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 80px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
+        /* --- 卡片元件 --- */
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; transition: background-color 0.3s, border-color 0.3s; }
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
@@ -98,14 +99,13 @@
 </head>
 <body onclick="resumeAudioContext()">
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <div class="version-info">目前版本：測試版3</div>
     </div>
 
     <div class="scroll-area">
@@ -123,7 +123,6 @@
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
     let deletingIds = new Set(); 
-    let editingRows = new Set(); 
     let isUserInteracting = false; 
     let newlyAddedId = null;
 
@@ -165,7 +164,6 @@
 
     function updateAudioBtnUI() {
         const b = document.getElementById('audioBtn');
-        if(!b) return;
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
@@ -199,12 +197,12 @@
                 </div>
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
-                    <div class="time-box" id="timeBox${id}" onfocusin="handleFocusIn('${id}')" onfocusout="handleBoxBlur(event, '${id}')">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
+                    <div class="time-box" id="timeBox${id}">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'hr', 'min')" onblur="handleInput('${id}')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'min', 'sec')" onblur="handleInput('${id}')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'sec', null)" onblur="handleInput('${id}')">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -218,26 +216,12 @@
         if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
     }
 
-    function handleFocusIn(id) {
-        editingRows.add(id);
-    }
-
-    window.checkEnter = function(e, id) {
-        if (e.key === "Enter" || e.keyCode === 13) {
-            e.target.blur(); 
-        }
-    }
-
     window.limitAndFocus = function(id, current, next) {
         const el = document.getElementById(current + id);
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
-            if(next) {
-                document.getElementById(next + id).focus();
-            } else {
-                el.blur();
-                focusNextRowHour(id);
-            }
+            if(next) document.getElementById(next + id).focus();
+            else focusNextRowHour(id);
         }
     }
 
@@ -324,10 +308,10 @@
     function updateDynamicInfo() {
         const now = Date.now();
         if(currentTimeEl) currentTimeEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-        
+        const activeEl = document.activeElement; 
+
         rowOrder.forEach(id => {
             if (deletingIds.has(id)) return;
-
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
             if (!item) return;
             const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
@@ -337,41 +321,26 @@
 
             if (t) {
                 const diff = Math.floor((t - now) / 1000);
-                card.classList.remove('card-warning', 'card-critical', 'card-ready');
                 if (diff > 0) {
+                    card.classList.remove('card-warning', 'card-critical', 'card-ready');
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
-                }
 
-                if (diff <= 0) {
-                    item.className = 'viz-item ready'; 
-                    cdEl.innerText = "已發車";
-                } else if (!isUserInteracting) {
-                    item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
-                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    const vh = Math.floor(diff / 3600), vm = Math.floor((diff % 3600) / 60), vs = diff % 60;
-                    cdEl.innerText = (vh > 0 ? vh + ":" : "") + vm.toString().padStart(2,'0') + ":" + vs.toString().padStart(2,'0');
-                }
-
-                if (diff > 0) {
                     if (diff > 300) {
                         if (timeBox) timeBox.style.display = 'flex';
                         if (labelEl) labelEl.style.display = 'inline-block';
                         if (respawnEl) respawnEl.style.display = 'none';
 
-                        if (!editingRows.has(id)) {
-                            const displayRemaining = diff - 300;
-                            const h = Math.floor(displayRemaining / 3600), 
-                                  m = Math.floor((displayRemaining % 3600) / 60), 
-                                  s = displayRemaining % 60;
-                            
-                            const hrInp = document.getElementById(`hr${id}`), 
-                                  minInp = document.getElementById(`min${id}`), 
-                                  secInp = document.getElementById(`sec${id}`);
-                            
+                        const displayRemaining = diff - 300;
+                        const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
+                        const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
+                        
+                        // 修正：如果正在編輯這行的任何一格，不更新數值
+                        const isFocusingAnyInThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
+                        if (!isFocusingAnyInThisRow) {
                             if (hrInp) hrInp.value = h > 0 ? h : "";
-                            if (minInp) minInp.value = (h > 0 || m > 0) ? m : (displayRemaining > 0 ? "0" : "");
-                            if (secInp) secInp.value = (displayRemaining > 0) ? s : "";
+                            if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
+                            if (secInp) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
                         }
                     } else {
                         if (timeBox) timeBox.style.display = 'none';
@@ -382,9 +351,6 @@
                             const rm = Math.floor(diff / 60), rs = diff % 60;
                             respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
                         }
-                    }
-                    if (diff <= 10 && !card.dataset.warned) { 
-                        playWarningBeep(); card.dataset.warned = "1"; 
                     }
                 } else {
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
@@ -397,9 +363,24 @@
                             respawnEl.innerText = "已發車";
                             respawnEl.style.color = "var(--accent)";
                         }
+                        card.classList.remove('card-critical', 'card-warning');
                         card.classList.add('card-ready');
                     } else {
                         resetRow(id);
+                    }
+                }
+
+                if (diff <= 0) {
+                    item.className = 'viz-item ready'; cdEl.innerText = "已發車";
+                } else {
+                    if (!isUserInteracting) {
+                        item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
+                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                        const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+                        cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+                    }
+                    if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
+                        playWarningBeep(); card.dataset.warned = "1"; 
                     }
                 }
             } else { 
@@ -408,7 +389,7 @@
                 if (timeBox) timeBox.style.display = 'flex';
                 if (labelEl) labelEl.style.display = 'inline-block';
                 if (respawnEl) respawnEl.style.display = 'none';
-                if(!isUserInteracting && item) {
+                if(!isUserInteracting) {
                     if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
                     targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
                 }
@@ -416,62 +397,20 @@
         });
     }
 
-    function focusNextRowHour(currentId) {
-        const startIndex = rowOrder.indexOf(currentId) + 1;
-        for (let i = startIndex; i < rowOrder.length; i++) {
-            const nextId = rowOrder[i];
-            const nextHrEl = document.getElementById(`hr${nextId}`);
-            const nextTimeBox = document.getElementById(`timeBox${nextId}`);
-            if (nextHrEl && nextTimeBox && nextTimeBox.style.display !== 'none') {
-                nextHrEl.focus();
-                return;
-            }
+    function focusNextRowHour(id) {
+        const idx = rowOrder.indexOf(id);
+        if (idx < rowOrder.length - 1) {
+            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`); if(nextEl) nextEl.focus();
         }
-    }
-
-    // --- 修改後的失焦處理邏輯 ---
-    function handleBoxBlur(event, id) {
-        const timeBox = document.getElementById(`timeBox${id}`);
-        const lostFocusFrom = event.target.id; // 記錄剛剛是哪一個欄位失焦 (例如 "hr1")
-
-        setTimeout(() => {
-            const nowFocused = document.activeElement;
-
-            // 如果目前焦點不在整個時分秒框內 (代表按下了鍵盤勾勾或點擊空白處)
-            if (!timeBox || !timeBox.contains(nowFocused)) {
-                
-                // 特殊規則：如果是從「時」離開，且焦點到外部了，強行跳轉到「秒」
-                if (lostFocusFrom.startsWith('hr')) {
-                    const secInp = document.getElementById(`sec${id}`);
-                    if (secInp) {
-                        secInp.focus(); // 跳轉到秒
-                        return; // 中止後續流程，不結束編輯狀態
-                    }
-                }
-
-                // 一般離開邏輯：結束編輯並保存
-                handleInput(id);
-                editingRows.delete(id); 
-                renderVizBar();
-            }
-        }, 150);
     }
 
     function handleInput(id) {
-        const hrVal = document.getElementById(`hr${id}`)?.value, 
-              minVal = document.getElementById(`min${id}`)?.value, 
-              secVal = document.getElementById(`sec${id}`)?.value;
-        
-        if (!hrVal && !minVal && !secVal) {
-            targetTimes[id] = null;
-        } else {
-            const totalSec = (parseInt(hrVal)||0)*3600 + (parseInt(minVal)||0)*60 + (parseInt(secVal)||0);
-            targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
-        }
-        
+        const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
+        if (!h && !m && !s) targetTimes[id] = null;
+        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
         const card = document.getElementById(`card${id}`);
         if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; card.dataset.departedTime = ""; }
-        saveAll(); 
+        saveAll(); renderVizBar(); 
     }
 
     function resetRow(id) {
@@ -488,7 +427,9 @@
     function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
     function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
 
-    /* --- 拖曳排序邏輯 --- */
+    /**
+     * --- 拖曳排序邏輯 ---
+     */
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
     placeholder.className = 'placeholder';
