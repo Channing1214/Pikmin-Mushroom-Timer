@@ -200,11 +200,11 @@
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}" onfocusin="handleFocusIn('${id}')" onfocusout="handleBoxBlur(event, '${id}')">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onchange="handleInput('${id}')" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onchange="handleInput('${id}')" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onchange="handleInput('${id}')" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -224,7 +224,7 @@
 
     window.checkEnter = function(e, id) {
         if (e.key === "Enter" || e.keyCode === 13) {
-            e.target.blur(); 
+            e.target.blur(); // 這會觸發 handleBoxBlur
         }
     }
 
@@ -429,16 +429,17 @@
         }
     }
 
+    // iOS 關鍵觸發器：當整個 TimeBox 失去焦點時（包含按下鍵盤 Done）
     function handleBoxBlur(event, id) {
         const timeBox = document.getElementById(`timeBox${id}`);
-        // 增加延遲時間以確保 iOS 鍵盤關閉後 document.activeElement 已正確變更
         setTimeout(() => {
+            // 判定目前新的焦點是否在同一個 timeBox 的三個 input 之外
             if (!timeBox || !timeBox.contains(document.activeElement)) {
-                handleInput(id); // 離開整個 TimeBox 組時保存數據並開始倒數
-                editingRows.delete(id); 
-                renderVizBar(); // 立即更新下方狀態列
+                handleInput(id);      // 抓取數值並計算倒數目標
+                editingRows.delete(id); // 解除鎖定，讓 updateDynamicInfo 可以運行
+                renderVizBar();       // 立即更新 UI
             }
-        }, 200);
+        }, 150);
     }
 
     function handleInput(id) {
@@ -446,11 +447,12 @@
               minVal = document.getElementById(`min${id}`)?.value, 
               secVal = document.getElementById(`sec${id}`)?.value;
         
+        // 只要有任何一格有填數字就進行計算，沒填預設 0
         if (!hrVal && !minVal && !secVal) {
             targetTimes[id] = null;
         } else {
             const totalSec = (parseInt(hrVal)||0)*3600 + (parseInt(minVal)||0)*60 + (parseInt(secVal)||0);
-            // 倒數 5 分鐘緩衝 = 300 秒
+            // 倒數目標 = 現在時間 + (輸入時間 + 5分鐘重生緩衝)
             targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
         }
         
