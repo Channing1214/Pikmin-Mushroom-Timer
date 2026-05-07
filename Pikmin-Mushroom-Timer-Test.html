@@ -226,7 +226,7 @@
     function detectDevice() {
         isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
         const deviceTag = document.getElementById('deviceTag');
-        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.10";
+        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.測試";
     }
 
     function jumpToCard(id) {
@@ -465,8 +465,8 @@
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
 
-                // 新增：跑步後 0.8 秒吹口哨
-                if (!hasWhistled && elapsed >= 800) {
+                // 新增：跑步後 0.9 秒吹口哨
+                if (!hasWhistled && elapsed >= 900) {
                     if (isAudioEnabled) playSound(whistleBuffer);
                     hasWhistled = true;
                 }
