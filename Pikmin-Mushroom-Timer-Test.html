@@ -27,6 +27,7 @@
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; gap: 4px; align-items: center; }
         .version-tag { position: absolute; right: 8px; bottom: 2px; font-size: 0.6rem; color: #bbb; pointer-events: none; }
 
+        /* 統一 1px border 避免抖動 */
         .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; line-height: 1.4; }
         .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
         .btn-audio-off { color: #999; background-color: #f5f5f5; border-color: #ddd; }
@@ -45,7 +46,7 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 4500; display: none; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 150px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
@@ -142,9 +143,6 @@
     <div class="viz-bar" id="vizBar"></div>
 
 <script>
-    /**
-     * --- 全域變數 ---
-     */
     const app = document.getElementById('app');
     const vizBar = document.getElementById('vizBar');
     const currentTimeEl = document.getElementById('currentTime');
@@ -169,10 +167,7 @@
                 fetch('pikmin_throw.mp3'),
                 fetch('pikmin_2_whistle.mp3')
             ]);
-            const [dataThrow, dataWhistle] = await Promise.all([
-                resThrow.arrayBuffer(),
-                resWhistle.arrayBuffer()
-            ]);
+            const [dataThrow, dataWhistle] = await Promise.all([resThrow.arrayBuffer(), resWhistle.arrayBuffer()]);
             soundBuffer = await audioCtx.decodeAudioData(dataThrow);
             whistleBuffer = await audioCtx.decodeAudioData(dataWhistle);
         } catch (e) { console.error('音檔載入失敗', e); }
@@ -231,38 +226,36 @@
     }
     function clearHistory() { if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); } }
 
-    // --- 核心邏輯 ---
-    function saveAll() {
-        localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
-        localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
+    /**
+     * 動態遮擋偵測捲動
+     * 改進：不僅在 Resize 偵測，在 Focus 或自動跳轉時主動檢查座標。
+     */
+    function smartScroll(el) {
+        // 微小延遲確保鍵盤已彈出且座標穩定
+        setTimeout(() => {
+            const vv = window.visualViewport;
+            if (!vv) return;
+
+            const rect = el.getBoundingClientRect();
+            const headerHeight = 100;
+            const buffer = 20; // 邊距緩衝
+
+            // 判斷是否被遮擋 (電腦版 vv.height = window.innerHeight，判定通常為 false)
+            const isBlockedBelow = rect.bottom > vv.height - buffer;
+            const isBlockedAbove = rect.top < headerHeight + buffer;
+
+            if (isBlockedBelow || isBlockedAbove) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 120);
     }
+
     function init() {
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
         rowOrder.forEach((id, idx) => createRow(id, idx, false));
         renderVizBar();
         setInterval(updateDynamicInfo, 1000); 
-    }
-
-    /**
-     * 核心優化：智慧捲動判定
-     * 僅在元素「真的被擋住」時執行捲動。
-     */
-    function smartScroll(el) {
-        // 給予 150ms 延遲，讓虛擬鍵盤有時間彈出
-        setTimeout(() => {
-            const rect = el.getBoundingClientRect();
-            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            const headerHeight = 100; // time-header 的大約高度
-
-            // 判斷是否被遮擋：底部超過鍵盤頂部，或者頂部被 Header 遮住
-            const isBlockedByKeyboard = rect.bottom > viewportHeight;
-            const isBlockedByHeader = rect.top < headerHeight;
-
-            if (isBlockedByKeyboard || isBlockedByHeader) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 150);
     }
 
     function createRow(id, index, isNew = false) {
@@ -296,29 +289,42 @@
         if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
     }
 
-    /**
-     * 智慧跳轉與捲動結合
-     */
+    // 跳轉欄位邏輯整合 smartScroll
     window.limitAndFocus = function(id, current, next) {
         const el = document.getElementById(current + id);
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
             if(next) {
-                const nextInp = document.getElementById(next + id);
-                nextInp.focus();
-                // smartScroll(nextInp); // 已在 onfocus 綁定，這裡不用重複寫
+                const nextEl = document.getElementById(next + id);
+                nextEl.focus();
+                smartScroll(nextEl); // 自動跳轉時主動判定
             } else {
                 const isLastRow = (rowOrder.indexOf(id) === rowOrder.length - 1);
                 if (isLastRow) {
-                    const addBtn = document.getElementById('addRowBtn');
-                    addBtn.focus();
-                    smartScroll(addBtn); // 手動觸發
+                    const btn = document.getElementById('addRowBtn');
+                    btn.focus();
+                    smartScroll(btn);
                 } else {
                     focusNextRowHour(id);
                 }
             }
         }
         handleInput(id);
+    }
+
+    function focusNextRowHour(currentId) {
+        const idx = rowOrder.indexOf(currentId);
+        for (let i = idx + 1; i < rowOrder.length; i++) {
+            const nextId = rowOrder[i], respawnEl = document.getElementById(`respawn${nextId}`);
+            if (respawnEl && respawnEl.style.display === 'none') {
+                const hr = document.getElementById(`hr${nextId}`);
+                if (hr) {
+                    hr.focus();
+                    smartScroll(hr); // 跳下一行主動判定
+                    return;
+                }
+            }
+        }
     }
 
     function changeRows() {
@@ -333,7 +339,7 @@
     }
 
     function deleteSpecificRow(id) {
-        if(rowOrder.length > 1 && confirm("確定要移除嗎？")) {
+        if(rowOrder.length > 1 && confirm("確定要讓皮克敏大隊把它搬走嗎？")) {
             const wrapper = document.getElementById(`wrapper${id}`);
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
@@ -412,14 +418,10 @@
                     card.classList.remove('card-warning', 'card-critical', 'card-ready');
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
-
                     const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                     const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
-
                     if (diff > 300 || isEditingThisRow) {
-                        if (timeBox) timeBox.style.display = 'flex';
-                        if (labelEl) labelEl.style.display = 'inline-block';
-                        if (respawnEl) respawnEl.style.display = 'none';
+                        if (timeBox) timeBox.style.display = 'flex'; if (labelEl) labelEl.style.display = 'inline-block'; if (respawnEl) respawnEl.style.display = 'none';
                         const displayRemaining = Math.max(0, diff - 300);
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
                         if (!isEditingThisRow) {
@@ -428,20 +430,11 @@
                             if (secInp) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
                         }
                     } else {
-                        if (timeBox) timeBox.style.display = 'none';
-                        if (labelEl) labelEl.style.display = 'none';
-                        if (respawnEl) {
-                            respawnEl.style.display = 'block'; respawnEl.style.color = "var(--accent)"; 
-                            const rm = Math.floor(diff / 60), rs = diff % 60;
-                            respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
-                        }
+                        if (timeBox) timeBox.style.display = 'none'; if (labelEl) labelEl.style.display = 'none';
+                        if (respawnEl) { respawnEl.style.display = 'block'; respawnEl.style.color = "var(--accent)"; const rm = Math.floor(diff / 60), rs = diff % 60; respawnEl.innerText = `重生倒數${rm}分${rs}秒`; }
                     }
                 } else {
-                    if (!card.dataset.recorded) {
-                        const nameStr = document.getElementById(`name${id}`)?.value || `菇菇${parseInt(idx)+1}`;
-                        addToHistory(nameStr, t);
-                        card.dataset.recorded = "1";
-                    }
+                    if (!card.dataset.recorded) { const nameStr = document.getElementById(`name${id}`)?.value || `菇菇${parseInt(idx)+1}`; addToHistory(nameStr, t); card.dataset.recorded = "1"; }
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
                     const elapsed = now - parseInt(card.dataset.departedTime);
                     if (elapsed < 5000) {
@@ -450,16 +443,8 @@
                         card.classList.remove('card-critical', 'card-warning'); card.classList.add('card-ready');
                     } else { resetRow(id); }
                 }
-
-                if (diff <= 0) {
-                    item.className = 'viz-item ready'; cdEl.innerText = "已發車";
-                } else {
-                    if (!isUserInteracting) {
-                        item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
-                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                        const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
-                        cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
-                    }
+                if (diff <= 0) { item.className = 'viz-item ready'; cdEl.innerText = "已發車"; } else {
+                    if (!isUserInteracting) { item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : '')); targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false }); const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60; cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0'); }
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { playSound(soundBuffer); card.dataset.warned = "1"; }
                 }
             } else { 
@@ -470,34 +455,19 @@
         });
     }
 
-    function focusNextRowHour(currentId) {
-        const idx = rowOrder.indexOf(currentId);
-        for (let i = idx + 1; i < rowOrder.length; i++) {
-            const nextId = rowOrder[i], respawnEl = document.getElementById(`respawn${nextId}`);
-            if (respawnEl && respawnEl.style.display === 'none') {
-                const hr = document.getElementById(`hr${nextId}`); 
-                if (hr) { 
-                    hr.focus(); 
-                    return; 
-                }
-            }
-        }
-    }
-
     function handleInput(id) {
         const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
         if (!h && !m && !s) targetTimes[id] = null;
         else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
         const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = ""; card.dataset.departedTime = ""; card.dataset.recorded = ""; }
+        if(card) { card.dataset.warned = card.dataset.departedTime = card.dataset.recorded = ""; }
         saveAll(); renderVizBar(); 
     }
 
     function resetRow(id) {
         ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
-        targetTimes[id] = null; 
-        const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = ""; card.dataset.departedTime = ""; card.dataset.recorded = ""; card.classList.remove('card-warning', 'card-critical', 'card-ready'); }
+        targetTimes[id] = null; const card = document.getElementById(`card${id}`);
+        if(card) { card.dataset.warned = card.dataset.departedTime = card.dataset.recorded = ""; card.classList.remove('card-warning', 'card-critical', 'card-ready'); }
         saveAll(); renderVizBar();
     }
 
@@ -510,15 +480,10 @@
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
     placeholder.className = 'placeholder';
-
-    function startAutoScroll() {
-        if (autoScrollSpeed !== 0 && dragItem) { vizBar.scrollLeft += autoScrollSpeed; updatePlaceholderPosition(lastTouchX); }
-        scrollRafId = requestAnimationFrame(startAutoScroll);
-    }
+    function startAutoScroll() { if (autoScrollSpeed !== 0 && dragItem) { vizBar.scrollLeft += autoScrollSpeed; updatePlaceholderPosition(lastTouchX); } scrollRafId = requestAnimationFrame(startAutoScroll); }
     function updatePlaceholderPosition(clientX) {
         const after = [...vizBar.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')].reduce((c, el) => {
-            const b = el.getBoundingClientRect(); const o = clientX - (b.left + b.width/2);
-            return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
+            const b = el.getBoundingClientRect(); const o = clientX - (b.left + b.width/2); return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
         }, { offset: -Infinity }).element;
         if (after) vizBar.insertBefore(placeholder, after); else vizBar.appendChild(placeholder);
     }
@@ -526,15 +491,13 @@
         const onStart = (e) => {
             const t = e.touches ? e.touches[0] : e; const startX = t.clientX; isUserInteracting = true; el.classList.add('pressing');
             dragTimer = setTimeout(() => {
-                dragItem = el; const r = el.getBoundingClientRect();
-                Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
+                dragItem = el; const r = el.getBoundingClientRect(); Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
                 dragItem.dataset.ox = startX - r.left; el.classList.replace('pressing', 'dragging'); el.parentNode.insertBefore(placeholder, el);
                 vizBar.style.scrollBehavior = 'auto'; startAutoScroll();
             }, 300);
         };
         const onMove = (e) => {
-            if (!dragItem) return; e.preventDefault(); const t = e.touches ? e.touches[0] : e; lastTouchX = t.clientX;
-            dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
+            if (!dragItem) return; e.preventDefault(); const t = e.touches ? e.touches[0] : e; lastTouchX = t.clientX; dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
             const threshold = 60, maxScrollSpeed = 12, winW = window.innerWidth;
             if (t.clientX < threshold) autoScrollSpeed = -((threshold - t.clientX) / threshold) * maxScrollSpeed;
             else if (t.clientX > winW - threshold) autoScrollSpeed = ((t.clientX - (winW - threshold)) / threshold) * maxScrollSpeed;
@@ -546,9 +509,8 @@
             if (dragItem) {
                 dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
                 if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
-                placeholder.remove();
-                rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
-                saveAll(); rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
+                placeholder.remove(); rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id); saveAll(); 
+                rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
                 rowOrder.forEach((id, i) => { const ni = document.getElementById(`name${id}`); if(ni) ni.placeholder = `菇菇${i+1}`; });
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { el.classList.remove('pressing'); isUserInteracting = false; }
@@ -556,7 +518,6 @@
         el.addEventListener('touchstart', onStart, {passive: true}); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
         el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
     }
-
     init();
 </script>
 </body>
