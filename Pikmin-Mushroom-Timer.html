@@ -117,7 +117,8 @@
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <div class="version-tag">v.測試版</div>
+        <!-- 版本資訊與裝置顯示 -->
+        <div class="version-tag" id="versionTag">v.測試版</div>
     </div>
 
     <!-- 發車紀錄面板 -->
@@ -149,6 +150,9 @@
     
     // 智慧偵測：是否為行動裝置
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    // 更新版本標籤顯示裝置類型
+    document.getElementById('versionTag').innerText = `v.測試版 (${isMobile ? '手機版' : '電腦版'})`;
 
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
@@ -227,13 +231,10 @@
     function clearHistory() { if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); } }
 
     /**
-     * 智慧捲動判定：
-     * 電腦版(isMobile=false)基本上不會被遮擋，直接略過。
-     * 手機版則檢查座標，決定是否推動視野。
+     * 智慧捲動判定
      */
     function smartScroll(el) {
         if (!isMobile) return; 
-
         setTimeout(() => {
             const vv = window.visualViewport;
             if (!vv) return;
@@ -334,8 +335,6 @@
     function changeRows() {
         const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
         newlyAddedId = id; rowOrder.push(id); createRow(id, rowOrder.length - 1, true); saveAll(); renderVizBar(); 
-        
-        // 修改點：只有手機版在按下 + 時才執行強制捲動到底部
         if (isMobile) {
             setTimeout(() => {
                 mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
@@ -425,10 +424,8 @@
                     card.classList.remove('card-warning', 'card-critical', 'card-ready');
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
-
                     const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                     const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
-
                     if (diff > 300 || isEditingThisRow) {
                         if (timeBox) timeBox.style.display = 'flex'; if (labelEl) labelEl.style.display = 'inline-block'; if (respawnEl) respawnEl.style.display = 'none';
                         const displayRemaining = Math.max(0, diff - 300);
@@ -452,7 +449,6 @@
                         card.classList.remove('card-critical', 'card-warning'); card.classList.add('card-ready');
                     } else { resetRow(id); }
                 }
-
                 if (diff <= 0) { item.className = 'viz-item ready'; cdEl.innerText = "已發車"; } else {
                     if (!isUserInteracting) {
                         item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
