@@ -25,6 +25,7 @@
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
+        .version-tag { position: absolute; right: 8px; bottom: 2px; font-size: 0.6rem; color: #bbb; pointer-events: none; }
 
         .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; margin: 0 2px; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
@@ -42,13 +43,10 @@
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; transition: background-color 0.3s, border-color 0.3s; }
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
-        /* 行的狀態顏色 (不閃爍) */
         .card-warning { background-color: var(--warning-bg) !important; border-color: var(--warning-border) !important; }
         .card-critical { background-color: var(--critical-bg) !important; border-color: var(--critical-border) !important; }
-        /* 發車樣式：灰底 */
         .card-ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
 
-        /* 封裝區域 */
         .dynamic-content { display: flex; align-items: center; gap: 4px; width: 172px; justify-content: center; }
         .dynamic-content span { align-self: flex-end; margin-bottom: 6px; } 
 
@@ -56,7 +54,6 @@
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
-        /* 重生倒數顯示樣式：寬度固定140px以利在容器中置中，字體靠左 */
         .respawn-display { display: none; width: 140px; text-align: left; color: var(--accent); font-weight: bold; font-size: 0.95rem; white-space: nowrap; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; flex-shrink: 0; }
@@ -74,21 +71,18 @@
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
         .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
         
-        /* --- 小卡動畫 --- */
         .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes viz-pop-fast {
             0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
             100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
         }
 
-        /* --- 小卡狀態動畫 (保持閃爍) --- */
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
-        /* --- 拖曳與皮克敏動畫 --- */
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; transition: none !important; }
         .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
@@ -104,13 +98,14 @@
 </head>
 <body onclick="resumeAudioContext()">
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機-測試版 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
+        <div class="version-tag">v.測試版</div>
     </div>
 
     <div class="scroll-area">
@@ -343,9 +338,14 @@
                         const displayRemaining = diff - 300;
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
                         const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
-                        if (hrInp && hrInp !== activeEl) hrInp.value = h > 0 ? h : "";
-                        if (minInp && minInp !== activeEl) minInp.value = (h > 0 || m > 0) ? m : "";
-                        if (secInp && secInp !== activeEl) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
+                        
+                        // 修改點：如果目前該卡片的任何一個時分秒輸入框正在編輯(focus)，則不自動更新該排的輸入值
+                        const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
+                        if (!isEditingThisRow) {
+                            if (hrInp) hrInp.value = h > 0 ? h : "";
+                            if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
+                            if (secInp) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
+                        }
                     } else {
                         if (timeBox) timeBox.style.display = 'none';
                         if (labelEl) labelEl.style.display = 'none';
@@ -365,15 +365,16 @@
                         if (respawnEl) {
                             respawnEl.style.display = 'block';
                             respawnEl.innerText = "已發車";
-                            respawnEl.style.color = "var(--accent)"; // 橘色字
+                            respawnEl.style.color = "var(--accent)";
                         }
                         card.classList.remove('card-critical', 'card-warning');
-                        card.classList.add('card-ready'); // 灰底
+                        card.classList.add('card-ready');
                     } else {
                         resetRow(id);
                     }
                 }
 
+                // 下方小卡則不受編輯狀態影響，始終維持倒數更新
                 if (diff <= 0) {
                     item.className = 'viz-item ready'; cdEl.innerText = "已發車";
                 } else {
