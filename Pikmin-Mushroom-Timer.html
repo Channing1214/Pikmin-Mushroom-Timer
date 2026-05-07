@@ -1,11 +1,9 @@
---- START OF FILE text/plain ---
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機v10.1</title>
+    <title>搶菇計算機V10.2</title>
     <style>
         /* --- 基礎變數與設定 --- */
         :root {
@@ -47,7 +45,7 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 4500; display: none; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 80px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; scroll-behavior: smooth; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; scroll-behavior: smooth; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; transition: padding-bottom 0.3s ease; }
         .container.keyboard-active { padding-bottom: 60vh !important; }
 
@@ -226,7 +224,7 @@
     function detectDevice() {
         isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
         const deviceTag = document.getElementById('deviceTag');
-        deviceTag.innerHTML = /*(isMobileDevice ? "📱" : "💻") + */" v10.1";
+        deviceTag.innerHTML = " v10.2";
     }
 
     function jumpToCard(id) {
@@ -432,9 +430,6 @@
         }, 150);
     }
 
-    /**
-     * --- 皮克敏搬運邏輯：調整口哨與跑步時間 ---
-     */
     function deleteSpecificRow(id) {
         const nameInput = document.getElementById(`name${id}`);
         const currentName = (nameInput && nameInput.value.trim()) || nameInput.placeholder;
@@ -449,7 +444,6 @@
             deletingIds.add(id); 
             squad.style.display = 'block';
             
-            // 創建 5 隻皮克敏
             const workers = [];
             for(let i=0; i<5; i++) {
                 const el = document.createElement('div'); el.className = 'pikmin-worker'; squad.appendChild(el);
@@ -459,13 +453,12 @@
             let startTime = null;
             let isScrambling = true; 
             let hasJumped = false; 
-            let hasWhistled = false; // 用於控制口哨只吹一次
+            let hasWhistled = false;
 
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
 
-                // 跑步後 0.95 秒吹口哨
                 if (!hasWhistled && elapsed >= 950) {
                     if (isAudioEnabled) playSound(whistleBuffer);
                     hasWhistled = true;
@@ -479,14 +472,11 @@
                         p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                     });
 
-                    // 隨機跑時間為 1 秒 (1000ms)
                     if (elapsed >= 1000) {
                         isScrambling = false;
-                        // 停頓一小段時間後跳
                         setTimeout(() => {
                             workers.forEach(p => p.el.classList.add('pikmin-jump-anim'));
                             hasJumped = true;
-                            // 跳完後執行搬運
                             setTimeout(startCarrying, 400);
                         }, 100);
                     }
@@ -499,7 +489,6 @@
                 if (vizItem) vizItem.classList.add('viz-item-exit');
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
                 
-                // 正式移除數據
                 setTimeout(() => {
                     const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
                     delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
@@ -508,7 +497,6 @@
                     renderVizBar(); 
                 }, 300); 
 
-                // 衝刺！
                 workers.forEach((p, i) => {
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     p.el.style.left = (nameX + (i * 8)) + 'px'; 
@@ -516,7 +504,6 @@
                     p.el.style.bottom = '-10px';
                 });
 
-                // 搬走行動
                 setTimeout(() => { 
                     wrapper.classList.add('carrying'); 
                     wrapper.style.marginBottom = `-${rowHeight}px`; 
@@ -578,7 +565,17 @@
                         if (respawnEl) { respawnEl.style.display = 'block'; respawnEl.style.color = "var(--accent)"; const rm = Math.floor(diff / 60), rs = diff % 60; respawnEl.innerText = `重生倒數${rm}分${rs}秒`; }
                     }
                 } else {
-                    if (!card.dataset.departedTime) card.dataset.departedTime = now;
+                    // --- 修正：處理計時歸零或重新整理後的邏輯 ---
+                    if (!card.dataset.departedTime) {
+                        // 如果重新整理時，diff 已經是負值，且還沒有 departedTime 暫存，
+                        // 代表是在頁面關閉期間結束的，直接重置為初始狀態。
+                        if (diff < 0) {
+                            resetRow(id);
+                            return;
+                        }
+                        card.dataset.departedTime = now;
+                    }
+                    
                     const elapsed = now - parseInt(card.dataset.departedTime);
                     if (elapsed < 5000) {
                         if (timeBox) timeBox.style.display = 'none'; if (labelEl) labelEl.style.display = 'none';
@@ -586,7 +583,10 @@
                         card.classList.remove('card-critical', 'card-warning'); card.classList.add('card-ready');
                     } else { resetRow(id); }
                 }
-                if (diff <= 0) { item.className = 'viz-item ready'; cdEl.innerText = "已發車"; } else {
+                
+                if (diff <= 0) { 
+                    item.className = 'viz-item ready'; cdEl.innerText = "已發車"; 
+                } else {
                     if (!isUserInteracting) {
                         const baseClass = 'viz-item' + (id === newlyAddedId ? ' viz-item-new' : '');
                         item.className = baseClass + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
