@@ -226,7 +226,7 @@
     function detectDevice() {
         isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
         const deviceTag = document.getElementById('deviceTag');
-        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.測試";
+        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.10";
     }
 
     function jumpToCard(id) {
@@ -465,7 +465,7 @@
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
 
-                // 新增：跑步後 0.9 秒吹口哨
+                // 跑步後 0.9 秒吹口哨
                 if (!hasWhistled && elapsed >= 900) {
                     if (isAudioEnabled) playSound(whistleBuffer);
                     hasWhistled = true;
@@ -479,7 +479,7 @@
                         p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                     });
 
-                    // 修改：隨機跑時間增加到 1 秒 (1000ms)
+                    // 隨機跑時間為 1 秒 (1000ms)
                     if (elapsed >= 1000) {
                         isScrambling = false;
                         // 停頓一小段時間後跳
@@ -522,9 +522,9 @@
                     wrapper.style.marginBottom = `-${rowHeight}px`; 
                     wrapper.style.opacity = "0.7"; 
                     wrapper.style.pointerEvents = "none"; 
-                }, 400);
+                }, 300);
 
-                setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
+                setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 1000);
             }
         }
     }
