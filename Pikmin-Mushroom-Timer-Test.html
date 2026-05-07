@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機V10</title>
+    <title>搶菇計算機</title>
     <style>
         /* --- 基礎變數與設定 --- */
         :root {
@@ -131,7 +131,7 @@
 </head>
 <body onclick="resumeAudioContext()">
     <div class="time-header">
-        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
+        <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機V測試 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
             <button class="btn-action" onclick="toggleGroups()" style="color:var(--primary); font-weight:bold;">🍄 菇菇群組</button>
@@ -479,8 +479,8 @@
                         p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                     });
 
-                    // 修改：隨機跑時間增加到 1.2 秒 (1200ms)
-                    if (elapsed >= 1200) {
+                    // 修改：隨機跑時間增加到 1 秒 (1000ms)
+                    if (elapsed >= 1000) {
                         isScrambling = false;
                         // 停頓一小段時間後跳
                         setTimeout(() => {
