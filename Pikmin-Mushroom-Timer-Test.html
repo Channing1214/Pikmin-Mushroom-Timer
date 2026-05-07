@@ -136,7 +136,7 @@
 
     <div class="scroll-area">
         <div class="container" id="app"></div>
-        <button class="btn-add-row" onclick="changeRows()">➕</button>
+        <button class="btn-add-row" onclick="changeRows()" id="addRowBtn">➕</button>
     </div>
 
     <div class="viz-bar" id="vizBar"></div>
@@ -165,24 +165,19 @@
     async function loadSounds() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
-            // 同時載入兩個音檔
             const [resThrow, resWhistle] = await Promise.all([
                 fetch('pikmin_throw.mp3'),
                 fetch('pikmin_2_whistle.mp3')
             ]);
-            
             const [dataThrow, dataWhistle] = await Promise.all([
                 resThrow.arrayBuffer(),
                 resWhistle.arrayBuffer()
             ]);
-
             soundBuffer = await audioCtx.decodeAudioData(dataThrow);
             whistleBuffer = await audioCtx.decodeAudioData(dataWhistle);
         } catch (e) { console.error('音檔載入失敗', e); }
     }
-
     function resumeAudioContext() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
-
     function playSound(buffer) {
         if (!isAudioEnabled || !buffer || !audioCtx) return;
         resumeAudioContext();
@@ -191,7 +186,6 @@
         source.connect(audioCtx.destination);
         source.start(0);
     }
-
     async function toggleAudio() {
         if (!audioCtx) await loadSounds();
         resumeAudioContext();
@@ -199,7 +193,6 @@
         updateAudioBtnUI();
         if (isAudioEnabled) playSound(soundBuffer);
     }
-
     function updateAudioBtnUI() {
         const b = document.getElementById('audioBtn');
         b.innerText = isAudioEnabled ? "🔊" : "🔇";
@@ -211,12 +204,8 @@
         if (!audioCtx && isAudioEnabled) await loadSounds();
         const isOpen = historyPanel.classList.toggle('open');
         overlay.style.display = isOpen ? 'block' : 'none';
-        if(isOpen) {
-            renderHistory();
-            if (isAudioEnabled) playSound(whistleBuffer); // 播放哨音
-        }
+        if(isOpen) { renderHistory(); if (isAudioEnabled) playSound(whistleBuffer); }
     }
-
     function addToHistory(name, targetTimestamp) {
         const timeStr = new Date(targetTimestamp).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const dateStr = new Date().toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
@@ -226,7 +215,6 @@
         if (historyData.length > 50) historyData.pop();
         localStorage.setItem('mushroom_history', JSON.stringify(historyData));
     }
-
     function renderHistory() {
         historyList.innerHTML = historyData.length === 0 ? '<div style="text-align:center; color:#999; margin-top:20px;">尚無發車紀錄</div>' : '';
         historyData.forEach((item, index) => {
@@ -236,29 +224,47 @@
             historyList.appendChild(div);
         });
     }
-
     function deleteHistory(index) {
         historyData.splice(index, 1);
         localStorage.setItem('mushroom_history', JSON.stringify(historyData));
         renderHistory();
     }
-
-    function clearHistory() {
-        if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); }
-    }
+    function clearHistory() { if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); } }
 
     // --- 核心邏輯 ---
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
         localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
     }
-
     function init() {
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
         rowOrder.forEach((id, idx) => createRow(id, idx, false));
         renderVizBar();
         setInterval(updateDynamicInfo, 1000); 
+    }
+
+    /**
+     * 需求 1: 動態遮擋偵測捲動
+     * 使用 VisualViewport API 偵測鍵盤彈出後的可見視窗高度
+     */
+    function handleFocusScroll(el) {
+        if (!window.visualViewport) return;
+
+        const onViewportChange = () => {
+            const viewportHeight = window.visualViewport.height;
+            const scrollArea = document.querySelector('.scroll-area');
+            const rect = el.getBoundingClientRect();
+
+            // 如果輸入框底部超過了目前可見視窗的高度 (被鍵盤擋住)
+            if (rect.bottom > viewportHeight) {
+                const diff = rect.bottom - viewportHeight + 30; // 多預留 30px 空間
+                scrollArea.scrollBy({ top: diff, behavior: 'smooth' });
+            }
+        };
+
+        // 監聽一次性 resize 事件 (鍵盤彈出)
+        window.visualViewport.addEventListener('resize', onViewportChange, { once: true });
     }
 
     function createRow(id, index, isNew = false) {
@@ -269,16 +275,16 @@
         wrapper.innerHTML = `
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
-                    <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="localStorage.setItem('mushroom_name_${id}', this.value); renderVizBar();" onfocus="this.select()">
+                    <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="localStorage.setItem('mushroom_name_${id}', this.value); renderVizBar();" onfocus="this.select(); handleFocusScroll(this)">
                 </div>
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')" onfocus="this.select()">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')" onfocus="this.select(); handleFocusScroll(this)">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')" onfocus="this.select()">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')" onfocus="this.select(); handleFocusScroll(this)">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)" onfocus="this.select()">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)" onfocus="this.select(); handleFocusScroll(this)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -292,12 +298,24 @@
         if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
     }
 
+    /**
+     * 需求 2: 最後一行的秒數輸入完跳轉到 "+" 按鈕
+     */
     window.limitAndFocus = function(id, current, next) {
         const el = document.getElementById(current + id);
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
-            if(next) document.getElementById(next + id).focus();
-            else focusNextRowHour(id);
+            if(next) {
+                document.getElementById(next + id).focus();
+            } else {
+                // 如果是當前 rowOrder 裡的最後一格秒數
+                const isLastRow = (rowOrder.indexOf(id) === rowOrder.length - 1);
+                if (isLastRow) {
+                    document.getElementById('addRowBtn').focus();
+                } else {
+                    focusNextRowHour(id);
+                }
+            }
         }
         handleInput(id);
     }
@@ -352,10 +370,7 @@
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     p.el.style.left = (nameX + (i * 8)) + 'px'; p.el.style.transform = 'scaleX(1)'; p.el.style.bottom = '-10px';
                 });
-                setTimeout(() => {
-                    wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`;
-                    wrapper.style.opacity = "0.7"; wrapper.style.pointerEvents = "none";
-                }, 400);
+                setTimeout(() => { wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`; wrapper.style.opacity = "0.7"; wrapper.style.pointerEvents = "none"; }, 400);
                 setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
             }
         }
@@ -368,8 +383,7 @@
             if (deletingIds.has(id)) return;
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
-            item.className = 'viz-item'; 
-            if (id === newlyAddedId) item.classList.add('viz-new');
+            item.className = 'viz-item'; if (id === newlyAddedId) item.classList.add('viz-new');
             item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
             addDragListeners(item); vizBar.appendChild(item);
@@ -398,16 +412,20 @@
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
 
-                    if (diff > 300) {
+                    const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
+                    const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
+
+                    /**
+                     * 需求 3: 若正在輸入時分秒，先不要進入重生倒數狀態
+                     */
+                    if (diff > 300 || isEditingThisRow) {
                         if (timeBox) timeBox.style.display = 'flex';
                         if (labelEl) labelEl.style.display = 'inline-block';
                         if (respawnEl) respawnEl.style.display = 'none';
 
-                        const displayRemaining = diff - 300;
+                        const displayRemaining = Math.max(0, diff - 300);
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
-                        const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                         
-                        const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
                         if (!isEditingThisRow) {
                             if (hrInp) hrInp.value = h > 0 ? h : "";
                             if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
@@ -428,12 +446,10 @@
                         addToHistory(nameStr, t);
                         card.dataset.recorded = "1";
                     }
-
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
                     const elapsed = now - parseInt(card.dataset.departedTime);
                     if (elapsed < 5000) {
-                        if (timeBox) timeBox.style.display = 'none';
-                        if (labelEl) labelEl.style.display = 'none';
+                        if (timeBox) timeBox.style.display = 'none'; if (labelEl) labelEl.style.display = 'none';
                         if (respawnEl) { respawnEl.style.display = 'block'; respawnEl.innerText = "已發車"; respawnEl.style.color = "var(--accent)"; }
                         card.classList.remove('card-critical', 'card-warning'); card.classList.add('card-ready');
                     } else { resetRow(id); }
