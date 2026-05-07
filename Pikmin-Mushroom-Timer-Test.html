@@ -45,7 +45,7 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 4500; display: none; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 150px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
@@ -245,26 +245,24 @@
     }
 
     /**
-     * 需求 1: 動態遮擋偵測捲動
-     * 使用 VisualViewport API 偵測鍵盤彈出後的可見視窗高度
+     * 核心優化：智慧捲動判定
+     * 僅在元素「真的被擋住」時執行捲動。
      */
-    function handleFocusScroll(el) {
-        if (!window.visualViewport) return;
-
-        const onViewportChange = () => {
-            const viewportHeight = window.visualViewport.height;
-            const scrollArea = document.querySelector('.scroll-area');
+    function smartScroll(el) {
+        // 給予 150ms 延遲，讓虛擬鍵盤有時間彈出
+        setTimeout(() => {
             const rect = el.getBoundingClientRect();
+            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            const headerHeight = 100; // time-header 的大約高度
 
-            // 如果輸入框底部超過了目前可見視窗的高度 (被鍵盤擋住)
-            if (rect.bottom > viewportHeight) {
-                const diff = rect.bottom - viewportHeight + 30; // 多預留 30px 空間
-                scrollArea.scrollBy({ top: diff, behavior: 'smooth' });
+            // 判斷是否被遮擋：底部超過鍵盤頂部，或者頂部被 Header 遮住
+            const isBlockedByKeyboard = rect.bottom > viewportHeight;
+            const isBlockedByHeader = rect.top < headerHeight;
+
+            if (isBlockedByKeyboard || isBlockedByHeader) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        };
-
-        // 監聽一次性 resize 事件 (鍵盤彈出)
-        window.visualViewport.addEventListener('resize', onViewportChange, { once: true });
+        }, 150);
     }
 
     function createRow(id, index, isNew = false) {
@@ -275,16 +273,16 @@
         wrapper.innerHTML = `
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
-                    <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="localStorage.setItem('mushroom_name_${id}', this.value); renderVizBar();" onfocus="this.select(); handleFocusScroll(this)">
+                    <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="localStorage.setItem('mushroom_name_${id}', this.value); renderVizBar();" onfocus="this.select(); smartScroll(this)">
                 </div>
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')" onfocus="this.select(); handleFocusScroll(this)">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')" onfocus="this.select(); smartScroll(this)">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')" onfocus="this.select(); handleFocusScroll(this)">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')" onfocus="this.select(); smartScroll(this)">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)" onfocus="this.select(); handleFocusScroll(this)">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)" onfocus="this.select(); smartScroll(this)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -299,19 +297,22 @@
     }
 
     /**
-     * 需求 2: 最後一行的秒數輸入完跳轉到 "+" 按鈕
+     * 智慧跳轉與捲動結合
      */
     window.limitAndFocus = function(id, current, next) {
         const el = document.getElementById(current + id);
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
             if(next) {
-                document.getElementById(next + id).focus();
+                const nextInp = document.getElementById(next + id);
+                nextInp.focus();
+                // smartScroll(nextInp); // 已在 onfocus 綁定，這裡不用重複寫
             } else {
-                // 如果是當前 rowOrder 裡的最後一格秒數
                 const isLastRow = (rowOrder.indexOf(id) === rowOrder.length - 1);
                 if (isLastRow) {
-                    document.getElementById('addRowBtn').focus();
+                    const addBtn = document.getElementById('addRowBtn');
+                    addBtn.focus();
+                    smartScroll(addBtn); // 手動觸發
                 } else {
                     focusNextRowHour(id);
                 }
@@ -415,17 +416,12 @@
                     const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                     const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
 
-                    /**
-                     * 需求 3: 若正在輸入時分秒，先不要進入重生倒數狀態
-                     */
                     if (diff > 300 || isEditingThisRow) {
                         if (timeBox) timeBox.style.display = 'flex';
                         if (labelEl) labelEl.style.display = 'inline-block';
                         if (respawnEl) respawnEl.style.display = 'none';
-
                         const displayRemaining = Math.max(0, diff - 300);
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
-                        
                         if (!isEditingThisRow) {
                             if (hrInp) hrInp.value = h > 0 ? h : "";
                             if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
@@ -479,7 +475,11 @@
         for (let i = idx + 1; i < rowOrder.length; i++) {
             const nextId = rowOrder[i], respawnEl = document.getElementById(`respawn${nextId}`);
             if (respawnEl && respawnEl.style.display === 'none') {
-                const hr = document.getElementById(`hr${nextId}`); if (hr) { hr.focus(); return; }
+                const hr = document.getElementById(`hr${nextId}`); 
+                if (hr) { 
+                    hr.focus(); 
+                    return; 
+                }
             }
         }
     }
@@ -505,7 +505,7 @@
     function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
 
     /**
-     * --- 拖曳排序邏輯 ---
+     * --- 拖曳排序邏輯 (復原進階版) ---
      */
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
