@@ -1,5 +1,3 @@
---- START OF FILE text/plain ---
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -34,7 +32,7 @@
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 80px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
@@ -44,10 +42,13 @@
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; transition: background-color 0.3s, border-color 0.3s; }
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
+        /* 行的狀態顏色 (不閃爍) */
         .card-warning { background-color: var(--warning-bg) !important; border-color: var(--warning-border) !important; }
         .card-critical { background-color: var(--critical-bg) !important; border-color: var(--critical-border) !important; }
+        /* 發車樣式：灰底 */
         .card-ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
 
+        /* 封裝區域 */
         .dynamic-content { display: flex; align-items: center; gap: 4px; width: 172px; justify-content: center; }
         .dynamic-content span { align-self: flex-end; margin-bottom: 6px; } 
 
@@ -55,6 +56,7 @@
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
+        /* 重生倒數顯示樣式：寬度固定140px以利在容器中置中，字體靠左 */
         .respawn-display { display: none; width: 140px; text-align: left; color: var(--accent); font-weight: bold; font-size: 0.95rem; white-space: nowrap; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; flex-shrink: 0; }
@@ -72,18 +74,21 @@
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
         .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
         
+        /* --- 小卡動畫 --- */
         .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes viz-pop-fast {
             0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
             100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
         }
 
+        /* --- 小卡狀態動畫 (保持閃爍) --- */
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
+        /* --- 拖曳與皮克敏動畫 --- */
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; transition: none !important; }
         .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
@@ -116,6 +121,9 @@
     <div class="viz-bar" id="vizBar"></div>
 
 <script>
+    /**
+     * --- 全域變數 ---
+     */
     const app = document.getElementById('app');
     const vizBar = document.getElementById('vizBar');
     const currentTimeEl = document.getElementById('currentTime');
@@ -198,11 +206,11 @@
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'hr', 'min')" onblur="handleInput('${id}')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'min', 'sec')" onblur="handleInput('${id}')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'sec', null)" onblur="handleInput('${id}')">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -223,6 +231,7 @@
             if(next) document.getElementById(next + id).focus();
             else focusNextRowHour(id);
         }
+        handleInput(id);
     }
 
     function changeRows() {
@@ -334,14 +343,9 @@
                         const displayRemaining = diff - 300;
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
                         const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
-                        
-                        // 修正：如果正在編輯這行的任何一格，不更新數值
-                        const isFocusingAnyInThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
-                        if (!isFocusingAnyInThisRow) {
-                            if (hrInp) hrInp.value = h > 0 ? h : "";
-                            if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
-                            if (secInp) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
-                        }
+                        if (hrInp && hrInp !== activeEl) hrInp.value = h > 0 ? h : "";
+                        if (minInp && minInp !== activeEl) minInp.value = (h > 0 || m > 0) ? m : "";
+                        if (secInp && secInp !== activeEl) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
                     } else {
                         if (timeBox) timeBox.style.display = 'none';
                         if (labelEl) labelEl.style.display = 'none';
@@ -361,10 +365,10 @@
                         if (respawnEl) {
                             respawnEl.style.display = 'block';
                             respawnEl.innerText = "已發車";
-                            respawnEl.style.color = "var(--accent)";
+                            respawnEl.style.color = "var(--accent)"; // 橘色字
                         }
                         card.classList.remove('card-critical', 'card-warning');
-                        card.classList.add('card-ready');
+                        card.classList.add('card-ready'); // 灰底
                     } else {
                         resetRow(id);
                     }
