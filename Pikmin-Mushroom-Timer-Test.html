@@ -105,7 +105,7 @@
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <div class="version-info">目前版本：測試版</div>
+        <div class="version-info">目前版本：測試版3</div>
     </div>
 
     <div class="scroll-area">
@@ -222,21 +222,9 @@
         editingRows.add(id);
     }
 
-    // 處理小鍵盤勾勾 (Enter) 按鈕的邏輯
     window.checkEnter = function(e, id) {
         if (e.key === "Enter" || e.keyCode === 13) {
-            const currentInp = e.target;
-            // 當前輸入為「時」且內容長度為一位數時
-            if (currentInp.id.startsWith("hr") && currentInp.value.length === 1) {
-                e.preventDefault(); // 阻止 iOS 收起鍵盤
-                const secInp = document.getElementById("sec" + id);
-                if (secInp) {
-                    secInp.focus();
-                    secInp.select(); // 對焦到秒，並且維持全選（防清除）
-                }
-            } else {
-                currentInp.blur(); // 其他欄位直接失焦，觸發倒數
-            }
+            e.target.blur(); 
         }
     }
 
@@ -349,15 +337,12 @@
 
             if (t) {
                 const diff = Math.floor((t - now) / 1000);
-                
-                // --- 1. 更新卡片背景顏色 ---
                 card.classList.remove('card-warning', 'card-critical', 'card-ready');
                 if (diff > 0) {
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
                 }
 
-                // --- 2. 更新下方狀態列 (Viz Bar) ---
                 if (diff <= 0) {
                     item.className = 'viz-item ready'; 
                     cdEl.innerText = "已發車";
@@ -368,14 +353,12 @@
                     cdEl.innerText = (vh > 0 ? vh + ":" : "") + vm.toString().padStart(2,'0') + ":" + vs.toString().padStart(2,'0');
                 }
 
-                // --- 3. 倒數邏輯 (時分秒選取中仍會更新 UI 倒數，但輸入框不會被強行覆蓋) ---
                 if (diff > 0) {
                     if (diff > 300) {
                         if (timeBox) timeBox.style.display = 'flex';
                         if (labelEl) labelEl.style.display = 'inline-block';
                         if (respawnEl) respawnEl.style.display = 'none';
 
-                        // 只有當前「非編輯中」的列，輸入框內容才會隨時間自動減少
                         if (!editingRows.has(id)) {
                             const displayRemaining = diff - 300;
                             const h = Math.floor(displayRemaining / 3600), 
@@ -400,7 +383,6 @@
                             respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
                         }
                     }
-
                     if (diff <= 10 && !card.dataset.warned) { 
                         playWarningBeep(); card.dataset.warned = "1"; 
                     }
@@ -447,16 +429,32 @@
         }
     }
 
+    // --- 修改後的失焦處理邏輯 ---
     function handleBoxBlur(event, id) {
         const timeBox = document.getElementById(`timeBox${id}`);
+        const lostFocusFrom = event.target.id; // 記錄剛剛是哪一個欄位失焦 (例如 "hr1")
+
         setTimeout(() => {
-            // 只有當新對焦的元件不在目前這一列的 TimeBox 內時，才儲存數據並結束編輯狀態
-            if (!timeBox || !timeBox.contains(document.activeElement)) {
+            const nowFocused = document.activeElement;
+
+            // 如果目前焦點不在整個時分秒框內 (代表按下了鍵盤勾勾或點擊空白處)
+            if (!timeBox || !timeBox.contains(nowFocused)) {
+                
+                // 特殊規則：如果是從「時」離開，且焦點到外部了，強行跳轉到「秒」
+                if (lostFocusFrom.startsWith('hr')) {
+                    const secInp = document.getElementById(`sec${id}`);
+                    if (secInp) {
+                        secInp.focus(); // 跳轉到秒
+                        return; // 中止後續流程，不結束編輯狀態
+                    }
+                }
+
+                // 一般離開邏輯：結束編輯並保存
                 handleInput(id);
                 editingRows.delete(id); 
                 renderVizBar();
             }
-        }, 200);
+        }, 150);
     }
 
     function handleInput(id) {
