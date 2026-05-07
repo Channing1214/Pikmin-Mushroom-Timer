@@ -122,6 +122,7 @@
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
     let deletingIds = new Set(); 
+    let editingRows = new Set(); 
     let isUserInteracting = false; 
     let newlyAddedId = null;
 
@@ -197,12 +198,12 @@
                 </div>
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
-                    <div class="time-box" id="timeBox${id}" onfocusout="handleBoxBlur(event, '${id}')">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'hr', 'min')" onkeydown="checkEnter(event, '${id}')">
+                    <div class="time-box" id="timeBox${id}" onfocusin="handleFocusIn('${id}')" onfocusout="handleBoxBlur(event, '${id}')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'min', 'sec')" onkeydown="checkEnter(event, '${id}')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'sec', null)" onkeydown="checkEnter(event, '${id}')">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -216,10 +217,13 @@
         if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
     }
 
-    // 監聽鍵盤 Enter (勾勾)
+    function handleFocusIn(id) {
+        editingRows.add(id);
+    }
+
     window.checkEnter = function(e, id) {
         if (e.key === "Enter" || e.keyCode === 13) {
-            e.target.blur(); // 觸發 blur 以執行 handleInput
+            e.target.blur(); 
         }
     }
 
@@ -230,7 +234,6 @@
             if(next) {
                 document.getElementById(next + id).focus();
             } else {
-                // 秒數填完後自動失去焦點，觸發倒數
                 el.blur();
                 focusNextRowHour(id);
             }
@@ -320,10 +323,11 @@
     function updateDynamicInfo() {
         const now = Date.now();
         if(currentTimeEl) currentTimeEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-        const activeEl = document.activeElement; 
-
+        
         rowOrder.forEach(id => {
             if (deletingIds.has(id)) return;
+            if (editingRows.has(id)) return;
+
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
             if (!item) return;
             const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
@@ -344,15 +348,18 @@
                         if (respawnEl) respawnEl.style.display = 'none';
 
                         const displayRemaining = diff - 300;
-                        const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
-                        const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
+                        const h = Math.floor(displayRemaining / 3600), 
+                              m = Math.floor((displayRemaining % 3600) / 60), 
+                              s = displayRemaining % 60;
                         
-                        const isFocusingAnyInThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
-                        if (!isFocusingAnyInThisRow) {
-                            if (hrInp) hrInp.value = h > 0 ? h : "";
-                            if (minInp) minInp.value = (h > 0 || m > 0) ? m : "";
-                            if (secInp) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
-                        }
+                        const hrInp = document.getElementById(`hr${id}`), 
+                              minInp = document.getElementById(`min${id}`), 
+                              secInp = document.getElementById(`sec${id}`);
+                        
+                        if (hrInp) hrInp.value = h > 0 ? h : "";
+                        if (minInp) minInp.value = (h > 0 || m > 0) ? m : (displayRemaining > 0 ? "0" : "");
+                        if (secInp) secInp.value = (displayRemaining > 0) ? s : "";
+                        
                     } else {
                         if (timeBox) timeBox.style.display = 'none';
                         if (labelEl) labelEl.style.display = 'none';
@@ -423,23 +430,23 @@
 
     function handleBoxBlur(event, id) {
         const timeBox = document.getElementById(`timeBox${id}`);
-        // 如果焦點移出了整個 timeBox，則視為輸入結束
-        if (!timeBox || !timeBox.contains(event.relatedTarget)) {
-            handleInput(id);
-        }
+        setTimeout(() => {
+            if (!timeBox || !timeBox.contains(document.activeElement)) {
+                handleInput(id);
+                editingRows.delete(id); 
+            }
+        }, 100);
     }
 
     function handleInput(id) {
-        const hrEl = document.getElementById(`hr${id}`),
-              minEl = document.getElementById(`min${id}`),
-              secEl = document.getElementById(`sec${id}`);
+        const hrVal = document.getElementById(`hr${id}`)?.value, 
+              minVal = document.getElementById(`min${id}`)?.value, 
+              secVal = document.getElementById(`sec${id}`)?.value;
         
-        const h = hrEl?.value, m = minEl?.value, s = secEl?.value;
-        
-        if (!h && !m && !s) {
+        if (!hrVal && !minVal && !secVal) {
             targetTimes[id] = null;
         } else {
-            const totalSec = (parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0);
+            const totalSec = (parseInt(hrVal)||0)*3600 + (parseInt(minVal)||0)*60 + (parseInt(secVal)||0);
             targetTimes[id] = Date.now() + (totalSec + 300) * 1000;
         }
         
