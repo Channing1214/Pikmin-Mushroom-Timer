@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機-測試版</title>
+    <title>搶菇計算機V測試</title>
     <style>
         /* --- 基礎變數與設定 --- */
         :root {
@@ -226,7 +226,7 @@
     function detectDevice() {
         isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
         const deviceTag = document.getElementById('deviceTag');
-        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.測試版";
+        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.10";
     }
 
     function jumpToCard(id) {
@@ -475,8 +475,8 @@
                     // 1. 跑約 1000ms 後，準備聽哨聲
                     if (elapsed >= 1000) {
                         isScrambling = false;
-                        // 2. 播放口哨 (延遲播放)
-                        if (isAudioEnabled) setTimeout(() => playSound(whistleBuffer), 100);
+                        // 2. 播放口哨
+                        if (isAudioEnabled) playSound(whistleBuffer);
                         // 3. 停頓一小段時間後跳
                         setTimeout(() => {
                             workers.forEach(p => p.el.classList.add('pikmin-jump-anim'));
