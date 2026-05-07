@@ -1,5 +1,3 @@
---- START OF FILE text/plain ---
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -34,7 +32,7 @@
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 80px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
@@ -197,12 +195,12 @@
                 </div>
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
-                    <div class="time-box" id="timeBox${id}">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'hr', 'min')" onblur="handleInput('${id}')">
+                    <div class="time-box" id="timeBox${id}" onfocusout="handleBoxBlur(event, '${id}')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'hr', 'min')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'min', 'sec')" onblur="handleInput('${id}')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'min', 'sec')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'sec', null)" onblur="handleInput('${id}')">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" oninput="limitAndFocus('${id}', 'sec', null)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -220,8 +218,12 @@
         const el = document.getElementById(current + id);
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
-            if(next) document.getElementById(next + id).focus();
-            else focusNextRowHour(id);
+            if(next) {
+                document.getElementById(next + id).focus();
+            } else {
+                // 秒數填完，嘗試跳到下一個可輸入的「時」框
+                focusNextRowHour(id);
+            }
         }
     }
 
@@ -335,7 +337,6 @@
                         const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
                         const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                         
-                        // 修正：如果正在編輯這行的任何一格，不更新數值
                         const isFocusingAnyInThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
                         if (!isFocusingAnyInThisRow) {
                             if (hrInp) hrInp.value = h > 0 ? h : "";
@@ -397,10 +398,29 @@
         });
     }
 
-    function focusNextRowHour(id) {
-        const idx = rowOrder.indexOf(id);
-        if (idx < rowOrder.length - 1) {
-            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`); if(nextEl) nextEl.focus();
+    /**
+     * 修改後的跳格邏輯：
+     * 會搜尋接下來的所有列，跳過重生中（不可見）的列，跳到下一個可輸入的「時」
+     */
+    function focusNextRowHour(currentId) {
+        const startIndex = rowOrder.indexOf(currentId) + 1;
+        for (let i = startIndex; i < rowOrder.length; i++) {
+            const nextId = rowOrder[i];
+            const nextHrEl = document.getElementById(`hr${nextId}`);
+            const nextTimeBox = document.getElementById(`timeBox${nextId}`);
+            
+            // 檢查該列是否存在，且其 timeBox 是否處於顯示狀態（非重生中）
+            if (nextHrEl && nextTimeBox && nextTimeBox.style.display !== 'none') {
+                nextHrEl.focus();
+                return; // 找到就停止搜尋
+            }
+        }
+    }
+
+    function handleBoxBlur(event, id) {
+        const timeBox = document.getElementById(`timeBox${id}`);
+        if (!timeBox.contains(event.relatedTarget)) {
+            handleInput(id);
         }
     }
 
