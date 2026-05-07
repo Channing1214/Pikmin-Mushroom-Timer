@@ -34,7 +34,7 @@
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 80px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
@@ -105,7 +105,7 @@
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <div class="version-info">目前版本：測試版2</div>
+        <div class="version-info">目前版本：測試版</div>
     </div>
 
     <div class="scroll-area">
@@ -222,9 +222,21 @@
         editingRows.add(id);
     }
 
+    // 處理小鍵盤勾勾 (Enter) 按鈕的邏輯
     window.checkEnter = function(e, id) {
         if (e.key === "Enter" || e.keyCode === 13) {
-            e.target.blur(); 
+            const currentInp = e.target;
+            // 當前輸入為「時」且內容長度為一位數時
+            if (currentInp.id.startsWith("hr") && currentInp.value.length === 1) {
+                e.preventDefault(); // 阻止 iOS 收起鍵盤
+                const secInp = document.getElementById("sec" + id);
+                if (secInp) {
+                    secInp.focus();
+                    secInp.select(); // 對焦到秒，並且維持全選（防清除）
+                }
+            } else {
+                currentInp.blur(); // 其他欄位直接失焦，觸發倒數
+            }
         }
     }
 
@@ -338,14 +350,14 @@
             if (t) {
                 const diff = Math.floor((t - now) / 1000);
                 
-                // --- 1. 更新卡片背景顏色 (即使在選取中也更新) ---
+                // --- 1. 更新卡片背景顏色 ---
                 card.classList.remove('card-warning', 'card-critical', 'card-ready');
                 if (diff > 0) {
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
                 }
 
-                // --- 2. 更新下方狀態列 (Viz Bar) (即使在選取中也更新) ---
+                // --- 2. 更新下方狀態列 (Viz Bar) ---
                 if (diff <= 0) {
                     item.className = 'viz-item ready'; 
                     cdEl.innerText = "已發車";
@@ -356,15 +368,14 @@
                     cdEl.innerText = (vh > 0 ? vh + ":" : "") + vm.toString().padStart(2,'0') + ":" + vs.toString().padStart(2,'0');
                 }
 
-                // --- 3. 核心倒數邏輯 (區分編輯狀態) ---
+                // --- 3. 倒數邏輯 (時分秒選取中仍會更新 UI 倒數，但輸入框不會被強行覆蓋) ---
                 if (diff > 0) {
                     if (diff > 300) {
-                        // 一般倒數階段 (剩餘 > 5 分鐘)
                         if (timeBox) timeBox.style.display = 'flex';
                         if (labelEl) labelEl.style.display = 'inline-block';
                         if (respawnEl) respawnEl.style.display = 'none';
 
-                        // 只有在「非編輯狀態」下才更新 Input 的數值
+                        // 只有當前「非編輯中」的列，輸入框內容才會隨時間自動減少
                         if (!editingRows.has(id)) {
                             const displayRemaining = diff - 300;
                             const h = Math.floor(displayRemaining / 3600), 
@@ -380,7 +391,6 @@
                             if (secInp) secInp.value = (displayRemaining > 0) ? s : "";
                         }
                     } else {
-                        // 重生倒數階段 (最後 5 分鐘)
                         if (timeBox) timeBox.style.display = 'none';
                         if (labelEl) labelEl.style.display = 'none';
                         if (respawnEl) {
@@ -391,12 +401,10 @@
                         }
                     }
 
-                    // 警報聲判定
                     if (diff <= 10 && !card.dataset.warned) { 
                         playWarningBeep(); card.dataset.warned = "1"; 
                     }
                 } else {
-                    // 已過期階段
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
                     const elapsed = now - parseInt(card.dataset.departedTime);
                     if (elapsed < 5000) {
@@ -413,7 +421,6 @@
                     }
                 }
             } else { 
-                // 無目標時間狀態
                 card.classList.remove('card-warning', 'card-critical', 'card-ready');
                 card.dataset.departedTime = "";
                 if (timeBox) timeBox.style.display = 'flex';
@@ -443,6 +450,7 @@
     function handleBoxBlur(event, id) {
         const timeBox = document.getElementById(`timeBox${id}`);
         setTimeout(() => {
+            // 只有當新對焦的元件不在目前這一列的 TimeBox 內時，才儲存數據並結束編輯狀態
             if (!timeBox || !timeBox.contains(document.activeElement)) {
                 handleInput(id);
                 editingRows.delete(id); 
