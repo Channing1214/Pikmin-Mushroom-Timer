@@ -33,16 +33,15 @@
         .btn-audio-off { color: #999; background-color: #f5f5f5; border-color: #ddd; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; }
 
-        /* --- 發車紀錄面板 --- */
-        .history-panel { position: fixed; top: 0; right: -100%; width: 85%; height: 100%; background: #fff; z-index: 5000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -4px 0 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
-        .history-panel.open { right: 0; }
-        .history-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; }
-        .history-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .history-item { padding: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; animation: row-pop-in 0.3s; }
-        .history-item-info { display: flex; flex-direction: column; gap: 2px; text-align: left; }
-        .history-item-name { font-weight: bold; font-size: 0.95rem; color: var(--text); }
-        .history-item-time { font-size: 0.8rem; color: var(--gray); }
-        .history-item-del { color: var(--danger); font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        /* --- 群組紀錄面板 --- */
+        .group-panel { position: fixed; top: 0; right: -100%; width: 85%; height: 100%; background: #fff; z-index: 5000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -4px 0 15px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+        .group-panel.open { right: 0; }
+        .group-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; }
+        .group-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .group-item { padding: 12px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 8px; animation: row-pop-in 0.3s; }
+        .group-item-top { display: flex; gap: 8px; align-items: center; }
+        .group-item-name-input { flex: 1; font-weight: bold; font-size: 1rem; border: none !important; background: #f5f5f5 !important; border-radius: 4px; padding: 4px 8px; width: auto; }
+        .group-item-actions { display: flex; gap: 6px; justify-content: flex-end; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 4500; display: none; }
 
         /* --- Scroll Area 中間內容區 --- */
@@ -59,18 +58,11 @@
             100% { border-color: #eee; transform: translateY(0); box-shadow: 0 1px 4px rgba(0,0,0,0.08); background-color: var(--card-bg); }
         }
 
-        .row-dragging-active .mushroom-card {
-            border-color: var(--primary);
-            background-color: #f9fff0;
-            transform: scale(1.02);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-        }
+        .row-dragging-active .mushroom-card { border-color: var(--primary); background-color: #f9fff0; transform: scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: all 0.2s; }
 
-        .row-new { animation: row-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .row-new { animation: row-pop-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
         @keyframes row-pop-in {
-            0% { opacity: 0; transform: scale(0.8) translateY(15px); max-height: 0; }
-            70% { transform: scale(1.05) translateY(-5px); }
+            0% { opacity: 0; transform: scale(0.96) translateY(10px); max-height: 0; }
             100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
         }
 
@@ -115,7 +107,6 @@
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; transition: none !important; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
 
-        /* 皮克敏搬運動畫 */
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
         .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
@@ -127,7 +118,7 @@
         <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
-            <button class="btn-action" onclick="toggleHistory()" style="color:var(--primary); font-weight:bold;">🕒 發車紀錄</button>
+            <button class="btn-action" onclick="toggleGroups()" style="color:var(--primary); font-weight:bold;">👥 菇菇群組</button>
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
@@ -135,14 +126,14 @@
         <div class="version-tag"><span id="deviceType">檢測中...</span> | v.測試版</div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="toggleHistory()"></div>
-    <div class="history-panel" id="historyPanel">
-        <div class="history-header">
-            <h2 style="margin:0; font-size:1.1rem;">🕒 發車紀錄</h2>
-            <button class="btn-action" onclick="clearHistory()" style="background:none; border:1px solid white; color:white;">清空</button>
+    <div class="overlay" id="overlay" onclick="toggleGroups()"></div>
+    <div class="group-panel" id="groupPanel">
+        <div class="group-header">
+            <h2 style="margin:0; font-size:1.1rem;">👥 菇菇群組</h2>
+            <button class="btn-action" onclick="recordCurrentNames()" style="background:var(--accent); border:none; color:white; font-weight:bold;">➕ 紀錄菇菇</button>
         </div>
-        <div class="history-list" id="historyList"></div>
-        <button onclick="toggleHistory()" style="margin:15px; padding:12px; border-radius:10px; border:none; background:var(--ready-bg); color:var(--text); font-weight:bold;">關閉</button>
+        <div class="group-list" id="groupList"></div>
+        <button onclick="toggleGroups()" style="margin:15px; padding:12px; border-radius:10px; border:none; background:var(--ready-bg); color:var(--text); font-weight:bold;">關閉</button>
     </div>
 
     <div class="scroll-area" id="scrollArea">
@@ -160,13 +151,13 @@
     const vizBar = document.getElementById('vizBar');
     const scrollArea = document.getElementById('scrollArea');
     const currentTimeEl = document.getElementById('currentTime');
-    const historyPanel = document.getElementById('historyPanel');
-    const historyList = document.getElementById('historyList');
+    const groupPanel = document.getElementById('groupPanel');
+    const groupList = document.getElementById('groupList');
     const overlay = document.getElementById('overlay');
     
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
-    let historyData = JSON.parse(localStorage.getItem('mushroom_history')) || [];
+    let groupData = JSON.parse(localStorage.getItem('mushroom_groups')) || [];
     let deletingIds = new Set(); 
     let isUserInteracting = false; 
     let newlyAddedId = null;
@@ -174,6 +165,7 @@
 
     let audioCtx = null, soundBuffer = null, whistleBuffer = null, isAudioEnabled = false;
 
+    // --- 音效強化：確保 context 穩定恢復 ---
     async function loadSounds() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
@@ -186,15 +178,22 @@
             whistleBuffer = await audioCtx.decodeAudioData(dataWhistle);
         } catch (e) { console.error('音檔載入失敗', e); }
     }
-    function resumeAudioContext() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
+    
+    function resumeAudioContext() {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
     function playSound(buffer) {
         if (!isAudioEnabled || !buffer || !audioCtx) return;
-        resumeAudioContext();
-        const source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.start(0);
+        // 每次播放前確保 context 是運作中的
+        audioCtx.resume().then(() => {
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+        });
     }
+
     async function toggleAudio() {
         if (!audioCtx) await loadSounds();
         resumeAudioContext();
@@ -226,40 +225,102 @@
         setTimeout(() => card.classList.remove('card-selected'), 600);
     }
 
-    async function toggleHistory() {
+    // --- 群組功能：優化紀錄與放出邏輯 ---
+    async function toggleGroups() {
         if (!audioCtx && isAudioEnabled) await loadSounds();
-        const isOpen = historyPanel.classList.toggle('open');
+        const isOpen = groupPanel.classList.toggle('open');
         overlay.style.display = isOpen ? 'block' : 'none';
         if(isOpen) {
-            renderHistory();
+            renderGroups();
             if (isAudioEnabled) playSound(whistleBuffer);
         }
     }
-    function addToHistory(name, targetTimestamp) {
-        const timeStr = new Date(targetTimestamp).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const dateStr = new Date().toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' });
-        const isDuplicate = historyData.length > 0 && historyData[0].name === name && historyData[0].timestamp === targetTimestamp;
-        if (isDuplicate) return;
-        historyData.unshift({ name, time: timeStr, date: dateStr, timestamp: targetTimestamp });
-        if (historyData.length > 50) historyData.pop();
-        localStorage.setItem('mushroom_history', JSON.stringify(historyData));
-    }
-    function renderHistory() {
-        historyList.innerHTML = historyData.length === 0 ? '<div style="text-align:center; color:#999; margin-top:20px;">尚無發車紀錄</div>' : '';
-        historyData.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `<div class="history-item-info"><div class="history-item-name">${item.name}</div><div class="history-item-time">${item.date} ${item.time} 發車</div></div><div class="history-item-del" onclick="deleteHistory(${index})">✖</div>`;
-            historyList.appendChild(div);
+
+    function recordCurrentNames() {
+        const names = rowOrder.map((id, idx) => {
+            const input = document.getElementById(`name${id}`);
+            // 若為空，紀錄其預設 Placeholder 名稱
+            return (input && input.value) ? input.value : `菇菇${idx + 1}`;
         });
+        
+        const newGroup = {
+            id: Date.now(),
+            name: `菇菇群組 ${groupData.length + 1}`,
+            names: names
+        };
+        
+        // 新紀錄放在最上面
+        groupData.unshift(newGroup);
+        saveGroups();
+        renderGroups();
     }
-    function deleteHistory(index) {
-        historyData.splice(index, 1);
-        localStorage.setItem('mushroom_history', JSON.stringify(historyData));
-        renderHistory();
+
+    function releaseGroup(groupId) {
+        const group = groupData.find(g => g.id === groupId);
+        if (!group) return;
+        
+        // 配合群組數量，動態調整主畫面行數
+        const targetCount = group.names.length;
+        
+        // 若群組數量多於目前行數，增加行
+        while (rowOrder.length < targetCount) {
+            const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
+            rowOrder.push(id);
+        }
+        
+        // 若群組數量少於目前行數，減少行 (不需確認，放出群組為覆蓋操作)
+        while (rowOrder.length > targetCount) {
+            const idToRemove = rowOrder.pop();
+            localStorage.removeItem(`mushroom_name_${idToRemove}`);
+            delete targetTimes[idToRemove];
+        }
+        
+        // 同步 DOM 與資料
+        app.innerHTML = "";
+        rowOrder.forEach((id, idx) => {
+            const newName = group.names[idx];
+            localStorage.setItem(`mushroom_name_${id}`, newName);
+            createRow(id, idx, false);
+        });
+
+        saveAll();
+        renderVizBar();
+        if (isAudioEnabled) playSound(whistleBuffer);
+        toggleGroups();
     }
-    function clearHistory() {
-        if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); }
+
+    function updateGroupName(groupId, newName) {
+        const group = groupData.find(g => g.id === groupId);
+        if (group) { group.name = newName; saveGroups(); }
+    }
+
+    function deleteGroup(groupId) {
+        if (confirm("確定要刪除此群組嗎？")) {
+            groupData = groupData.filter(g => g.id !== groupId);
+            saveGroups(); renderGroups();
+        }
+    }
+
+    function saveGroups() { localStorage.setItem('mushroom_groups', JSON.stringify(groupData)); }
+
+    function renderGroups() {
+        groupList.innerHTML = groupData.length === 0 ? '<div style="text-align:center; color:#999; margin-top:20px;">尚無群組紀錄</div>' : '';
+        groupData.forEach((group) => {
+            const div = document.createElement('div');
+            div.className = 'group-item';
+            div.innerHTML = `
+                <div class="group-item-top">
+                    <input type="text" class="group-item-name-input" value="${group.name}" 
+                           oninput="updateGroupName(${group.id}, this.value)" placeholder="群組名稱">
+                </div>
+                <div style="font-size:0.8rem; color:#888;">成員: ${group.names.filter(n => n).join(', ') || '無名稱'}</div>
+                <div class="group-item-actions">
+                    <button class="btn-action" style="color:var(--primary); font-weight:bold;" onclick="releaseGroup(${group.id})">🚀 放出菇菇</button>
+                    <button class="btn-action" style="color:var(--danger);" onclick="deleteGroup(${group.id})">✖ 刪除</button>
+                </div>
+            `;
+            groupList.appendChild(div);
+        });
     }
 
     function smartScroll(el) {
@@ -284,6 +345,7 @@
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
         localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
     }
+    
     function init() {
         detectDevice();
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
@@ -292,6 +354,7 @@
         renderVizBar();
         setInterval(updateDynamicInfo, 1000); 
     }
+    
     function createRow(id, index, isNew = false) {
         const savedName = localStorage.getItem(`mushroom_name_${id}`) || "";
         const wrapper = document.createElement('div');
@@ -329,8 +392,7 @@
             el.value = el.value.slice(0, 2);
             if(next) {
                 const nextInp = document.getElementById(next + id);
-                nextInp.focus();
-                smartScroll(nextInp); 
+                nextInp.focus(); smartScroll(nextInp); 
             } else {
                 const isLastRow = (rowOrder.indexOf(id) === rowOrder.length - 1);
                 if (isLastRow) { smartScroll(document.getElementById('addRowBtn')); } 
@@ -363,9 +425,7 @@
 
     function deleteSpecificRow(id) {
         if(rowOrder.length > 1 && confirm("確定要讓皮克敏大隊把它搬走嗎？")) {
-            // --- 皮克敏集合音效 ---
             if (isAudioEnabled) playSound(whistleBuffer);
-
             const wrapper = document.getElementById(`wrapper${id}`);
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
@@ -458,7 +518,6 @@
                         if (respawnEl) { respawnEl.style.display = 'block'; respawnEl.style.color = "var(--accent)"; const rm = Math.floor(diff / 60), rs = diff % 60; respawnEl.innerText = `重生倒數${rm}分${rs}秒`; }
                     }
                 } else {
-                    if (!card.dataset.recorded) { const nameStr = document.getElementById(`name${id}`)?.value || `菇菇${parseInt(idx)+1}`; addToHistory(nameStr, t); card.dataset.recorded = "1"; }
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
                     const elapsed = now - parseInt(card.dataset.departedTime);
                     if (elapsed < 5000) {
@@ -478,7 +537,7 @@
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { playSound(soundBuffer); card.dataset.warned = "1"; }
                 }
             } else { 
-                card.classList.remove('card-warning', 'card-critical', 'card-ready'); card.dataset.departedTime = ""; card.dataset.recorded = "";
+                card.classList.remove('card-warning', 'card-critical', 'card-ready'); card.dataset.departedTime = "";
                 if (timeBox) timeBox.style.display = 'flex'; if (labelEl) labelEl.style.display = 'inline-block'; if (respawnEl) respawnEl.style.display = 'none';
                 if(!isUserInteracting) { 
                     item.className = 'viz-item' + (id === newlyAddedId ? ' viz-item-new' : '');
@@ -493,19 +552,30 @@
         if (!h && !m && !s) targetTimes[id] = null;
         else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
         const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = card.dataset.departedTime = card.dataset.recorded = ""; }
+        if(card) { card.dataset.warned = card.dataset.departedTime = ""; }
         saveAll(); renderVizBar(); 
     }
 
     function resetRow(id) {
         ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
         targetTimes[id] = null; const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = card.dataset.departedTime = card.dataset.recorded = ""; card.classList.remove('card-warning', 'card-critical', 'card-ready'); }
+        if(card) { card.dataset.warned = card.dataset.departedTime = ""; card.classList.remove('card-warning', 'card-critical', 'card-ready'); }
         saveAll(); renderVizBar();
     }
 
     function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
-    function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
+    
+    // --- 重置功能優化：保留群組 ---
+    function resetToInitial() {
+        if(confirm("重置所有計算數據（菇菇群組將會保留）？")) {
+            // 備份群組
+            const backupGroups = localStorage.getItem('mushroom_groups');
+            localStorage.clear();
+            // 還原群組
+            if(backupGroups) localStorage.setItem('mushroom_groups', backupGroups);
+            location.reload();
+        }
+    }
 
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
@@ -563,13 +633,7 @@
             targetWrapper = document.getElementById(`wrapper${el.dataset.id}`);
             dragTimer = setTimeout(() => {
                 dragItem = el; const r = el.getBoundingClientRect();
-                Object.assign(dragItem.style, { 
-                    left: r.left+'px', 
-                    top: r.top+'px', 
-                    width: r.width+'px', 
-                    height: r.height+'px',
-                    pointerEvents: 'none' 
-                });
+                Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px', pointerEvents: 'none' });
                 dragItem.dataset.ox = startX - r.left; 
                 el.classList.replace('pressing', 'dragging'); 
                 el.parentNode.insertBefore(placeholder, el);
