@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>搶菇計算機V測試</title>
+    <title>搶菇計算機V10</title>
     <style>
         /* --- 基礎變數與設定 --- */
         :root {
@@ -433,7 +433,7 @@
     }
 
     /**
-     * --- 皮克敏搬運邏輯：優化節奏 ---
+     * --- 皮克敏搬運邏輯：調整口哨與跑步時間 ---
      */
     function deleteSpecificRow(id) {
         const nameInput = document.getElementById(`name${id}`);
@@ -457,12 +457,19 @@
             }
 
             let startTime = null;
-            let isScrambling = true; // 是否正在隨機跑
-            let hasJumped = false; // 是否已跳躍
+            let isScrambling = true; 
+            let hasJumped = false; 
+            let hasWhistled = false; // 用於控制口哨只吹一次
 
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
+
+                // 新增：跑步後 0.8 秒吹口哨
+                if (!hasWhistled && elapsed >= 800) {
+                    if (isAudioEnabled) playSound(whistleBuffer);
+                    hasWhistled = true;
+                }
 
                 if (isScrambling) {
                     workers.forEach(p => {
@@ -472,18 +479,16 @@
                         p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
                     });
 
-                    // 1. 跑約 1000ms 後，準備聽哨聲
-                    if (elapsed >= 1000) {
+                    // 修改：隨機跑時間增加到 1.2 秒 (1200ms)
+                    if (elapsed >= 1200) {
                         isScrambling = false;
-                        // 2. 播放口哨
-                        if (isAudioEnabled) playSound(whistleBuffer);
-                        // 3. 停頓一小段時間後跳
+                        // 停頓一小段時間後跳
                         setTimeout(() => {
                             workers.forEach(p => p.el.classList.add('pikmin-jump-anim'));
                             hasJumped = true;
-                            // 4. 跳完後執行搬運
+                            // 跳完後執行搬運
                             setTimeout(startCarrying, 400);
-                        }, 750);
+                        }, 250);
                     }
                     if (isScrambling) requestAnimationFrame(animateScramble);
                 }
