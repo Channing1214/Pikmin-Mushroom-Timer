@@ -1,3 +1,4 @@
+--- START OF FILE text/plain ---
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -199,11 +200,11 @@
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}" onfocusin="handleFocusIn('${id}')" onfocusout="handleBoxBlur(event, '${id}')">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'hr', 'min')">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'min', 'sec')">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.value=''" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" onfocus="this.select()" onkeydown="checkEnter(event, '${id}')" oninput="limitAndFocus('${id}', 'sec', null)">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -326,7 +327,7 @@
         
         rowOrder.forEach(id => {
             if (deletingIds.has(id)) return;
-            if (editingRows.has(id)) return;
+            if (editingRows.has(id)) return; // 正在編輯時，不讓系統倒數強行刷新 input 數值
 
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
             if (!item) return;
@@ -356,6 +357,7 @@
                               minInp = document.getElementById(`min${id}`), 
                               secInp = document.getElementById(`sec${id}`);
                         
+                        // 更新數值時使用更友善的判斷，避免全變成 0
                         if (hrInp) hrInp.value = h > 0 ? h : "";
                         if (minInp) minInp.value = (h > 0 || m > 0) ? m : (displayRemaining > 0 ? "0" : "");
                         if (secInp) secInp.value = (displayRemaining > 0) ? s : "";
@@ -430,12 +432,13 @@
 
     function handleBoxBlur(event, id) {
         const timeBox = document.getElementById(`timeBox${id}`);
+        // 使用延遲確保 focus 已經轉移到下一個元素
         setTimeout(() => {
             if (!timeBox || !timeBox.contains(document.activeElement)) {
                 handleInput(id);
                 editingRows.delete(id); 
             }
-        }, 100);
+        }, 150);
     }
 
     function handleInput(id) {
