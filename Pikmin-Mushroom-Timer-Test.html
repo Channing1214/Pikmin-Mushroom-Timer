@@ -21,34 +21,28 @@
         input[type="number"] { -moz-appearance: textfield; }
         input[type="text"] { border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; padding: 6px; width: 75px; -webkit-user-select: text; user-select: text; }
 
-        /* --- Header 頂部固定區 --- */
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
-        .row-controls { display: flex; justify-content: center; margin-bottom: 2px; }
+        .row-controls { display: flex; justify: center; margin-bottom: 2px; justify-content: center; }
 
         .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; margin: 0 2px; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
         .btn-audio-off { color: #999; background-color: #f5f5f5; }
         .btn-audio-on { color: #2e7d32; background-color: #e8f5e9; border-color: #66bb6a; border-width: 2px; }
 
-        /* --- Scroll Area 中間內容區 --- */
         .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
-        /* --- 卡片元件 --- */
         .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; transition: background-color 0.3s, border-color 0.3s; }
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
         
-        /* 行的狀態顏色 (不閃爍) */
         .card-warning { background-color: var(--warning-bg) !important; border-color: var(--warning-border) !important; }
         .card-critical { background-color: var(--critical-bg) !important; border-color: var(--critical-border) !important; }
-        /* 發車樣式：灰底 */
         .card-ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
 
-        /* 封裝區域 */
         .dynamic-content { display: flex; align-items: center; gap: 4px; width: 172px; justify-content: center; }
         .dynamic-content span { align-self: flex-end; margin-bottom: 6px; } 
 
@@ -56,15 +50,12 @@
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
-        /* 重生倒數顯示樣式：寬度固定140px以利在容器中置中，字體靠左 */
         .respawn-display { display: none; width: 140px; text-align: left; color: var(--accent); font-weight: bold; font-size: 0.95rem; white-space: nowrap; }
 
         .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; flex-shrink: 0; }
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
-        .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
 
-        /* --- Viz Bar 下方狀態列 --- */
         .viz-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 2px solid var(--primary); padding: 6px 0 calc(8px + env(safe-area-inset-bottom)); display: flex; gap: 0; overflow-x: auto; overflow-y: hidden; justify-content: flex-start; box-shadow: 0 -2px 8px rgba(0,0,0,0.1); z-index: 3000; scroll-behavior: smooth; }
         .viz-bar::before, .viz-bar::after { content: ''; min-width: 25px; margin: auto; }
         
@@ -72,26 +63,13 @@
         .viz-item strong { font-size: 0.8rem; width: 64px; overflow: hidden; text-overflow: ellipsis; text-align: center; margin-bottom: 2px; }
         .viz-item .viz-target { font-size: 0.7rem; color: #888; }
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
-        .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
         
-        /* --- 小卡動畫 --- */
-        .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        @keyframes viz-pop-fast {
-            0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
-            100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
-        }
-
-        /* --- 小卡狀態動畫 (保持閃爍) --- */
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
-        /* --- 拖曳與皮克敏動畫 --- */
-        .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; transition: none !important; }
-        .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
-        .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
         .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
@@ -140,7 +118,6 @@
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
             const response = await fetch('pikmin_throw.mp3');
-            if (!response.ok) throw new Error('音檔載入失敗');
             const arrayBuffer = await response.arrayBuffer();
             soundBuffer = await audioCtx.decodeAudioData(arrayBuffer);
         } catch (e) { console.error(e); }
@@ -164,10 +141,7 @@
         resumeAudioContext();
         isAudioEnabled = !isAudioEnabled;
         updateAudioBtnUI();
-        if (isAudioEnabled) {
-            if(!soundBuffer) await loadSound();
-            playWarningBeep(); 
-        }
+        if (isAudioEnabled) playWarningBeep(); 
     }
 
     function updateAudioBtnUI() {
@@ -206,11 +180,20 @@
                 <div class="dynamic-content" id="dynArea${id}">
                     <span id="label${id}">剩</span>
                     <div class="time-box" id="timeBox${id}">
-                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" 
+                            oninput="limitAndFocus('${id}', 'hr', 'min')" 
+                            onblur="handleInput('${id}')"
+                            onkeydown="if(event.key==='Enter') this.blur()">
                         <span>時</span>
-                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')">
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" 
+                            oninput="limitAndFocus('${id}', 'min', 'sec')" 
+                            onblur="handleInput('${id}')"
+                            onkeydown="if(event.key==='Enter') this.blur()">
                         <span>分</span>
-                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)">
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" 
+                            oninput="limitAndFocus('${id}', 'sec', null)" 
+                            onblur="handleInput('${id}')"
+                            onkeydown="if(event.key==='Enter') this.blur()">
                         <span>秒</span>
                     </div>
                     <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
@@ -229,72 +212,44 @@
         if(el.value.length >= 2) {
             el.value = el.value.slice(0, 2);
             if(next) document.getElementById(next + id).focus();
-            else focusNextRowHour(id);
+            else el.blur(); // 輸入完秒數自動確認
         }
-        handleInput(id);
+    }
+
+    function handleInput(id) {
+        const h = document.getElementById(`hr${id}`).value, 
+              m = document.getElementById(`min${id}`).value, 
+              s = document.getElementById(`sec${id}`).value;
+        if (!h && !m && !s) {
+            targetTimes[id] = null;
+        } else {
+            // 加上 300 秒 (5分鐘) 重生時間
+            targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
+        }
+        const card = document.getElementById(`card${id}`);
+        if(card) { card.dataset.warned = ""; card.dataset.departedTime = ""; }
+        saveAll(); 
+        renderVizBar(); 
     }
 
     function changeRows() {
         const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
-        newlyAddedId = id; 
-        rowOrder.push(id);
+        newlyAddedId = id; rowOrder.push(id);
         createRow(id, rowOrder.length - 1, true); 
-        saveAll(); 
-        renderVizBar(); 
+        saveAll(); renderVizBar();
         setTimeout(() => {
-            const scrollArea = document.querySelector('.scroll-area');
-            scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
-            vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
-            setTimeout(() => { newlyAddedId = null; }, 400);
+            document.querySelector('.scroll-area').scrollTo({ top: 9999, behavior: 'smooth' });
+            newlyAddedId = null;
         }, 150);
     }
 
     function deleteSpecificRow(id) {
-        if(rowOrder.length > 1 && confirm("確定要讓皮克敏大隊把它搬走嗎？")) {
-            const wrapper = document.getElementById(`wrapper${id}`);
-            const squad = document.getElementById(`squad${id}`);
-            const card = document.getElementById(`card${id}`);
-            const vizItem = document.getElementById(`viz-${id}`);
-            const cardLeft = card.offsetLeft, cardRight = cardLeft + card.offsetWidth, rowHeight = wrapper.offsetHeight;
-            deletingIds.add(id); 
-            squad.style.display = 'block';
-            const workers = [];
-            for(let i=0; i<5; i++) {
-                const el = document.createElement('div'); el.className = 'pikmin-worker'; squad.appendChild(el);
-                workers.push({ el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) });
-            }
-            let startTime = null;
-            function animateScramble(timestamp) {
-                if (!startTime) startTime = timestamp;
-                const progress = timestamp - startTime;
-                workers.forEach(p => {
-                    p.x += p.speed; if (p.x <= cardLeft || p.x >= cardRight - 45) p.speed *= -1;
-                    p.el.style.left = p.x + 'px'; p.el.style.transform = p.speed > 0 ? 'scaleX(1)' : 'scaleX(-1)';
-                });
-                if (progress < 1200) requestAnimationFrame(animateScramble); else startCarrying();
-            }
-            requestAnimationFrame(animateScramble);
-            function startCarrying() {
-                if (vizItem) vizItem.classList.add('viz-item-exit');
-                const nameInput = document.getElementById(`name${id}`);
-                const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
-                setTimeout(() => {
-                    const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
-                    delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
-                    deletingIds.delete(id); saveAll();
-                    rowOrder.forEach((rid, i) => { const el = document.getElementById(`name${rid}`); if(el) el.placeholder = `菇菇${i+1}`; });
-                    renderVizBar(); 
-                }, 400); 
-                workers.forEach((p, i) => {
-                    p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    p.el.style.left = (nameX + (i * 8)) + 'px'; p.el.style.transform = 'scaleX(1)'; p.el.style.bottom = '-10px';
-                });
-                setTimeout(() => {
-                    wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`;
-                    wrapper.style.opacity = "0.7"; wrapper.style.pointerEvents = "none";
-                }, 400);
-                setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 2500);
-            }
+        if(rowOrder.length > 1 && confirm("確定要刪除嗎？")) {
+            const idx = rowOrder.indexOf(id); 
+            if (idx > -1) rowOrder.splice(idx, 1);
+            delete targetTimes[id];
+            document.getElementById(`wrapper${id}`).remove();
+            saveAll(); renderVizBar();
         }
     }
 
@@ -302,14 +257,11 @@
         if (isUserInteracting) return;
         vizBar.innerHTML = "";
         rowOrder.forEach((id, idx) => {
-            if (deletingIds.has(id)) return;
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
-            item.className = 'viz-item'; 
-            if (id === newlyAddedId) item.classList.add('viz-new');
-            item.id = `viz-${id}`; item.dataset.id = id;
+            item.className = 'viz-item'; item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
-            addDragListeners(item); vizBar.appendChild(item);
+            vizBar.appendChild(item);
         });
         updateDynamicInfo();
     }
@@ -320,13 +272,13 @@
         const activeEl = document.activeElement; 
 
         rowOrder.forEach(id => {
-            if (deletingIds.has(id)) return;
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
-            if (!item) return;
+            if (!item || !card) return;
             const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
-            const timeBox = document.getElementById(`timeBox${id}`);
-            const respawnEl = document.getElementById(`respawn${id}`);
-            const labelEl = document.getElementById(`label${id}`);
+            const timeBox = document.getElementById(`timeBox${id}`), respawnEl = document.getElementById(`respawn${id}`), labelEl = document.getElementById(`label${id}`);
+            
+            const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
+            const isEditing = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
 
             if (t) {
                 const diff = Math.floor((t - now) / 1000);
@@ -336,177 +288,49 @@
                     else if (diff <= 30) card.classList.add('card-warning');
 
                     if (diff > 300) {
-                        if (timeBox) timeBox.style.display = 'flex';
-                        if (labelEl) labelEl.style.display = 'inline-block';
-                        if (respawnEl) respawnEl.style.display = 'none';
-
-                        const displayRemaining = diff - 300;
-                        const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
-                        const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
-                        if (hrInp && hrInp !== activeEl) hrInp.value = h > 0 ? h : "";
-                        if (minInp && minInp !== activeEl) minInp.value = (h > 0 || m > 0) ? m : "";
-                        if (secInp && secInp !== activeEl) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
-                    } else {
-                        if (timeBox) timeBox.style.display = 'none';
-                        if (labelEl) labelEl.style.display = 'none';
-                        if (respawnEl) {
-                            respawnEl.style.display = 'block';
-                            respawnEl.style.color = "var(--accent)"; 
-                            const rm = Math.floor(diff / 60), rs = diff % 60;
-                            respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
+                        timeBox.style.display = 'flex'; labelEl.style.display = 'inline-block'; respawnEl.style.display = 'none';
+                        if (!isEditing) {
+                            const rem = diff - 300;
+                            const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60), s = rem % 60;
+                            hrInp.value = h > 0 ? h : "";
+                            minInp.value = (h > 0 || m > 0) ? m : "";
+                            secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
                         }
+                    } else {
+                        timeBox.style.display = 'none'; labelEl.style.display = 'none'; respawnEl.style.display = 'block';
+                        const rm = Math.floor(diff / 60), rs = diff % 60;
+                        respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
                     }
+                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                    const hh = Math.floor(diff / 3600), mm = Math.floor((diff % 3600) / 60), ss = diff % 60;
+                    cdEl.innerText = (hh > 0 ? hh + ":" : "") + mm.toString().padStart(2,'0') + ":" + ss.toString().padStart(2,'0');
                 } else {
                     if (!card.dataset.departedTime) card.dataset.departedTime = now;
-                    const elapsed = now - parseInt(card.dataset.departedTime);
-                    if (elapsed < 5000) {
-                        if (timeBox) timeBox.style.display = 'none';
-                        if (labelEl) labelEl.style.display = 'none';
-                        if (respawnEl) {
-                            respawnEl.style.display = 'block';
-                            respawnEl.innerText = "已發車";
-                            respawnEl.style.color = "var(--accent)"; // 橘色字
-                        }
-                        card.classList.remove('card-critical', 'card-warning');
-                        card.classList.add('card-ready'); // 灰底
-                    } else {
-                        resetRow(id);
-                    }
+                    if (now - card.dataset.departedTime < 5000) {
+                        timeBox.style.display = 'none'; labelEl.style.display = 'none'; respawnEl.style.display = 'block';
+                        respawnEl.innerText = "已發車"; respawnEl.style.color = "var(--accent)";
+                        card.className = "mushroom-card card-ready";
+                        cdEl.innerText = "已發車";
+                    } else { resetRow(id); }
                 }
-
-                if (diff <= 0) {
-                    item.className = 'viz-item ready'; cdEl.innerText = "已發車";
-                } else {
-                    if (!isUserInteracting) {
-                        item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
-                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                        const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
-                        cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
-                    }
-                    if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
-                        playWarningBeep(); card.dataset.warned = "1"; 
-                    }
-                }
-            } else { 
+            } else {
                 card.classList.remove('card-warning', 'card-critical', 'card-ready');
-                card.dataset.departedTime = "";
-                if (timeBox) timeBox.style.display = 'flex';
-                if (labelEl) labelEl.style.display = 'inline-block';
-                if (respawnEl) respawnEl.style.display = 'none';
-                if(!isUserInteracting) {
-                    if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
-                    targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
-                }
+                timeBox.style.display = 'flex'; labelEl.style.display = 'inline-block'; respawnEl.style.display = 'none';
+                if (!isEditing) { hrInp.value = ""; minInp.value = ""; secInp.value = ""; }
+                targetEl.innerText = "--:--:--"; cdEl.innerText = "等待";
             }
         });
     }
 
-    function focusNextRowHour(id) {
-        const idx = rowOrder.indexOf(id);
-        if (idx < rowOrder.length - 1) {
-            const nextEl = document.getElementById(`hr${rowOrder[idx+1]}`); if(nextEl) nextEl.focus();
-        }
-    }
-
-    function handleInput(id) {
-        const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
-        if (!h && !m && !s) targetTimes[id] = null;
-        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
-        const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; card.dataset.departedTime = ""; }
-        saveAll(); renderVizBar(); 
-    }
-
     function resetRow(id) {
-        ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
-        targetTimes[id] = null; 
+        targetTimes[id] = null;
         const card = document.getElementById(`card${id}`);
-        if(card) { 
-            card.dataset.autoCleared = card.dataset.warned = card.dataset.departedTime = ""; 
-            card.classList.remove('card-warning', 'card-critical', 'card-ready');
-        }
+        if(card) { card.dataset.warned = ""; card.dataset.departedTime = ""; card.classList.remove('card-warning', 'card-critical', 'card-ready'); }
         saveAll(); renderVizBar();
     }
 
-    function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
-    function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
-
-    /**
-     * --- 拖曳排序邏輯 ---
-     */
-    let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
-    let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
-    placeholder.className = 'placeholder';
-
-    function startAutoScroll() {
-        if (autoScrollSpeed !== 0 && dragItem) {
-            vizBar.scrollLeft += autoScrollSpeed;
-            updatePlaceholderPosition(lastTouchX);
-        }
-        scrollRafId = requestAnimationFrame(startAutoScroll);
-    }
-
-    function updatePlaceholderPosition(clientX) {
-        const after = [...vizBar.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')].reduce((c, el) => {
-            const b = el.getBoundingClientRect(); 
-            const o = clientX - (b.left + b.width/2);
-            return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
-        }, { offset: -Infinity }).element;
-        if (after) vizBar.insertBefore(placeholder, after);
-        else vizBar.appendChild(placeholder);
-    }
-
-    function addDragListeners(el) {
-        const onStart = (e) => {
-            const t = e.touches ? e.touches[0] : e; 
-            const startX = t.clientX;
-            isUserInteracting = true; 
-            el.classList.add('pressing');
-            dragTimer = setTimeout(() => {
-                dragItem = el; 
-                const r = el.getBoundingClientRect();
-                Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
-                dragItem.dataset.ox = startX - r.left; 
-                el.classList.replace('pressing', 'dragging');
-                el.parentNode.insertBefore(placeholder, el);
-                vizBar.style.scrollBehavior = 'auto'; 
-                startAutoScroll();
-            }, 300);
-        };
-        const onMove = (e) => {
-            if (!dragItem) return; 
-            e.preventDefault();
-            const t = e.touches ? e.touches[0] : e; 
-            lastTouchX = t.clientX;
-            dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
-            const threshold = 60, maxScrollSpeed = 12, winW = window.innerWidth;
-            if (t.clientX < threshold) autoScrollSpeed = -((threshold - t.clientX) / threshold) * maxScrollSpeed;
-            else if (t.clientX > winW - threshold) autoScrollSpeed = ((t.clientX - (winW - threshold)) / threshold) * maxScrollSpeed;
-            else autoScrollSpeed = 0;
-            updatePlaceholderPosition(t.clientX);
-        };
-        const onEnd = () => {
-            clearTimeout(dragTimer); cancelAnimationFrame(scrollRafId); autoScrollSpeed = 0; vizBar.style.scrollBehavior = 'smooth';
-            if (dragItem) {
-                dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
-                if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
-                placeholder.remove();
-                rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
-                saveAll(); 
-                rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
-                rowOrder.forEach((id, i) => { const ni = document.getElementById(`name${id}`); if(ni) ni.placeholder = `菇菇${i+1}`; });
-                dragItem = null; isUserInteracting = false; renderVizBar();
-            } else { 
-                el.classList.remove('pressing'); isUserInteracting = false; 
-            }
-        };
-        el.addEventListener('touchstart', onStart, {passive: true}); 
-        window.addEventListener('touchmove', onMove, {passive:false}); 
-        window.addEventListener('touchend', onEnd);
-        el.addEventListener('mousedown', onStart); 
-        window.addEventListener('mousemove', onMove); 
-        window.addEventListener('mouseup', onEnd);
-    }
+    function clearAllInputs() { if(confirm("清除所有？")) rowOrder.forEach(resetRow); }
+    function resetToInitial() { if(confirm("完全重置？")) { localStorage.clear(); location.reload(); } }
 
     init();
 </script>
