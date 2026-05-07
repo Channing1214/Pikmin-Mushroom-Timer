@@ -45,9 +45,12 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 4500; display: none; }
 
         /* --- Scroll Area 中間內容區 --- */
-        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 80vh; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: 100px; padding-bottom: 110px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .container { width: 100%; max-width: 850px; display: flex; flex-direction: column; align-items: center; position: relative; transition: padding-bottom 0.3s ease; }
         
+        /* 解決底部捲動限制：當輸入框聚焦時，下方產生虛擬高度 */
+        .container.keyboard-active { padding-bottom: 60vh !important; }
+
         .row-wrapper { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; width: 100%; justify-content: center; position: relative; transition: margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s; }
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
@@ -96,7 +99,7 @@
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
-        /* 皮克敏動畫 */
+        /* 皮克敏搬運動畫 */
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
         .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
@@ -117,8 +120,7 @@
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <!-- 版本資訊與裝置顯示 -->
-        <div class="version-tag" id="versionTag">v.測試版</div>
+        <div class="version-tag"><span id="deviceType">檢測中...</span> | v.測試版</div>
     </div>
 
     <!-- 發車紀錄面板 -->
@@ -132,7 +134,7 @@
         <button onclick="toggleHistory()" style="margin:15px; padding:12px; border-radius:10px; border:none; background:var(--ready-bg); color:var(--text); font-weight:bold;">關閉</button>
     </div>
 
-    <div class="scroll-area" id="mainScroll">
+    <div class="scroll-area">
         <div class="container" id="app"></div>
         <button class="btn-add-row" onclick="changeRows()" id="addRowBtn">➕</button>
     </div>
@@ -140,20 +142,16 @@
     <div class="viz-bar" id="vizBar"></div>
 
 <script>
+    /**
+     * --- 全域變數 ---
+     */
     const app = document.getElementById('app');
     const vizBar = document.getElementById('vizBar');
     const currentTimeEl = document.getElementById('currentTime');
     const historyPanel = document.getElementById('historyPanel');
     const historyList = document.getElementById('historyList');
     const overlay = document.getElementById('overlay');
-    const mainScroll = document.getElementById('mainScroll');
     
-    // 智慧偵測：是否為行動裝置
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    
-    // 更新版本標籤顯示裝置類型
-    document.getElementById('versionTag').innerText = `v.測試版 (${isMobile ? '手機版' : '電腦版'})`;
-
     let targetTimes = JSON.parse(localStorage.getItem('mushroom_targets')) || {};
     let rowOrder = JSON.parse(localStorage.getItem('mushroom_row_order')) || [];
     let historyData = JSON.parse(localStorage.getItem('mushroom_history')) || [];
@@ -198,12 +196,22 @@
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
 
+    // --- 裝置偵測功能 ---
+    function updateDeviceStatus() {
+        const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+        const deviceTag = document.getElementById('deviceType');
+        deviceTag.innerText = isMobile ? "📱 手機版" : "💻 電腦版";
+    }
+
     // --- 發車紀錄功能 ---
     async function toggleHistory() {
         if (!audioCtx && isAudioEnabled) await loadSounds();
         const isOpen = historyPanel.classList.toggle('open');
         overlay.style.display = isOpen ? 'block' : 'none';
-        if(isOpen) { renderHistory(); if (isAudioEnabled) playSound(whistleBuffer); }
+        if(isOpen) {
+            renderHistory();
+            if (isAudioEnabled) playSound(whistleBuffer);
+        }
     }
     function addToHistory(name, targetTimestamp) {
         const timeStr = new Date(targetTimestamp).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -228,19 +236,26 @@
         localStorage.setItem('mushroom_history', JSON.stringify(historyData));
         renderHistory();
     }
-    function clearHistory() { if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); } }
+    function clearHistory() {
+        if(confirm("確定要清空發車紀錄嗎？")) { historyData = []; localStorage.setItem('mushroom_history', JSON.stringify(historyData)); renderHistory(); }
+    }
 
     /**
-     * 智慧捲動判定
+     * 智慧捲動與空間修正：
+     * 當輸入框聚焦時，為容器增加填充空間，並將元件捲動至畫面中間。
      */
     function smartScroll(el) {
-        if (!isMobile) return; 
+        const container = document.querySelector('.container');
+        // 暫時撐開底部高度，確保任何位置都能捲到中央
+        container.classList.add('keyboard-active');
+
         setTimeout(() => {
             const vv = window.visualViewport;
             if (!vv) return;
+
             const rect = el.getBoundingClientRect();
             const headerHeight = 100;
-            const buffer = 30;
+            const buffer = 40; 
 
             const isBlockedBelow = rect.bottom > vv.height - buffer;
             const isBlockedAbove = rect.top < headerHeight + buffer;
@@ -248,7 +263,15 @@
             if (isBlockedBelow || isBlockedAbove) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        }, 150); 
+        }, 150);
+
+        // 監聽失去焦點，還原高度
+        el.addEventListener('blur', function onBlur() {
+            setTimeout(() => {
+                container.classList.remove('keyboard-active');
+            }, 300);
+            el.removeEventListener('blur', onBlur);
+        });
     }
 
     // --- 核心邏輯 ---
@@ -257,13 +280,13 @@
         localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
     }
     function init() {
+        updateDeviceStatus();
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
         rowOrder.forEach((id, idx) => createRow(id, idx, false));
         renderVizBar();
         setInterval(updateDynamicInfo, 1000); 
     }
-
     function createRow(id, index, isNew = false) {
         const savedName = localStorage.getItem(`mushroom_name_${id}`) || "";
         const wrapper = document.createElement('div');
@@ -322,11 +345,11 @@
         for (let i = idx + 1; i < rowOrder.length; i++) {
             const nextId = rowOrder[i], respawnEl = document.getElementById(`respawn${nextId}`);
             if (respawnEl && respawnEl.style.display === 'none') {
-                const hr = document.getElementById(`hr${nextId}`);
-                if (hr) {
-                    hr.focus();
-                    smartScroll(hr);
-                    return;
+                const hr = document.getElementById(`hr${nextId}`); 
+                if (hr) { 
+                    hr.focus(); 
+                    smartScroll(hr); 
+                    return; 
                 }
             }
         }
@@ -335,13 +358,12 @@
     function changeRows() {
         const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
         newlyAddedId = id; rowOrder.push(id); createRow(id, rowOrder.length - 1, true); saveAll(); renderVizBar(); 
-        if (isMobile) {
-            setTimeout(() => {
-                mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' });
-                vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
-            }, 150);
-        }
-        setTimeout(() => { newlyAddedId = null; }, 400);
+        setTimeout(() => {
+            const scrollArea = document.querySelector('.scroll-area');
+            scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
+            vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
+            setTimeout(() => { newlyAddedId = null; }, 400);
+        }, 150);
     }
 
     function deleteSpecificRow(id) {
@@ -424,8 +446,10 @@
                     card.classList.remove('card-warning', 'card-critical', 'card-ready');
                     if (diff <= 10) card.classList.add('card-critical');
                     else if (diff <= 30) card.classList.add('card-warning');
+
                     const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
                     const isEditingThisRow = (activeEl === hrInp || activeEl === minInp || activeEl === secInp);
+
                     if (diff > 300 || isEditingThisRow) {
                         if (timeBox) timeBox.style.display = 'flex'; if (labelEl) labelEl.style.display = 'inline-block'; if (respawnEl) respawnEl.style.display = 'none';
                         const displayRemaining = Math.max(0, diff - 300);
@@ -449,6 +473,7 @@
                         card.classList.remove('card-critical', 'card-warning'); card.classList.add('card-ready');
                     } else { resetRow(id); }
                 }
+
                 if (diff <= 0) { item.className = 'viz-item ready'; cdEl.innerText = "已發車"; } else {
                     if (!isUserInteracting) {
                         item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
@@ -486,15 +511,20 @@
     function resetToInitial() { if(confirm("重置所有數據？")) { localStorage.clear(); location.reload(); } }
 
     /**
-     * --- 拖曳排序邏輯 (完整復原) ---
+     * --- 拖曳排序邏輯 ---
      */
     let dragItem = null, placeholder = document.createElement('div'), dragTimer = null;
     let autoScrollSpeed = 0, scrollRafId = null, lastTouchX = 0;
     placeholder.className = 'placeholder';
-    function startAutoScroll() { if (autoScrollSpeed !== 0 && dragItem) { vizBar.scrollLeft += autoScrollSpeed; updatePlaceholderPosition(lastTouchX); } scrollRafId = requestAnimationFrame(startAutoScroll); }
+
+    function startAutoScroll() {
+        if (autoScrollSpeed !== 0 && dragItem) { vizBar.scrollLeft += autoScrollSpeed; updatePlaceholderPosition(lastTouchX); }
+        scrollRafId = requestAnimationFrame(startAutoScroll);
+    }
     function updatePlaceholderPosition(clientX) {
         const after = [...vizBar.querySelectorAll('.viz-item:not(.dragging):not(.placeholder)')].reduce((c, el) => {
-            const b = el.getBoundingClientRect(); const o = clientX - (b.left + b.width/2); return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
+            const b = el.getBoundingClientRect(); const o = clientX - (b.left + b.width/2);
+            return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
         }, { offset: -Infinity }).element;
         if (after) vizBar.insertBefore(placeholder, after); else vizBar.appendChild(placeholder);
     }
@@ -502,13 +532,15 @@
         const onStart = (e) => {
             const t = e.touches ? e.touches[0] : e; const startX = t.clientX; isUserInteracting = true; el.classList.add('pressing');
             dragTimer = setTimeout(() => {
-                dragItem = el; const r = el.getBoundingClientRect(); Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
+                dragItem = el; const r = el.getBoundingClientRect();
+                Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
                 dragItem.dataset.ox = startX - r.left; el.classList.replace('pressing', 'dragging'); el.parentNode.insertBefore(placeholder, el);
                 vizBar.style.scrollBehavior = 'auto'; startAutoScroll();
             }, 300);
         };
         const onMove = (e) => {
-            if (!dragItem) return; e.preventDefault(); const t = e.touches ? e.touches[0] : e; lastTouchX = t.clientX; dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
+            if (!dragItem) return; e.preventDefault(); const t = e.touches ? e.touches[0] : e; lastTouchX = t.clientX;
+            dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
             const threshold = 60, maxScrollSpeed = 12, winW = window.innerWidth;
             if (t.clientX < threshold) autoScrollSpeed = -((threshold - t.clientX) / threshold) * maxScrollSpeed;
             else if (t.clientX > winW - threshold) autoScrollSpeed = ((t.clientX - (winW - threshold)) / threshold) * maxScrollSpeed;
@@ -520,8 +552,9 @@
             if (dragItem) {
                 dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
                 if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
-                placeholder.remove(); rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id); saveAll(); 
-                rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
+                placeholder.remove();
+                rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
+                saveAll(); rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
                 rowOrder.forEach((id, i) => { const ni = document.getElementById(`name${id}`); if(ni) ni.placeholder = `菇菇${i+1}`; });
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { el.classList.remove('pressing'); isUserInteracting = false; }
@@ -529,6 +562,7 @@
         el.addEventListener('touchstart', onStart, {passive: true}); window.addEventListener('touchmove', onMove, {passive:false}); window.addEventListener('touchend', onEnd);
         el.addEventListener('mousedown', onStart); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
     }
+
     init();
 </script>
 </body>
