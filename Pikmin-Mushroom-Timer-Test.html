@@ -26,7 +26,7 @@
         .time-header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(253, 250, 246, 0.96); padding: 5px 0; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 4000; }
         .time-display { font-size: 1.4rem; color: #444; font-weight: bold; line-height: 1; margin: 2px 0; }
         .row-controls { display: flex; justify-content: center; margin-bottom: 2px; gap: 4px; align-items: center; }
-        .version-tag { position: absolute; right: 4px; bottom: 1px; font-size: 0.5rem; color: #ccc; pointer-events: none; line-height: 1; }
+        .version-tag { position: absolute; right: 8px; bottom: 1px; font-size: 0.65rem; color: #bbb; pointer-events: none; line-height: 1; font-weight: bold; }
 
         .btn-action { padding: 1px 8px; font-size: 0.7rem; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; color: #555; transition: transform 0.1s, background-color 0.1s; display: inline-flex; align-items: center; justify-content: center; line-height: 1.4; box-sizing: border-box; }
         .btn-action:active { background-color: #f0f0f0 !important; transform: scale(0.95); }
@@ -38,7 +38,7 @@
         .group-panel.open { right: 0; }
         .group-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; }
         .group-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .group-item { padding: 12px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 8px; animation: row-pop-in 0.3s; }
+        .group-item { padding: 12px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 8px; animation: row-pop-in 0.2s ease-out; }
         .group-item-top { display: flex; gap: 8px; align-items: center; }
         .group-item-name-input { flex: 1; font-weight: bold; font-size: 1rem; border: none !important; background: #f5f5f5 !important; border-radius: 4px; padding: 4px 8px; width: auto; }
         .group-item-actions { display: flex; gap: 6px; justify-content: flex-end; }
@@ -60,9 +60,9 @@
 
         .row-dragging-active .mushroom-card { border-color: var(--primary); background-color: #f9fff0; transform: scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: all 0.2s; }
 
-        .row-new { animation: row-pop-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .row-new { animation: row-pop-in 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
         @keyframes row-pop-in {
-            0% { opacity: 0; transform: scale(0.96) translateY(10px); max-height: 0; }
+            0% { opacity: 0; transform: scale(0.96) translateY(8px); max-height: 0; }
             100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
         }
 
@@ -118,19 +118,25 @@
         <h1 style="color:var(--primary); font-size:1.1rem; margin:0;">🍄 搶菇計算機 🍄</h1>
         <div class="time-display" id="currentTime">--:--:--</div>
         <div class="row-controls">
-            <button class="btn-action" onclick="toggleGroups()" style="color:var(--primary); font-weight:bold;">👥 菇菇群組</button>
+            <!-- 3. 按鈕圖示可愛化 -->
+            <button class="btn-action" onclick="toggleGroups()" style="color:var(--primary); font-weight:bold;">🍄 菇菇群組</button>
             <button class="btn-action" onclick="clearAllInputs()" style="color:var(--accent);">🧹 一鍵清除</button>
             <button class="btn-action" onclick="resetToInitial()">🔄 重置</button>
             <button class="btn-action btn-audio-off" id="audioBtn" onclick="toggleAudio()">🔇</button>
         </div>
-        <div class="version-tag"><span id="deviceType">檢測中...</span> | v.測試版</div>
+        <div class="version-tag" id="deviceTag">...</div>
     </div>
 
+    <!-- 群組面板 -->
     <div class="overlay" id="overlay" onclick="toggleGroups()"></div>
     <div class="group-panel" id="groupPanel">
         <div class="group-header">
-            <h2 style="margin:0; font-size:1.1rem;">👥 菇菇群組</h2>
-            <button class="btn-action" onclick="recordCurrentNames()" style="background:var(--accent); border:none; color:white; font-weight:bold;">➕ 紀錄菇菇</button>
+            <h2 style="margin:0; font-size:1.1rem;">🍄 菇菇群組</h2>
+            <div style="display:flex; gap:5px;">
+                <button class="btn-action" onclick="recordCurrentNames()" style="background:var(--accent); border:none; color:white; font-weight:bold;">➕ 紀錄菇菇</button>
+                <!-- 2. 改名為清空菇菇 -->
+                <button class="btn-action" onclick="clearAllGroups()" style="background:white; border:1px solid #ddd; color:var(--danger);">🗑️ 清空菇菇</button>
+            </div>
         </div>
         <div class="group-list" id="groupList"></div>
         <button onclick="toggleGroups()" style="margin:15px; padding:12px; border-radius:10px; border:none; background:var(--ready-bg); color:var(--text); font-weight:bold;">關閉</button>
@@ -165,7 +171,6 @@
 
     let audioCtx = null, soundBuffer = null, whistleBuffer = null, isAudioEnabled = false;
 
-    // --- 音效強化：確保 context 穩定恢復 ---
     async function loadSounds() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         try {
@@ -179,13 +184,10 @@
         } catch (e) { console.error('音檔載入失敗', e); }
     }
     
-    function resumeAudioContext() {
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }
+    function resumeAudioContext() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
 
     function playSound(buffer) {
         if (!isAudioEnabled || !buffer || !audioCtx) return;
-        // 每次播放前確保 context 是運作中的
         audioCtx.resume().then(() => {
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
@@ -209,8 +211,8 @@
 
     function detectDevice() {
         isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
-        const deviceTag = document.getElementById('deviceType');
-        deviceTag.innerText = isMobileDevice ? "📱 手機版" : "💻 電腦版";
+        const deviceTag = document.getElementById('deviceTag');
+        deviceTag.innerHTML = (isMobileDevice ? "📱" : "💻") + " v.測試版";
     }
 
     function jumpToCard(id) {
@@ -225,66 +227,52 @@
         setTimeout(() => card.classList.remove('card-selected'), 600);
     }
 
-    // --- 群組功能：優化紀錄與放出邏輯 ---
     async function toggleGroups() {
         if (!audioCtx && isAudioEnabled) await loadSounds();
         const isOpen = groupPanel.classList.toggle('open');
         overlay.style.display = isOpen ? 'block' : 'none';
-        if(isOpen) {
-            renderGroups();
-            if (isAudioEnabled) playSound(whistleBuffer);
-        }
+        if(isOpen) { renderGroups(); }
     }
 
+    // 4. 按下紀錄時詢問名稱
     function recordCurrentNames() {
+        const groupName = prompt("請輸入菇菇群組名稱：", `菇菇群組 ${groupData.length + 1}`);
+        if (groupName === null) return; // 使用者按取消
+        
+        const finalName = groupName.trim() || `菇菇群組 ${groupData.length + 1}`;
         const names = rowOrder.map((id, idx) => {
             const input = document.getElementById(`name${id}`);
-            // 若為空，紀錄其預設 Placeholder 名稱
             return (input && input.value) ? input.value : `菇菇${idx + 1}`;
         });
-        
-        const newGroup = {
-            id: Date.now(),
-            name: `菇菇群組 ${groupData.length + 1}`,
-            names: names
-        };
-        
-        // 新紀錄放在最上面
+        const newGroup = { id: Date.now(), name: finalName, names: names };
         groupData.unshift(newGroup);
-        saveGroups();
-        renderGroups();
+        saveGroups(); renderGroups();
     }
 
+    // 5. 放出時提示確認
     function releaseGroup(groupId) {
         const group = groupData.find(g => g.id === groupId);
         if (!group) return;
         
-        // 配合群組數量，動態調整主畫面行數
+        if (!confirm(`確定要放出「${group.name}」並覆蓋目前的設定嗎？`)) return;
+
         const targetCount = group.names.length;
-        
-        // 若群組數量多於目前行數，增加行
         while (rowOrder.length < targetCount) {
             const id = (Math.max(0, ...rowOrder.map(Number)) + 1).toString();
             rowOrder.push(id);
         }
-        
-        // 若群組數量少於目前行數，減少行 (不需確認，放出群組為覆蓋操作)
         while (rowOrder.length > targetCount) {
             const idToRemove = rowOrder.pop();
             localStorage.removeItem(`mushroom_name_${idToRemove}`);
             delete targetTimes[idToRemove];
         }
-        
-        // 同步 DOM 與資料
         app.innerHTML = "";
         rowOrder.forEach((id, idx) => {
             const newName = group.names[idx];
             localStorage.setItem(`mushroom_name_${id}`, newName);
             createRow(id, idx, false);
         });
-
-        saveAll();
-        renderVizBar();
+        saveAll(); renderVizBar();
         if (isAudioEnabled) playSound(whistleBuffer);
         toggleGroups();
     }
@@ -295,9 +283,16 @@
     }
 
     function deleteGroup(groupId) {
-        if (confirm("確定要刪除此群組嗎？")) {
+        const group = groupData.find(g => g.id === groupId);
+        if (group && confirm(`確定要刪除「${group.name}」嗎？`)) {
             groupData = groupData.filter(g => g.id !== groupId);
             saveGroups(); renderGroups();
+        }
+    }
+
+    function clearAllGroups() {
+        if (groupData.length > 0 && confirm("確定要刪除所有菇菇群組嗎？")) {
+            groupData = []; saveGroups(); renderGroups();
         }
     }
 
@@ -383,7 +378,7 @@
             <div class="pikmin-squad" id="squad${id}"></div>
         `;
         app.appendChild(wrapper);
-        if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 400);
+        if (isNew) setTimeout(() => wrapper.classList.remove('row-new'), 200);
     }
 
     window.limitAndFocus = function(id, current, next) {
@@ -419,13 +414,18 @@
         setTimeout(() => {
             scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
             vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
-            setTimeout(() => { newlyAddedId = null; }, 500); 
+            setTimeout(() => { newlyAddedId = null; }, 400); 
         }, 150);
     }
 
+    // 1. 刪除提示換成 NAME
     function deleteSpecificRow(id) {
-        if(rowOrder.length > 1 && confirm("確定要讓皮克敏大隊把它搬走嗎？")) {
-            if (isAudioEnabled) playSound(whistleBuffer);
+        const nameInput = document.getElementById(`name${id}`);
+        const currentName = (nameInput && nameInput.value.trim()) || nameInput.placeholder;
+        
+        if(rowOrder.length > 1 && confirm(`確定要讓皮克敏大隊把「${currentName}」搬走嗎？`)) {
+            if (isAudioEnabled) setTimeout(() => playSound(whistleBuffer), 150);
+
             const wrapper = document.getElementById(`wrapper${id}`);
             const squad = document.getElementById(`squad${id}`);
             const card = document.getElementById(`card${id}`);
@@ -450,7 +450,6 @@
             requestAnimationFrame(animateScramble);
             function startCarrying() {
                 if (vizItem) vizItem.classList.add('viz-item-exit');
-                const nameInput = document.getElementById(`name${id}`);
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
                 setTimeout(() => {
                     const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
@@ -565,13 +564,10 @@
 
     function clearAllInputs() { if(confirm("清除所有時間？")) rowOrder.forEach(resetRow); }
     
-    // --- 重置功能優化：保留群組 ---
     function resetToInitial() {
         if(confirm("重置所有計算數據（菇菇群組將會保留）？")) {
-            // 備份群組
             const backupGroups = localStorage.getItem('mushroom_groups');
             localStorage.clear();
-            // 還原群組
             if(backupGroups) localStorage.setItem('mushroom_groups', backupGroups);
             location.reload();
         }
@@ -644,7 +640,7 @@
                 }
                 vizBar.style.scrollBehavior = 'auto'; 
                 startAutoScroll();
-            }, 250); 
+            }, 120); 
         };
         const onMove = (e) => {
             if (!dragItem) return; 
@@ -680,7 +676,7 @@
                 isUserInteracting = false; 
                 renderVizBar();
             } else {
-                if (touchDuration < 250) jumpToCard(el.dataset.id);
+                if (touchDuration < 120) jumpToCard(el.dataset.id);
                 el.classList.remove('pressing'); 
                 isUserInteracting = false;
             }
