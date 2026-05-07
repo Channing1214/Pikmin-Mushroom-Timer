@@ -39,15 +39,27 @@
         .row-new { animation: row-pop-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
         /* --- 卡片元件 --- */
-        .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; }
+        .mushroom-card { background: var(--card-bg); padding: 6px 10px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; gap: 4px; align-items: center; justify-content: center; border: 1px solid #eee; flex-shrink: 0; position: relative; z-index: 5; transition: background-color 0.3s, border-color 0.3s; }
         .input-group { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
-        .input-group span { align-self: flex-end; margin-bottom: 6px; } 
+        
+        /* 行的狀態顏色 (不閃爍) */
+        .card-warning { background-color: var(--warning-bg) !important; border-color: var(--warning-border) !important; }
+        .card-critical { background-color: var(--critical-bg) !important; border-color: var(--critical-border) !important; }
+        /* 發車樣式：灰底 */
+        .card-ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
+
+        /* 封裝區域 */
+        .dynamic-content { display: flex; align-items: center; gap: 4px; width: 172px; justify-content: center; }
+        .dynamic-content span { align-self: flex-end; margin-bottom: 6px; } 
 
         .time-box { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; background: white; padding: 0 4px; }
         .time-box input[type="number"] { border: none !important; width: 35px; text-align: center; font-size: 1.1rem; padding: 6px 0; outline: none; background: transparent; -webkit-user-select: text; user-select: text; font-weight: 500; }
         .time-box span { font-size: 0.75rem; color: #888; margin: 0 1px 6px 1px; font-weight: normal; align-self: flex-end; }
 
-        .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; }
+        /* 重生倒數顯示樣式：寬度固定140px以利在容器中置中，字體靠左 */
+        .respawn-display { display: none; width: 140px; text-align: left; color: var(--accent); font-weight: bold; font-size: 0.95rem; white-space: nowrap; }
+
+        .btn-small-reset { margin-left: 4px; width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: #f9f9f9; color: #bbb; font-size: 1.2rem; flex-shrink: 0; }
         .btn-row-delete { width: 38px; height: 38px; border-radius: 8px; background: white; border: 2px dashed #ffa39e; color: var(--danger); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; z-index: 6; }
         .btn-add-row { margin: 10px 0; width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px dashed var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
         .btn-add-row:active { transform: scale(0.9); background: #f0f4e8; }
@@ -62,30 +74,27 @@
         .viz-item .viz-cd { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
         .viz-item-exit { opacity: 0 !important; width: 0 !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; pointer-events: none; }
         
-        /* --- 修改：下方小卡新增動畫改為彈跳感 --- */
+        /* --- 小卡動畫 --- */
         .viz-new { animation: viz-pop-fast 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes viz-pop-fast {
             0% { opacity: 0; width: 0; min-width: 0; margin: 0; transform: scale(0.4) translateY(20px); }
             100% { opacity: 1; width: 68px; min-width: 68px; margin: 0 4px; transform: scale(1) translateY(0); }
         }
 
-        /* --- 狀態動畫 --- */
+        /* --- 小卡狀態動畫 (保持閃爍) --- */
         .warning { border-color: var(--warning-border); border-bottom: 4px solid var(--warning-border); animation: warning-blink 0.8s infinite; }
         @keyframes warning-blink { 0%, 100% { background-color: #fffde7; } 50% { background-color: #ffeb3b; } }
         .critical { border-color: var(--critical-border); border-bottom: 4px solid var(--critical-border); animation: critical-blink 0.5s infinite; }
         @keyframes critical-blink { 0%, 100% { background-color: var(--critical-bg); } 50% { background-color: #ffcdd2; } }
         .ready { background-color: var(--ready-bg) !important; border-color: var(--ready-border) !important; border-bottom: 4px solid var(--gray) !important; }
         
-        /* --- 拖曳相關 --- */
+        /* --- 拖曳與皮克敏動畫 --- */
         .dragging { position: fixed !important; z-index: 9999 !important; opacity: 0.95; transform: scale(1.15); box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--primary); background: #fff; margin: 0 !important; transition: none !important; }
         .placeholder { min-width: 68px; height: 68px; border: 2px dashed var(--primary); background: rgba(107, 142, 35, 0.05); border-radius: 10px; flex-shrink: 0; margin: 0 4px; }
         .pressing { background-color: #f0f0f0 !important; transform: scale(0.95); }
-
-        /* --- 皮克敏動畫 --- */
         .pikmin-squad { position: absolute; bottom: -20px; left: 0; width: 100%; height: 45px; pointer-events: none; z-index: 100; display: none; }
         .pikmin-worker { position: absolute; width: 45px; height: 45px; background-image: url('rock_pikmin_walk.gif'); background-size: contain; background-repeat: no-repeat; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); }
         .carrying { animation: carry-out-dash 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; }
-        
         @keyframes row-pop-in {
             0% { opacity: 0; transform: scale(0.8) translateY(-15px); max-height: 0; }
             100% { opacity: 1; transform: scale(1) translateY(0); max-height: 90px; }
@@ -125,9 +134,6 @@
     let isUserInteracting = false; 
     let newlyAddedId = null;
 
-    /**
-     * --- 音效處理 ---
-     */
     let audioCtx = null, soundBuffer = null, isAudioEnabled = false;
 
     async function loadSound() {
@@ -170,9 +176,6 @@
         b.className = "btn-action " + (isAudioEnabled ? "btn-audio-on" : "btn-audio-off");
     }
 
-    /**
-     * --- 資料操作 ---
-     */
     function saveAll() {
         localStorage.setItem('mushroom_targets', JSON.stringify(targetTimes));
         localStorage.setItem('mushroom_row_order', JSON.stringify(rowOrder));
@@ -182,9 +185,6 @@
         localStorage.setItem(`mushroom_name_${id}`, v); 
     }
 
-    /**
-     * --- UI 核心 ---
-     */
     function init() {
         if (!rowOrder.length) for (let i = 1; i <= 5; i++) rowOrder.push(i.toString());
         app.innerHTML = "";
@@ -202,15 +202,18 @@
             <div class="mushroom-card" id="card${id}" data-id="${id}">
                 <div class="input-group">
                     <input type="text" id="name${id}" placeholder="菇菇${index+1}" value="${savedName}" oninput="saveName('${id}', this.value); renderVizBar();">
-                    <span>剩</span>
                 </div>
-                <div class="time-box">
-                    <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')">
-                    <span>時</span>
-                    <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')">
-                    <span>分</span>
-                    <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)">
-                    <span>秒</span>
+                <div class="dynamic-content" id="dynArea${id}">
+                    <span id="label${id}">剩</span>
+                    <div class="time-box" id="timeBox${id}">
+                        <input type="number" id="hr${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'hr', 'min')">
+                        <span>時</span>
+                        <input type="number" id="min${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'min', 'sec')">
+                        <span>分</span>
+                        <input type="number" id="sec${id}" inputmode="numeric" placeholder="__" oninput="limitAndFocus('${id}', 'sec', null)">
+                        <span>秒</span>
+                    </div>
+                    <div class="respawn-display" id="respawn${id}">重生倒數5分0秒</div>
                 </div>
                 <button class="btn-small-reset" onclick="resetRow('${id}')">↺</button>
             </div>
@@ -242,7 +245,6 @@
             const scrollArea = document.querySelector('.scroll-area');
             scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
             vizBar.scrollTo({ left: vizBar.scrollWidth, behavior: 'smooth' });
-            // 動畫跑完後才清除 newlyAddedId，確保彈跳效果完成
             setTimeout(() => { newlyAddedId = null; }, 400);
         }, 150);
     }
@@ -254,16 +256,13 @@
             const card = document.getElementById(`card${id}`);
             const vizItem = document.getElementById(`viz-${id}`);
             const cardLeft = card.offsetLeft, cardRight = cardLeft + card.offsetWidth, rowHeight = wrapper.offsetHeight;
-            
             deletingIds.add(id); 
             squad.style.display = 'block';
-            
             const workers = [];
             for(let i=0; i<5; i++) {
                 const el = document.createElement('div'); el.className = 'pikmin-worker'; squad.appendChild(el);
                 workers.push({ el: el, x: cardLeft + Math.random() * (card.offsetWidth - 45), speed: (Math.random() * 3 + 2.5) * (Math.random() > 0.5 ? 1 : -1) });
             }
-            
             let startTime = null;
             function animateScramble(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -275,12 +274,10 @@
                 if (progress < 1200) requestAnimationFrame(animateScramble); else startCarrying();
             }
             requestAnimationFrame(animateScramble);
-
             function startCarrying() {
                 if (vizItem) vizItem.classList.add('viz-item-exit');
                 const nameInput = document.getElementById(`name${id}`);
                 const nameX = nameInput ? (cardLeft + nameInput.offsetLeft) : cardLeft;
-                
                 setTimeout(() => {
                     const idx = rowOrder.indexOf(id); if (idx > -1) rowOrder.splice(idx, 1);
                     delete targetTimes[id]; localStorage.removeItem(`mushroom_name_${id}`);
@@ -288,12 +285,10 @@
                     rowOrder.forEach((rid, i) => { const el = document.getElementById(`name${rid}`); if(el) el.placeholder = `菇菇${i+1}`; });
                     renderVizBar(); 
                 }, 400); 
-                
                 workers.forEach((p, i) => {
                     p.el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     p.el.style.left = (nameX + (i * 8)) + 'px'; p.el.style.transform = 'scaleX(1)'; p.el.style.bottom = '-10px';
                 });
-                
                 setTimeout(() => {
                     wrapper.classList.add('carrying'); wrapper.style.marginBottom = `-${rowHeight}px`;
                     wrapper.style.opacity = "0.7"; wrapper.style.pointerEvents = "none";
@@ -311,8 +306,7 @@
             const name = document.getElementById(`name${id}`)?.value || localStorage.getItem(`mushroom_name_${id}`) || `菇菇${idx+1}`;
             const item = document.createElement('div');
             item.className = 'viz-item'; 
-            if (id === newlyAddedId) item.classList.add('viz-new'); // 新增時加入彈出類名
-            
+            if (id === newlyAddedId) item.classList.add('viz-new');
             item.id = `viz-${id}`; item.dataset.id = id;
             item.innerHTML = `<strong>${name}</strong><span class="viz-target">--:--:--</span><span class="viz-cd">等待</span>`;
             addDragListeners(item); vizBar.appendChild(item);
@@ -323,34 +317,86 @@
     function updateDynamicInfo() {
         const now = Date.now();
         if(currentTimeEl) currentTimeEl.innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
-        if (isUserInteracting) return;
-        
+        const activeEl = document.activeElement; 
+
         rowOrder.forEach(id => {
             if (deletingIds.has(id)) return;
             const t = targetTimes[id], item = document.getElementById(`viz-${id}`), card = document.getElementById(`card${id}`);
             if (!item) return;
             const targetEl = item.querySelector('.viz-target'), cdEl = item.querySelector('.viz-cd');
-            
+            const timeBox = document.getElementById(`timeBox${id}`);
+            const respawnEl = document.getElementById(`respawn${id}`);
+            const labelEl = document.getElementById(`label${id}`);
+
             if (t) {
                 const diff = Math.floor((t - now) / 1000);
-                if (diff <= 0) {
-                    if (card && !card.dataset.autoCleared) {
-                        ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
-                        card.dataset.autoCleared = "1";
+                if (diff > 0) {
+                    card.classList.remove('card-warning', 'card-critical', 'card-ready');
+                    if (diff <= 10) card.classList.add('card-critical');
+                    else if (diff <= 30) card.classList.add('card-warning');
+
+                    if (diff > 300) {
+                        if (timeBox) timeBox.style.display = 'flex';
+                        if (labelEl) labelEl.style.display = 'inline-block';
+                        if (respawnEl) respawnEl.style.display = 'none';
+
+                        const displayRemaining = diff - 300;
+                        const h = Math.floor(displayRemaining / 3600), m = Math.floor((displayRemaining % 3600) / 60), s = displayRemaining % 60;
+                        const hrInp = document.getElementById(`hr${id}`), minInp = document.getElementById(`min${id}`), secInp = document.getElementById(`sec${id}`);
+                        if (hrInp && hrInp !== activeEl) hrInp.value = h > 0 ? h : "";
+                        if (minInp && minInp !== activeEl) minInp.value = (h > 0 || m > 0) ? m : "";
+                        if (secInp && secInp !== activeEl) secInp.value = (h > 0 || m > 0 || s > 0) ? s : "";
+                    } else {
+                        if (timeBox) timeBox.style.display = 'none';
+                        if (labelEl) labelEl.style.display = 'none';
+                        if (respawnEl) {
+                            respawnEl.style.display = 'block';
+                            respawnEl.style.color = "var(--accent)"; 
+                            const rm = Math.floor(diff / 60), rs = diff % 60;
+                            respawnEl.innerText = `重生倒數${rm}分${rs}秒`;
+                        }
                     }
+                } else {
+                    if (!card.dataset.departedTime) card.dataset.departedTime = now;
+                    const elapsed = now - parseInt(card.dataset.departedTime);
+                    if (elapsed < 5000) {
+                        if (timeBox) timeBox.style.display = 'none';
+                        if (labelEl) labelEl.style.display = 'none';
+                        if (respawnEl) {
+                            respawnEl.style.display = 'block';
+                            respawnEl.innerText = "已發車";
+                            respawnEl.style.color = "var(--accent)"; // 橘色字
+                        }
+                        card.classList.remove('card-critical', 'card-warning');
+                        card.classList.add('card-ready'); // 灰底
+                    } else {
+                        resetRow(id);
+                    }
+                }
+
+                if (diff <= 0) {
                     item.className = 'viz-item ready'; cdEl.innerText = "已發車";
                 } else {
-                    item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
-                    targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
-                    const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
-                    cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+                    if (!isUserInteracting) {
+                        item.className = 'viz-item' + (diff <= 10 ? ' critical' : (diff <= 30 ? ' warning' : ''));
+                        targetEl.innerText = new Date(t).toLocaleTimeString('zh-TW', { hour12: false });
+                        const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+                        cdEl.innerText = (h > 0 ? h + ":" : "") + m.toString().padStart(2,'0') + ":" + s.toString().padStart(2,'0');
+                    }
                     if (diff <= 10 && diff > 0 && card && !card.dataset.warned) { 
                         playWarningBeep(); card.dataset.warned = "1"; 
                     }
                 }
             } else { 
-                if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
-                targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
+                card.classList.remove('card-warning', 'card-critical', 'card-ready');
+                card.dataset.departedTime = "";
+                if (timeBox) timeBox.style.display = 'flex';
+                if (labelEl) labelEl.style.display = 'inline-block';
+                if (respawnEl) respawnEl.style.display = 'none';
+                if(!isUserInteracting) {
+                    if(!item.classList.contains('viz-new')) item.className = 'viz-item'; 
+                    targetEl.innerText = "--:--:--"; cdEl.innerText = "等待"; 
+                }
             }
         });
     }
@@ -365,16 +411,20 @@
     function handleInput(id) {
         const h = document.getElementById(`hr${id}`).value, m = document.getElementById(`min${id}`).value, s = document.getElementById(`sec${id}`).value;
         if (!h && !m && !s) targetTimes[id] = null;
-        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 15) * 1000;
+        else targetTimes[id] = Date.now() + ((parseInt(h)||0)*3600 + (parseInt(m)||0)*60 + (parseInt(s)||0) + 300) * 1000;
         const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; }
+        if(card) { card.dataset.warned = ""; card.dataset.autoCleared = ""; card.dataset.departedTime = ""; }
         saveAll(); renderVizBar(); 
     }
 
     function resetRow(id) {
         ['hr','min','sec'].forEach(k => { const el=document.getElementById(k+id); if(el) el.value = ""; });
-        targetTimes[id] = null; const card = document.getElementById(`card${id}`);
-        if(card) { card.dataset.autoCleared = card.dataset.warned = ""; }
+        targetTimes[id] = null; 
+        const card = document.getElementById(`card${id}`);
+        if(card) { 
+            card.dataset.autoCleared = card.dataset.warned = card.dataset.departedTime = ""; 
+            card.classList.remove('card-warning', 'card-critical', 'card-ready');
+        }
         saveAll(); renderVizBar();
     }
 
@@ -402,7 +452,6 @@
             const o = clientX - (b.left + b.width/2);
             return (o < 0 && o > c.offset) ? { offset: o, element: el } : c;
         }, { offset: -Infinity }).element;
-        
         if (after) vizBar.insertBefore(placeholder, after);
         else vizBar.appendChild(placeholder);
     }
@@ -413,59 +462,44 @@
             const startX = t.clientX;
             isUserInteracting = true; 
             el.classList.add('pressing');
-
             dragTimer = setTimeout(() => {
                 dragItem = el; 
                 const r = el.getBoundingClientRect();
                 Object.assign(dragItem.style, { left: r.left+'px', top: r.top+'px', width: r.width+'px', height: r.height+'px' });
                 dragItem.dataset.ox = startX - r.left; 
-                
                 el.classList.replace('pressing', 'dragging');
                 el.parentNode.insertBefore(placeholder, el);
                 vizBar.style.scrollBehavior = 'auto'; 
                 startAutoScroll();
             }, 300);
         };
-
         const onMove = (e) => {
             if (!dragItem) return; 
             e.preventDefault();
             const t = e.touches ? e.touches[0] : e; 
             lastTouchX = t.clientX;
             dragItem.style.left = (t.clientX - dragItem.dataset.ox) + 'px';
-
             const threshold = 60, maxScrollSpeed = 12, winW = window.innerWidth;
             if (t.clientX < threshold) autoScrollSpeed = -((threshold - t.clientX) / threshold) * maxScrollSpeed;
             else if (t.clientX > winW - threshold) autoScrollSpeed = ((t.clientX - (winW - threshold)) / threshold) * maxScrollSpeed;
             else autoScrollSpeed = 0;
-
             updatePlaceholderPosition(t.clientX);
         };
-
         const onEnd = () => {
-            clearTimeout(dragTimer);
-            cancelAnimationFrame(scrollRafId);
-            autoScrollSpeed = 0;
-            vizBar.style.scrollBehavior = 'smooth';
-
+            clearTimeout(dragTimer); cancelAnimationFrame(scrollRafId); autoScrollSpeed = 0; vizBar.style.scrollBehavior = 'smooth';
             if (dragItem) {
-                dragItem.classList.remove('dragging'); 
-                dragItem.style.cssText = '';
+                dragItem.classList.remove('dragging'); dragItem.style.cssText = '';
                 if (placeholder.parentNode) placeholder.parentNode.insertBefore(dragItem, placeholder);
                 placeholder.remove();
-                
                 rowOrder = [...vizBar.querySelectorAll('.viz-item')].map(i => i.dataset.id);
                 saveAll(); 
-                
                 rowOrder.forEach(id => { const wrp = document.getElementById(`wrapper${id}`); if(wrp) app.appendChild(wrp); });
                 rowOrder.forEach((id, i) => { const ni = document.getElementById(`name${id}`); if(ni) ni.placeholder = `菇菇${i+1}`; });
-
                 dragItem = null; isUserInteracting = false; renderVizBar();
             } else { 
                 el.classList.remove('pressing'); isUserInteracting = false; 
             }
         };
-
         el.addEventListener('touchstart', onStart, {passive: true}); 
         window.addEventListener('touchmove', onMove, {passive:false}); 
         window.addEventListener('touchend', onEnd);
